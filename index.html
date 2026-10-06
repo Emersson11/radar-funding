@@ -113,6 +113,7 @@ details{padding:10px 18px} summary{cursor:pointer;font-size:13px;color:var(--mut
     <button type="button" role="tab" data-aba="cruz" aria-selected="true">Entre corretoras</button>
     <button type="button" role="tab" data-aba="spot" aria-selected="false">À vista + futuro</button>
     <button type="button" role="tab" data-aba="matriz" aria-selected="false">Todas as taxas</button>
+    <button type="button" role="tab" data-aba="sim" aria-selected="false">Simulação</button>
   </div>
 
   <section id="aba-cruz">
@@ -136,6 +137,22 @@ details{padding:10px 18px} summary{cursor:pointer;font-size:13px;color:var(--mut
       <button type="button" data-mord="menor" aria-pressed="false">Menores taxas</button>
     </div>
     <div class="scroll"><table><thead id="th-matriz"></thead><tbody id="tb-matriz"></tbody></table></div>
+  </section>
+
+  <section id="aba-sim" hidden>
+    <h2>Robô em simulação</h2>
+    <p class="sub" id="sim-sub">Carregando a carteira simulada…</p>
+    <div class="kpis" id="sim-kpis" hidden>
+      <div class="kpi"><span class="rot">Saldo simulado</span><b id="sim-saldo">–</b></div>
+      <div class="kpi"><span class="rot">Resultado total</span><b id="sim-total">–</b></div>
+      <div class="kpi"><span class="rot">Operações fechadas</span><b id="sim-n">–</b></div>
+    </div>
+    <div class="fichas" id="sim-pos"></div>
+    <div class="box" id="sim-hist-box" hidden style="margin-top:14px">
+      <h2>Operações fechadas</h2>
+      <div class="scroll"><table><thead><tr><th>Ativo</th><th>Vendido em</th><th>Comprado em</th><th>Abertura</th><th>Fechamento</th><th>Funding</th><th>Taxas</th><th>Líquido (US$)</th></tr></thead><tbody id="sim-hist"></tbody></table></div>
+    </div>
+    <p class="note">Sem dinheiro real. O robô roda de hora em hora; o funding é estimado pela taxa de cada rodada. Esta aba pode levar alguns minutos para refletir a última rodada.</p>
   </section>
 
   <div class="duas">
@@ -343,6 +360,33 @@ function desenha(){
     VENUES.forEach(function(v){var r=DATA[v[0]]&&DATA[v[0]].get(a.b); if(r&&r.vol>=minVol) cel(tr,pct(r.apr),cls(r.apr)); else cel(tr,"–","vazio");}); tb.appendChild(tr);});
 }
 
+function dh(t){return new Date(t*1000).toLocaleString("pt-BR",{day:"2-digit",month:"2-digit",hour:"2-digit",minute:"2-digit"});}
+function sinal(v,c){return (v>=0?"+ ":"− ")+"US$ "+usd(Math.abs(v),c==null?3:c);}
+function carregaSim(){
+  if(window.SNAP){$("sim-sub").textContent="A simulação aparece só na versão ao vivo do site."; return;}
+  fetch("carteira.json?t="+Date.now()).then(function(r){ if(!r.ok) throw 0; return r.json(); }).then(function(c){
+    var hist=c.historico||[], p=c.posicao, ini=100, fechado=0; hist.forEach(function(h){fechado+=h.liquido;}); ini=c.saldo-fechado;
+    var parcial=p?p.funding-p.taxas:0;
+    $("sim-kpis").hidden=false;
+    $("sim-saldo").textContent="US$ "+usd(c.saldo+parcial);
+    $("sim-total").textContent=sinal(fechado+parcial); $("sim-total").className=cls(fechado+parcial);
+    $("sim-n").textContent=hist.length;
+    $("sim-sub").textContent="Começou com US$ "+usd(ini)+". "+(p?"Há uma posição aberta.":"Sem posição aberta: esperando uma diferença dentro dos limites.");
+    var box=$("sim-pos"); box.textContent="";
+    if(p){
+      var f=el("article","ficha"), t=el("div","ftopo"), e=el("div"); e.appendChild(el("span","ativo",p.ativo)); t.appendChild(e); t.appendChild(el("span","selo neutro","Aberta desde "+dh(p.aberto_em))); f.appendChild(t);
+      var r=el("div","liq"); r.appendChild(el("span","rot","Resultado parcial")); r.appendChild(el("b",cls(parcial),sinal(parcial)));
+      r.appendChild(el("p","sub","Funding acumulado US$ "+usd(p.funding,3)+" menos taxas de entrada US$ "+usd(p.taxas,3)+". Última rodada em "+dh(p.ultimo)+"."));
+      f.appendChild(r);
+      var o=el("div","ordens");
+      o.appendChild(linhaOrdem(1,"venda","Vendido",p.valor,p.ativo,"Futuro perpétuo",NOME[p.vender]||p.vender,null,null));
+      o.appendChild(linhaOrdem(2,"compra","Comprado",p.valor,p.ativo,"Futuro perpétuo",NOME[p.comprar]||p.comprar,null,null));
+      f.appendChild(o); box.appendChild(f);
+    }
+    var tb=$("sim-hist"); tb.textContent=""; $("sim-hist-box").hidden=!hist.length;
+    hist.slice().reverse().forEach(function(h){var tr=el("tr"); cel(tr,h.ativo); cel(tr,NOME[h.vender]||h.vender,"txt"); cel(tr,NOME[h.comprar]||h.comprar,"txt"); cel(tr,dh(h.aberto_em)); cel(tr,dh(h.fechado_em)); cel(tr,usd(h.funding,3)); cel(tr,usd(h.taxas,3)); cel(tr,sinal(h.liquido),cls(h.liquido)); tb.appendChild(tr);});
+  }).catch(function(){$("sim-sub").textContent="Ainda não há carteira simulada publicada.";});
+}
 var MORD="vol";
 document.querySelectorAll(".ordbot button").forEach(function(b){b.addEventListener("click",function(){ MORD=b.dataset.mord;
   document.querySelectorAll(".ordbot button").forEach(function(o){o.setAttribute("aria-pressed",o===b?"true":"false");}); desenha(); });});
@@ -367,8 +411,8 @@ function iniciar(){
 document.querySelectorAll(".abas button").forEach(function(b){b.addEventListener("click",function(){
   document.querySelectorAll(".abas button").forEach(function(o){o.setAttribute("aria-selected",o===b?"true":"false"); $("aba-"+o.dataset.aba).hidden=o!==b;});});});
 $("recarregar").addEventListener("click",iniciar);
-iniciar();
-if(!window.SNAP){ setInterval(iniciar,60000); setInterval(function(){HIST={};},3600000); }
+iniciar(); carregaSim();
+if(!window.SNAP){ setInterval(carregaSim,300000); setInterval(iniciar,60000); setInterval(function(){HIST={};},3600000); }
 </script>
 </body>
 </html>
