@@ -1,0 +1,13 @@
+{
+  "_como_editar": "Cada módulo tem um título e uma lista de aulas. Em 'youtube', cole o código do vídeo: em https://www.youtube.com/watch?v=ABC123 o código é ABC123. Apague o módulo de exemplo quando cadastrar os seus.",
+  "modulos": [
+    {
+      "titulo": "Módulo de exemplo",
+      "descricao": "Substitua pelos seus módulos no arquivo aulas.json.",
+      "aulas": [
+        { "titulo": "Aula de exemplo 1", "youtube": "", "duracao": "", "descricao": "Esta aula ainda não tem vídeo cadastrado." },
+        { "titulo": "Aula de exemplo 2", "youtube": "", "duracao": "", "descricao": "Esta aula ainda não tem vídeo cadastrado." }
+      ]
+    }
+  ]
+}

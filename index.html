@@ -113,6 +113,22 @@ button.ord:hover{color:var(--fg)}
 #conta-dentro{color:var(--band-muted);font-size:14px}
 .faixa .neg{color:var(--warn)} .sub2{color:var(--band-muted)}
 .so-leitor{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}
+.nots{list-style:none;padding:0;margin:8px 0 0;gap:0;max-width:none}
+.nots li{padding:10px 0;border-bottom:1px solid var(--line);display:flex;flex-direction:column;gap:2px}
+.nots a{color:var(--fg);text-decoration:none;font-weight:500} .nots a:hover{text-decoration:underline;text-underline-offset:3px}
+.nots .meta{font-size:12px;color:var(--muted)}
+td.quebra{white-space:normal;min-width:180px}
+tr.passado td{opacity:.55}
+#g-texto{max-width:80ch}
+.aulas{display:grid;grid-template-columns:minmax(220px,300px) 1fr;gap:20px;align-items:start}
+@media (max-width:760px){.aulas{grid-template-columns:1fr}}
+#au-menu{display:flex;flex-direction:column;gap:4px}
+.aumod{margin:10px 0 4px}
+button.aula{text-align:left;border:1px solid transparent;color:var(--fg);padding:8px 10px;font-weight:400}
+button.aula.atual{border-color:var(--accent);font-weight:600}
+.video{position:relative;aspect-ratio:16/9;max-width:100%;background:var(--soft);border-radius:3px;overflow:hidden}
+.video iframe{position:absolute;inset:0;width:100%;height:100%;border:0}
+.semvideo{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;color:var(--muted);padding:16px;text-align:center}
 .rodape{font-size:12px;color:var(--muted);border-top:1px solid var(--line);padding-top:14px}
 </style>
 </head>
@@ -121,7 +137,9 @@ button.ord:hover{color:var(--fg)}
   <div>
     <nav class="areas" id="areas" aria-label="Áreas do painel">
       <button type="button" data-area="carteira" aria-current="page">Carteira</button>
+      <button type="button" data-area="mercado" aria-current="false">Mercado</button>
       <button type="button" data-area="funding" aria-current="false">Funding</button>
+      <button type="button" data-area="aulas" aria-current="false">Aulas</button>
     </nav>
     <h1 id="titulo">Minha Carteira</h1>
     <p id="cart-status">Buscando preços…</p>
@@ -142,7 +160,6 @@ button.ord:hover{color:var(--fg)}
       <button type="button" role="tab" data-cj="resumo" aria-selected="true">Resumo</button>
       <button type="button" role="tab" data-cj="posicoes" aria-selected="false">Posições</button>
       <button type="button" role="tab" data-cj="lanc" aria-selected="false">Lançamentos</button>
-      <button type="button" role="tab" data-cj="mercado" aria-selected="false">Mercado</button>
     </div>
 
     <section id="cj-resumo">
@@ -196,7 +213,7 @@ button.ord:hover{color:var(--fg)}
       <p class="note" id="c-nota-local">Os lançamentos ficam guardados só neste navegador. Eles não aparecem em outro aparelho nem para outras pessoas, e somem se você limpar os dados do navegador. Salve uma cópia de segurança de vez em quando.</p>
     </section>
 
-    <section id="cj-mercado" hidden>
+    <section id="cj-mercado" data-solto="1" hidden>
       <div class="duas">
         <div class="box"><h2>Maiores altas em 24h</h2><div class="scroll"><table><thead><tr><th>Ativo</th><th>Preço (US$)</th><th>24h</th></tr></thead><tbody id="m-altas"></tbody></table></div></div>
         <div class="box"><h2>Maiores quedas em 24h</h2><div class="scroll"><table><thead><tr><th>Ativo</th><th>Preço (US$)</th><th>24h</th></tr></thead><tbody id="m-baixas"></tbody></table></div></div>
@@ -204,6 +221,58 @@ button.ord:hover{color:var(--fg)}
       <div class="box" style="margin-top:20px"><h2>Principais ativos</h2><div class="scroll"><table><thead><tr><th>Ativo</th><th>Preço (US$)</th><th>24h</th><th>Volume 24h</th></tr></thead><tbody id="m-princ"></tbody></table></div></div>
       <p class="note">Clique no título de uma coluna para ordenar do maior para o menor; clique de novo para inverter. Preços e volumes do mercado à vista da Binance, em dólar. Altas e quedas consideram só ativos com mais de US$ 20 milhões negociados em 24h. Os volumes de 7 e 30 dias incluem o dia de hoje até agora.</p>
     </section>
+  </div>
+
+  <div id="area-mercado" class="area" hidden>
+    <div class="abas" role="tablist" id="mabas">
+      <button type="button" role="tab" data-mj="resumo" aria-selected="true">Resumo</button>
+      <button type="button" role="tab" data-mj="ativos" aria-selected="false">Ativos</button>
+      <button type="button" role="tab" data-mj="noticias" aria-selected="false">Notícias</button>
+      <button type="button" role="tab" data-mj="calendario" aria-selected="false">Calendário</button>
+    </div>
+    <section id="mj-resumo">
+      <div class="kpis">
+        <div class="kpi"><span class="rot">Valor de mercado cripto</span><b id="g-cap">–</b><span class="sub" id="g-var"></span></div>
+        <div class="kpi"><span class="rot">Volume em 24h</span><b id="g-vol">–</b></div>
+        <div class="kpi"><span class="rot">Dominância do Bitcoin</span><b id="g-dom">–</b></div>
+        <div class="kpi"><span class="rot">Medo e ganância</span><b id="g-fng">–</b><span class="sub" id="g-fngc"></span></div>
+      </div>
+      <div class="box" style="margin-top:20px"><h2>O que está acontecendo</h2><ul id="g-texto"></ul><p class="note" id="g-quando"></p></div>
+      <div class="duas" style="margin-top:20px">
+        <div class="box"><h2>Próximos eventos de alto impacto</h2><div class="scroll"><table><thead><tr><th>Quando</th><th>Moeda</th><th>Evento</th></tr></thead><tbody id="g-eventos"></tbody></table></div></div>
+        <div class="box"><h2>Últimas notícias</h2><ul class="nots" id="g-nots"></ul></div>
+      </div>
+    </section>
+    <section id="mj-ativos" hidden></section>
+    <section id="mj-noticias" class="box" hidden>
+      <h2>Notícias de cripto</h2>
+      <div class="controles" style="margin:10px 0"><label>Fonte<select id="n-fonte"><option value="">Todas</option></select></label></div>
+      <ul class="nots" id="n-lista"></ul>
+      <p class="note">Títulos e links dos sites de origem, atualizados de hora em hora. Clique para ler a matéria no site que a publicou.</p>
+    </section>
+    <section id="mj-calendario" class="box" hidden>
+      <h2>Calendário econômico</h2>
+      <div class="controles" style="margin:10px 0">
+        <label>Impacto<select id="cal-imp"><option value="alto">Só alto</option><option value="medio" selected>Alto e médio</option><option value="todos">Todos</option></select></label>
+        <label>Moeda<select id="cal-moeda"><option value="">Todas</option></select></label>
+        <label>Período<select id="cal-per"><option value="futuro" selected>De hoje em diante</option><option value="tudo">Semana inteira</option></select></label>
+      </div>
+      <div class="scroll"><table><thead><tr><th>Dia</th><th>Hora</th><th>Moeda</th><th>Impacto</th><th>Evento</th><th>Previsão</th><th>Anterior</th></tr></thead><tbody id="cal-tb"></tbody></table></div>
+      <p class="note">Horários no fuso do seu aparelho. Cobre a semana atual e, quando disponível, a seguinte. Os nomes dos eventos vêm em inglês da fonte (Forex Factory).</p>
+    </section>
+  </div>
+
+  <div id="area-aulas" class="area" hidden>
+    <p class="sub" id="au-status">Carregando as aulas…</p>
+    <div class="aulas" id="au-wrap" hidden>
+      <nav class="box" id="au-menu" aria-label="Módulos e aulas"></nav>
+      <div class="box" id="au-palco">
+        <div class="video" id="au-video"></div>
+        <h2 id="au-titulo" style="margin-top:14px"></h2>
+        <p class="sub" id="au-desc"></p>
+        <p style="margin-top:12px"><button type="button" id="au-feito" class="sec">Marcar como assistida</button> <button type="button" id="au-prox">Próxima aula</button></p>
+      </div>
+    </div>
   </div>
 
   <div id="area-funding" class="area" hidden>
@@ -641,13 +710,14 @@ function mDesenha(){
 function cPrecos(){
   getJ("https://data-api.binance.vision/api/v3/ticker/24hr").then(function(l){ var m={};
     l.forEach(function(x){ if(/USDT$/.test(x.symbol)&&+x.lastPrice>0&&+x.quoteVolume>0) m[x.symbol.slice(0,-4)]={p:+x.lastPrice,v:(+x.priceChangePercent)/100,vol:+x.quoteVolume}; });
-    PRECOS=m; cDesenha(); mDesenha(); }).catch(function(){ $("cart-status").textContent="Não consegui buscar os preços. Confira a internet e clique em Atualizar."; });
+    PRECOS=m; cDesenha(); mDesenha(); mercResumo(); }).catch(function(){ $("cart-status").textContent="Não consegui buscar os preços. Confira a internet e clique em Atualizar."; });
 }
 function janela(j){ document.querySelectorAll("#cabas button").forEach(function(o){ var on=o.dataset.cj===j; o.setAttribute("aria-selected",on?"true":"false"); $("cj-"+o.dataset.cj).hidden=!on; }); }
 function editar(l){ EDIT=l.id; $("f-ativo").value=l.ativo; $("f-tipo").value=l.tipo; $("f-qtd").value=l.qtd; $("f-preco").value=l.preco; $("f-data").value=l.data; $("f-salvar").textContent="Salvar alteração"; $("f-cancelar").hidden=false; $("f-ativo").focus(); }
 function limpaForm(){ EDIT=null; $("c-form").reset(); $("f-data").value=new Date().toISOString().slice(0,10); $("f-salvar").textContent="Adicionar"; $("f-cancelar").hidden=true; $("f-erro").hidden=true; }
-function area(a){ ["carteira","funding"].forEach(function(x){ $("area-"+x).hidden=x!==a; }); document.querySelectorAll("#areas button").forEach(function(o){o.setAttribute("aria-current",o.dataset.area===a?"page":"false");});
-  $("titulo").textContent=a==="carteira"?"Minha Carteira":"Radar de Funding"; $("atualizado").hidden=a!=="funding"; $("cart-status").hidden=a!=="carteira"; try{history.replaceState(null,"","#"+a);}catch(e){} }
+var TITULOS={carteira:"Minha Carteira",mercado:"Mercado",funding:"Radar de Funding",aulas:"Aulas"};
+function area(a){ if(!TITULOS[a]) a="carteira"; Object.keys(TITULOS).forEach(function(x){ $("area-"+x).hidden=x!==a; }); document.querySelectorAll("#areas button").forEach(function(o){o.setAttribute("aria-current",o.dataset.area===a?"page":"false");});
+  $("titulo").textContent=TITULOS[a]; $("atualizado").hidden=a!=="funding"; $("cart-status").hidden=a==="funding"||a==="aulas"; try{history.replaceState(null,"","#"+a);}catch(e){} }
 $("c-form").addEventListener("submit",function(ev){ ev.preventDefault();
   var a=$("f-ativo").value.trim().toUpperCase().replace(/[^A-Z0-9]/g,""), q=+$("f-qtd").value, p=+$("f-preco").value, d=$("f-data").value, t=$("f-tipo").value, er=$("f-erro");
   var msg=!a?"Informe o ativo, por exemplo BTC.":!(q>0)?"A quantidade precisa ser maior que zero.":!(p>=0)||$("f-preco").value===""?"Informe o preço unitário em dólar.":!d?"Informe a data.":"";
@@ -667,6 +737,74 @@ $("c-exportar").addEventListener("click",function(){ var a=document.createElemen
 $("c-importar").addEventListener("change",function(ev){ var f=ev.target.files[0]; if(!f) return; var rd=new FileReader(); rd.onload=function(){ try{ var j=JSON.parse(rd.result); if(!j||!Array.isArray(j.lanc)) throw 0; CART={exemplo:false,lanc:j.lanc.filter(function(l){return l&&l.ativo&&l.qtd>0&&l.preco>=0&&l.data;}).map(function(l,i){return {id:l.id||Date.now()+i,ativo:String(l.ativo).toUpperCase(),tipo:l.tipo==="venda"?"venda":"compra",qtd:+l.qtd,preco:+l.preco,data:String(l.data)};})}; cGravar(); cDesenha(); $("f-erro").hidden=true; if(SB&&USUARIO) SB.from("lancamentos").insert(CART.lanc.map(paraNuvem)).then(function(r){ if(r.error) nuvemFalhou(); else nuvemCarrega(); }); }catch(e){ $("f-erro").textContent="Esse arquivo não é uma cópia de segurança da carteira."; $("f-erro").hidden=false; } ev.target.value=""; }; rd.readAsText(f); });
 document.querySelectorAll("#cabas button").forEach(function(b){b.addEventListener("click",function(){janela(b.dataset.cj);});});
 document.querySelectorAll("#areas button").forEach(function(b){b.addEventListener("click",function(){area(b.dataset.area);});});
+/* ---------- Mercado: resumo, notícias, calendário ---------- */
+var MERC=null;
+function grande(v){ return v>=1e12?"US$ "+usd(v/1e12,2)+" tri":"US$ "+usd(v/1e9,0)+" bi"; }
+function haQuanto(t){ var m=Math.max(0,Math.round((Date.now()/1000-t)/60)); return m<60?"há "+m+" min":m<1440?"há "+Math.round(m/60)+" h":"há "+Math.round(m/1440)+" d"; }
+var FNG_PT={"Extreme Fear":"medo extremo","Fear":"medo","Neutral":"neutro","Greed":"ganância","Extreme Greed":"ganância extrema"};
+var IMP={High:["alto","ruim"],Medium:["médio","pico"],Low:["baixo","neutro"],Holiday:["feriado","neutro"]};
+function notItem(n){ var li=el("li"); var a=el("a",null,n.titulo); a.href=n.link; a.target="_blank"; a.rel="noopener noreferrer"; li.appendChild(a); li.appendChild(el("span","meta",n.fonte+" · "+haQuanto(n.t))); return li; }
+function mercResumo(){
+  var ul=$("g-texto"); ul.textContent=""; var frases=[];
+  var btc=PRECOS.BTC, eth=PRECOS.ETH;
+  if(btc) frases.push("Bitcoin a US$ "+usd(btc.p,0)+", "+pct(btc.v)+" em 24 horas"+(eth?"; Ethereum a US$ "+usd(eth.p,0)+", "+pct(eth.v)+".":"."));
+  var pr=PRINCIPAIS.filter(function(a){return PRECOS[a];});
+  if(pr.length){ var sobe=pr.filter(function(a){return PRECOS[a].v>0;}).length; frases.push(sobe+" dos "+pr.length+" principais ativos estão em alta nas últimas 24 horas."); }
+  var liq=Object.keys(PRECOS).filter(function(k){return PRECOS[k].vol>=2e7;}).sort(function(a,b){return PRECOS[b].v-PRECOS[a].v;});
+  if(liq.length>1) frases.push("Maior alta entre os ativos líquidos: "+liq[0]+" ("+pct(PRECOS[liq[0]].v)+"). Maior queda: "+liq[liq.length-1]+" ("+pct(PRECOS[liq[liq.length-1]].v)+").");
+  if(MERC&&MERC.panorama){ var g=MERC.panorama; frases.push("O mercado cripto inteiro vale "+grande(g.cap)+", "+pct(g.var24/100)+" em 24 horas, com o Bitcoin respondendo por "+usd(g.dom_btc,1)+"% desse valor."); }
+  if(MERC&&MERC.fng) frases.push("O índice de medo e ganância está em "+MERC.fng.valor+" de 100 ("+(FNG_PT[MERC.fng.classe]||MERC.fng.classe)+").");
+  if(MERC&&MERC.calendario){ var agora=Date.now(), prox=MERC.calendario.filter(function(e){return e.impacto==="High"&&Date.parse(e.data)>agora;}).sort(function(a,b){return Date.parse(a.data)-Date.parse(b.data);})[0];
+    if(prox) frases.push("Próximo evento de alto impacto: "+prox.titulo+" ("+prox.moeda+"), "+new Date(prox.data).toLocaleString("pt-BR",{weekday:"long",day:"2-digit",month:"2-digit",hour:"2-digit",minute:"2-digit"})+"."); }
+  if(!frases.length) frases.push("Buscando os dados do mercado…");
+  frases.forEach(function(f){ul.appendChild(el("li",null,f));});
+}
+function mercDesenha(){
+  mercResumo(); if(!MERC) return;
+  if(MERC.panorama){ var g=MERC.panorama; $("g-cap").textContent=grande(g.cap); $("g-var").textContent=pct(g.var24/100)+" em 24h"; $("g-var").className="sub "+cls(g.var24); $("g-vol").textContent=grande(g.vol); $("g-dom").textContent=usd(g.dom_btc,1)+"%"; }
+  if(MERC.fng){ $("g-fng").textContent=MERC.fng.valor+" / 100"; $("g-fngc").textContent=FNG_PT[MERC.fng.classe]||MERC.fng.classe; }
+  $("g-quando").textContent="Panorama, notícias e calendário atualizados "+haQuanto(MERC.t)+". Preços ao vivo.";
+  var nots=MERC.noticias||[], gn=$("g-nots"); gn.textContent=""; nots.slice(0,6).forEach(function(n){gn.appendChild(notItem(n));}); if(!nots.length) gn.appendChild(el("li","vazio","Ainda sem notícias coletadas."));
+  var sf=$("n-fonte"), atual=sf.value; if(sf.options.length<2){ var fs={}; nots.forEach(function(n){fs[n.fonte]=1;}); Object.keys(fs).sort().forEach(function(f){var o=el("option",null,f); o.value=f; sf.appendChild(o);}); sf.value=atual; }
+  var nl=$("n-lista"); nl.textContent=""; nots.filter(function(n){return !sf.value||n.fonte===sf.value;}).forEach(function(n){nl.appendChild(notItem(n));}); if(!nl.children.length) nl.appendChild(el("li","vazio","Ainda sem notícias coletadas."));
+  var ev=(MERC.calendario||[]).slice().sort(function(a,b){return Date.parse(a.data)-Date.parse(b.data);}), agora=Date.now();
+  var ge=$("g-eventos"); ge.textContent=""; ev.filter(function(e){return e.impacto==="High"&&Date.parse(e.data)>agora;}).slice(0,6).forEach(function(e){ var tr=el("tr"); cel(tr,new Date(e.data).toLocaleString("pt-BR",{weekday:"short",day:"2-digit",month:"2-digit",hour:"2-digit",minute:"2-digit"}),"txt"); cel(tr,e.moeda); cel(tr,e.titulo,"txt quebra"); ge.appendChild(tr); });
+  if(!ge.children.length) semLinhas(ge,3,"Nenhum evento de alto impacto pela frente nesta semana.");
+  var sm=$("cal-moeda"); if(sm.options.length<2){ var ms={}; ev.forEach(function(e){ if(e.moeda) ms[e.moeda]=1; }); Object.keys(ms).sort().forEach(function(m){var o=el("option",null,m); o.value=m; sm.appendChild(o);}); }
+  var imp=$("cal-imp").value, per=$("cal-per").value, hoje=new Date(); hoje.setHours(0,0,0,0);
+  var tb=$("cal-tb"); tb.textContent=""; var diaAnt="";
+  ev.filter(function(e){ if(sm.value&&e.moeda!==sm.value) return false; if(imp==="alto"&&e.impacto!=="High") return false; if(imp==="medio"&&e.impacto!=="High"&&e.impacto!=="Medium") return false; return per==="tudo"||Date.parse(e.data)>=hoje.getTime(); })
+    .forEach(function(e){ var d=new Date(e.data), dia=d.toLocaleDateString("pt-BR",{weekday:"short",day:"2-digit",month:"2-digit"}), tr=el("tr"); if(Date.parse(e.data)<agora) tr.className="passado";
+      cel(tr,dia===diaAnt?"":dia,"txt"); diaAnt=dia; cel(tr,d.toLocaleTimeString("pt-BR",{hour:"2-digit",minute:"2-digit"})); cel(tr,e.moeda); var i=IMP[e.impacto]||[e.impacto,"neutro"]; var td=cel(tr,"","txt"); td.appendChild(el("span","selo "+i[1],i[0])); cel(tr,e.titulo,"txt quebra"); cel(tr,e.previsao||"–"); cel(tr,e.anterior||"–"); tb.appendChild(tr); });
+  if(!tb.children.length) semLinhas(tb,7,ev.length?"Nenhum evento com esses filtros.":"O calendário ainda não foi coletado.");
+}
+function mercCarrega(){ if(window.SNAP) return; fetch("mercado.json?t="+Date.now()).then(function(r){ if(!r.ok) throw 0; return r.json(); }).then(function(j){ MERC=j; mercDesenha(); }).catch(function(){ $("g-quando").textContent="Notícias e calendário ainda não foram coletados. Eles aparecem depois da primeira rodada do robô."; mercResumo(); }); }
+function mjanela(j){ document.querySelectorAll("#mabas button").forEach(function(o){ var on=o.dataset.mj===j; o.setAttribute("aria-selected",on?"true":"false"); $("mj-"+o.dataset.mj).hidden=!on; }); }
+document.querySelectorAll("#mabas button").forEach(function(b){b.addEventListener("click",function(){mjanela(b.dataset.mj);});});
+["n-fonte","cal-imp","cal-moeda","cal-per"].forEach(function(id){$(id).addEventListener("change",mercDesenha);});
+$("mj-ativos").appendChild($("cj-mercado")); $("cj-mercado").hidden=false;
+
+/* ---------- Aulas ---------- */
+var AULAS=[], AU=0, VISTAS={};
+try{ VISTAS=JSON.parse(localStorage.getItem("aulas_vistas"))||{}; }catch(e){}
+function auChave(a){ return a.modulo+"|"+a.titulo; }
+function auDesenha(){
+  var menu=$("au-menu"); menu.textContent=""; var mod="";
+  AULAS.forEach(function(a,i){ if(a.modulo!==mod){ mod=a.modulo; menu.appendChild(el("div","rot aumod",mod)); }
+    var b=el("button","aula"+(i===AU?" atual":""),(VISTAS[auChave(a)]?"✓ ":"")+a.titulo+(a.duracao?"  ·  "+a.duracao:"")); b.type="button"; b.addEventListener("click",function(){AU=i; auDesenha();}); menu.appendChild(b); });
+  var a=AULAS[AU]; if(!a) return; var v=$("au-video"); v.textContent="";
+  if(a.youtube&&/^[\w-]{6,20}$/.test(a.youtube)){ var f=document.createElement("iframe"); f.src="https://www.youtube-nocookie.com/embed/"+a.youtube; f.title=a.titulo; f.allow="accelerometer; encrypted-media; picture-in-picture; fullscreen"; f.allowFullscreen=true; f.loading="lazy"; v.appendChild(f); }
+  else v.appendChild(el("div","semvideo","Esta aula ainda não tem vídeo cadastrado."));
+  $("au-titulo").textContent=a.titulo; $("au-desc").textContent=a.descricao||"";
+  $("au-feito").textContent=VISTAS[auChave(a)]?"Desmarcar como assistida":"Marcar como assistida"; $("au-prox").hidden=AU>=AULAS.length-1;
+  var feitas=AULAS.filter(function(x){return VISTAS[auChave(x)];}).length; $("au-status").textContent=feitas+" de "+AULAS.length+" aulas assistidas.";
+}
+function auCarrega(){ if(window.SNAP){$("au-status").textContent="As aulas aparecem só na versão ao vivo do site."; return;}
+  fetch("aulas.json?t="+Date.now()).then(function(r){ if(!r.ok) throw 0; return r.json(); }).then(function(j){ AULAS=[]; (j.modulos||[]).forEach(function(m){ (m.aulas||[]).forEach(function(a){ AULAS.push({modulo:m.titulo||"Módulo",titulo:a.titulo||"Aula",youtube:(a.youtube||"").trim(),duracao:a.duracao||"",descricao:a.descricao||""}); }); });
+    if(!AULAS.length){ $("au-status").textContent="Nenhuma aula cadastrada ainda."; return; } $("au-wrap").hidden=false; auDesenha(); }).catch(function(){ $("au-status").textContent="Não consegui carregar as aulas."; }); }
+$("au-feito").addEventListener("click",function(){ var k=auChave(AULAS[AU]); if(VISTAS[k]) delete VISTAS[k]; else VISTAS[k]=1; try{localStorage.setItem("aulas_vistas",JSON.stringify(VISTAS));}catch(e){} auDesenha(); });
+$("au-prox").addEventListener("click",function(){ if(AU<AULAS.length-1){ AU++; auDesenha(); } });
+mercCarrega(); auCarrega(); setInterval(mercCarrega,600000);
 /* ---------- Conta (Supabase) ---------- */
 var CFG=window.PAINEL_CONFIG||{}, SB=null, USUARIO=null, PLANO=null;
 function contaMsg(t,erro){ var m=$("conta-msg"); m.textContent=t||""; m.hidden=!t; m.className=erro?"neg":"sub2"; }
@@ -712,7 +850,7 @@ $("conta-sair").addEventListener("click",function(){ SB.auth.signOut(); });
 $("c-migrar-ok").addEventListener("click",function(){ var local=[]; try{ local=JSON.parse(localStorage.getItem(CHAVE)).lanc||[]; }catch(e){}
   SB.from("lancamentos").insert(local.map(paraNuvem)).then(function(r){ if(r.error){ nuvemFalhou(); return; } $("c-migrar").hidden=true; nuvemCarrega(); }); });
 contaDesenha();
-cLer(); limpaForm(); area(location.hash==="#funding"?"funding":"carteira"); cDesenha(); mDesenha(); cPrecos(); setInterval(cPrecos,60000);
+cLer(); limpaForm(); area(location.hash.slice(1)); cDesenha(); mDesenha(); cPrecos(); setInterval(cPrecos,60000);
 
 iniciar(); carregaSim();
 if(!window.SNAP){ setInterval(carregaSim,300000); setInterval(iniciar,60000); setInterval(function(){HIST={};},3600000); }
