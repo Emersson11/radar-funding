@@ -97,6 +97,8 @@ details{padding:10px 18px} summary{cursor:pointer;font-size:13px;color:var(--mut
 #lado .marca{font:600 26px/1.15 var(--serif);letter-spacing:0;text-transform:none;color:var(--band-fg);margin-bottom:12px}
 #lado button{background:none}
 #lado-bt{display:none}
+.faixa{position:relative} #marca-topo{font:600 clamp(30px,3.4vw,46px)/1.1 var(--serif);color:var(--band-fg);text-align:center;margin-bottom:12px}
+@media (min-width:1100px){ #marca-topo{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);margin:0;white-space:nowrap;pointer-events:none} }
 @media (min-width:900px){ body{padding-left:56px} #lado{position:fixed;left:0;top:0;bottom:0;width:56px;box-sizing:border-box;padding:14px 8px;overflow:hidden;border-right:1px solid rgba(255,255,255,.12);z-index:25;transition:width .18s ease,box-shadow .18s ease}
   #lado-bt{display:block;width:40px;height:40px;padding:0;font-size:20px;line-height:1;border:0;color:var(--band-fg);margin-bottom:18px}
   #lado .marca,#lado .areas{width:206px;opacity:0;pointer-events:none;transition:opacity .15s ease}
@@ -200,7 +202,7 @@ button.mini{font-size:12px;color:var(--muted)}
       <button type="button" data-area="admin" aria-current="false" id="bt-admin" hidden>Administração</button>
     </nav>
 </aside>
-<header class="faixa"><div class="in">
+<header class="faixa"><div id="marca-topo" hidden></div><div class="in">
   <div>
     <h1 id="titulo">Minha Carteira</h1>
     <p id="cart-status">Buscando preços…</p>
@@ -399,6 +401,7 @@ button.mini{font-size:12px;color:var(--muted)}
       <div class="box" style="margin-top:20px">
         <h2>Nome do site</h2>
         <form class="controles" id="adm-nome-form" style="margin-top:10px"><label>Nome que aparece no topo e na aba do navegador<input id="adm-nome" type="text" maxlength="40" style="width:260px"></label><button type="submit">Salvar nome</button></form>
+        <form class="controles" id="adm-menu-form" style="margin-top:10px"><label>Nome que aparece no menu da esquerda<input id="adm-nome-menu" type="text" maxlength="24" style="width:260px"></label><button type="submit">Salvar nome do menu</button></form>
         <h2 style="margin-top:22px;font-size:17px">Abas do menu</h2><p class="sub">Mude o nome e a ordem das abas. A primeira da lista é a que abre quando alguém entra no site.</p><div id="adm-abas" style="display:flex;flex-direction:column;gap:8px;margin-top:10px;max-width:460px"></div><p style="margin-top:10px"><button type="button" id="adm-abas-salvar">Salvar abas</button> <button type="button" class="sec" id="adm-abas-padrao">Voltar ao padrão</button> <span class="sub" id="adm-abas-msg"></span></p>
       </div>
       <div class="box" style="margin-top:20px">
@@ -1237,14 +1240,15 @@ function abasAdm(){ var box=$("adm-abas"); if(!box) return; box.textContent=""; 
 function abasLe(){ [].forEach.call(document.querySelectorAll("#adm-abas input"),function(inp){ ABAS.forEach(function(a){ if(a.id===inp.dataset.id) a.nome=inp.value.trim()||a.nome; }); }); }
 function abasSalva(l){ var v=JSON.stringify(l); SB.from("config_site").upsert({chave:"abas",valor:v}).then(function(r){ if(r.error){ $("adm-abas-msg").textContent="Não consegui salvar as abas."; return; } try{ localStorage.setItem("abas_menu",v); }catch(e){} abasAplica(l); $("adm-abas-msg").textContent="Abas salvas."; }); }
 document.addEventListener("DOMContentLoaded",function(){ $("adm-abas-salvar").addEventListener("click",function(){ abasLe(); abasSalva(ABAS); }); $("adm-abas-padrao").addEventListener("click",function(){ abasSalva(ABASP.map(function(x){return {id:x[0],nome:x[1]};})); }); abasAdm(); });
-function nomeSite(n){ if(!n) return; document.title=n; $("marca").textContent=n; $("marca").hidden=false; if($("adm-nome")) $("adm-nome").value=n; }
+function nomeMenu(n){ $("marca").textContent=n||"Menu"; $("marca").hidden=false; if($("adm-nome-menu")) $("adm-nome-menu").value=n||""; }
+function nomeSite(n){ if(!n) return; document.title=n; $("marca-topo").textContent=n; $("marca-topo").hidden=false; if($("marca").hidden) nomeMenu(""); if($("adm-nome")) $("adm-nome").value=n; }
 function conteudoCarrega(){
   if(!SB) return Promise.resolve(false);
   return Promise.all([SB.from("modulos").select("*"),SB.from("aulas").select("*"),SB.from("config_site").select("*")]).then(function(r){
     if(r[0].error||r[1].error) return false;
     var ord=function(a,b){return a.ordem-b.ordem||a.id-b.id;};
     MODS=(r[0].data||[]).slice().sort(ord).map(function(m){ return {id:m.id,titulo:m.titulo,descricao:m.descricao||"",ordem:m.ordem,aulas:(r[1].data||[]).filter(function(a){return a.modulo_id===m.id;}).sort(ord)}; });
-    if(!r[2].error) (r[2].data||[]).forEach(function(c){ if(c.chave==="nome") nomeSite(c.valor); if(c.chave==="abas"){ try{ abasAplica(JSON.parse(c.valor)); localStorage.setItem("abas_menu",c.valor); }catch(e){} } });
+    if(!r[2].error) (r[2].data||[]).forEach(function(c){ if(c.chave==="nome") nomeSite(c.valor); if(c.chave==="nome_menu") nomeMenu(c.valor); if(c.chave==="abas"){ try{ abasAplica(JSON.parse(c.valor)); localStorage.setItem("abas_menu",c.valor); }catch(e){} } });
     admConteudo();
     if(!MODS.length) return false;
     AULAS=[]; MODS.forEach(function(m){ m.aulas.forEach(function(a){ AULAS.push({id:a.id,modulo:m.titulo,titulo:a.titulo,youtube:a.youtube||"",duracao:a.duracao||"",descricao:a.descricao||""}); }); });
@@ -1280,6 +1284,7 @@ $("adm-aula-form").addEventListener("submit",function(ev){ ev.preventDefault(); 
   var row={modulo_id:+$("aa-mod").value,titulo:$("aa-titulo").value.trim(),youtube:id,duracao:$("aa-dur").value.trim(),descricao:$("aa-desc").value.trim(),ordem:+$("aa-ordem").value||0}; if(!row.modulo_id){ admErro("Crie um módulo antes de adicionar aulas."); return; }
   (EDA?SB.from("aulas").update(row).eq("id",EDA):SB.from("aulas").insert(row)).then(function(r){ if(r.error){ admErro("Não consegui salvar a aula."); return; } limpaAula(); conteudoCarrega(); }); });
 $("am-cancelar").addEventListener("click",limpaMod); $("aa-cancelar").addEventListener("click",limpaAula);
+$("adm-menu-form").addEventListener("submit",function(ev){ ev.preventDefault(); var n=$("adm-nome-menu").value.trim(); if(!n) return; SB.from("config_site").upsert({chave:"nome_menu",valor:n}).then(function(r){ if(r.error) admErro("Não consegui salvar o nome do menu."); else nomeMenu(n); }); });
 $("adm-nome-form").addEventListener("submit",function(ev){ ev.preventDefault(); var n=$("adm-nome").value.trim(); if(!n) return;
   SB.from("config_site").upsert({chave:"nome",valor:n}).then(function(r){ if(r.error) admErro("Não consegui salvar o nome."); else nomeSite(n); }); });
 function avCarrega(){ var a=AULAS[AU], box=$("av-estrelas"), txt=$("av-txt"); if(!box) return; var pode=!!(SB&&USUARIO&&a&&a.id);
