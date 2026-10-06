@@ -136,6 +136,7 @@ tr.passado td{opacity:.55}
 #au-palco .video{max-width:860px}
 .aulas>*{min-width:0;width:100%;box-sizing:border-box} #au-menu>*{min-width:0;max-width:100%} .carr{position:relative;min-width:0} .trilho{display:flex;gap:14px;overflow-x:auto;scroll-snap-type:x proximity;scroll-behavior:smooth;padding:4px 2px 12px;scrollbar-width:thin}
 button.cartao{flex:0 0 clamp(200px,22vw,280px);scroll-snap-align:start;padding:0;border:1px solid var(--line);border-radius:6px;background:var(--surface);color:var(--fg);text-align:left;overflow:hidden;display:flex;flex-direction:column;font-weight:400}
+button.cartao.modulo{flex-basis:clamp(260px,26vw,380px)} .cartao.modulo .nome{font:600 18px/1.25 var(--serif);padding-bottom:2px} .cartao .prog{display:block;padding:0 12px 12px;font-size:13px;color:var(--muted)} #au-palco[hidden]{display:none}
 button.cartao:hover{border-color:var(--accent)} button.cartao.atual{border-color:var(--accent);box-shadow:0 0 0 2px var(--accent)}
 .cartao .capa{position:relative;aspect-ratio:16/9;background:var(--soft) center/cover no-repeat;display:block;width:100%}
 .cartao .capa i{position:absolute;right:6px;bottom:6px;background:rgba(0,0,0,.78);color:#fff;font:500 12px var(--mono);font-style:normal;padding:2px 6px;border-radius:3px}
@@ -1029,12 +1030,22 @@ try{ VISTAS=JSON.parse(localStorage.getItem("aulas_vistas"))||{}; }catch(e){}
 function auChave(a){ return a.modulo+"|"+a.titulo; }
 function auDesenha(){
   var menu=$("au-menu"); menu.textContent=""; var mod="";
-  var trilho=null, atualEl=null;
-  AULAS.forEach(function(a,i){ if(a.modulo!==mod||!trilho){ mod=a.modulo; var n=AULAS.filter(function(x){return x.modulo===mod;}).length; menu.appendChild(el("div","rot aumod",mod+"  ·  "+n+(n>1?" aulas":" aula")));
-      var c=el("div","carr"), e=el("button","seta esq","‹"), d=el("button","seta dir","›"); trilho=el("div","trilho"); e.type=d.type="button"; e.setAttribute("aria-label","Aulas anteriores de "+mod); d.setAttribute("aria-label","Próximas aulas de "+mod);
-      (function(t,e,d){ var at=function(){ e.hidden=t.scrollLeft<4; d.hidden=t.scrollLeft+t.clientWidth>=t.scrollWidth-4; }; e.addEventListener("click",function(){ t.scrollBy({left:-t.clientWidth*0.8}); }); d.addEventListener("click",function(){ t.scrollBy({left:t.clientWidth*0.8}); }); t.addEventListener("scroll",at); setTimeout(at,60); window.addEventListener("resize",at); })(trilho,e,d);
-      c.appendChild(e); c.appendChild(trilho); c.appendChild(d); menu.appendChild(c); }
-    var b=el("button","cartao"+(i===AU?" atual":"")), capa=el("span","capa"); b.type="button"; if(a.youtube&&/^[\w-]{6,20}$/.test(a.youtube)) capa.style.backgroundImage="url(https://i.ytimg.com/vi/"+a.youtube+"/mqdefault.jpg)";
+  var carr=function(rot){ var c=el("div","carr"), e=el("button","seta esq","‹"), d=el("button","seta dir","›"), t=el("div","trilho"); e.type=d.type="button"; e.setAttribute("aria-label","Anteriores"); d.setAttribute("aria-label","Próximos");
+    var at=function(){ e.hidden=t.scrollLeft<4; d.hidden=t.scrollLeft+t.clientWidth>=t.scrollWidth-4; }; e.addEventListener("click",function(){ t.scrollBy({left:-t.clientWidth*0.8}); }); d.addEventListener("click",function(){ t.scrollBy({left:t.clientWidth*0.8}); }); t.addEventListener("scroll",at); setTimeout(at,60); window.addEventListener("resize",at);
+    c.appendChild(e); c.appendChild(t); c.appendChild(d); menu.appendChild(c); return t; };
+  var capaDe=function(a,span){ if(a&&a.youtube&&/^[\w-]{6,20}$/.test(a.youtube)) span.style.backgroundImage="url(https://i.ytimg.com/vi/"+a.youtube+"/mqdefault.jpg)"; };
+  if(typeof AUMOD==="undefined") window.AUMOD=null; if(AUMOD!=null&&AULAS[AU]&&AULAS[AU].modulo!==AUMOD) AUMOD=AULAS[AU].modulo;
+  $("au-palco").hidden=AUMOD==null;
+  if(AUMOD==null){ var nomes=[]; AULAS.forEach(function(a){ if(nomes.indexOf(a.modulo)<0) nomes.push(a.modulo); });
+    menu.appendChild(el("div","rot aumod","Módulos")); var t=carr();
+    nomes.forEach(function(nm){ var l=AULAS.filter(function(x){return x.modulo===nm;}), vistas=l.filter(function(x){return VISTAS[auChave(x)];}).length, b=el("button","cartao modulo"), capa=el("span","capa"); b.type="button"; capaDe(l[0],capa);
+      capa.appendChild(el("i",null,l.length+(l.length>1?" aulas":" aula"))); if(vistas===l.length) capa.appendChild(el("b",null,"✓ Concluído")); b.appendChild(capa); b.appendChild(el("span","nome",nm)); b.appendChild(el("span","prog",vistas+" de "+l.length+" assistidas"));
+      b.addEventListener("click",function(){ AUMOD=nm; AU=AULAS.indexOf(l.filter(function(x){return !VISTAS[auChave(x)];})[0]||l[0]); auDesenha(); window.scrollTo({top:0,behavior:"smooth"}); }); t.appendChild(b); });
+    var ft=AULAS.filter(function(x){return VISTAS[auChave(x)];}).length; $("au-status").textContent=ft+" de "+AULAS.length+" aulas assistidas. Escolha um módulo para começar.";
+    return; }
+  var volta=el("button","sec","← Todos os módulos"); volta.type="button"; volta.style.alignSelf="flex-start"; volta.style.marginBottom="14px"; volta.addEventListener("click",function(){ AUMOD=null; $("au-video").textContent=""; auDesenha(); }); menu.appendChild(volta);
+  var doMod=AULAS.filter(function(x){return x.modulo===AUMOD;}); menu.appendChild(el("div","rot aumod",AUMOD+"  ·  "+doMod.length+(doMod.length>1?" aulas":" aula"))); var trilho=carr(), atualEl=null;
+  AULAS.forEach(function(a,i){ if(a.modulo!==AUMOD) return; var b=el("button","cartao"+(i===AU?" atual":"")), capa=el("span","capa"); b.type="button"; capaDe(a,capa);
     if(a.duracao) capa.appendChild(el("i",null,a.duracao)); if(VISTAS[auChave(a)]) capa.appendChild(el("b",null,"✓ Assistida")); b.appendChild(capa); b.appendChild(el("span","nome",a.titulo));
     b.addEventListener("click",function(){ AU=i; auDesenha(); $("au-palco").scrollIntoView({behavior:"smooth",block:"start"}); }); trilho.appendChild(b); if(i===AU) atualEl=b; });
   if(atualEl) setTimeout(function(){ var t=atualEl.parentNode; t.scrollLeft=Math.max(0,atualEl.offsetLeft-t.offsetLeft-20); },30);
