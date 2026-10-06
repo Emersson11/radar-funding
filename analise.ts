@@ -109,6 +109,8 @@ async function gemini(prompt: string) {
   const chave = Deno.env.get("GEMINI_API_KEY");
   if (!chave) throw new Error("O segredo GEMINI_API_KEY não está configurado.");
   let ultimo = "";
+  for (let volta = 0; volta < 2; volta++) {
+  if (volta) await new Promise((r) => setTimeout(r, 6000));
   for (const modelo of MODELOS) {
     const r = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${modelo}:generateContent`, {
       method: "POST", headers: { "Content-Type": "application/json", "x-goog-api-key": chave },
@@ -117,7 +119,8 @@ async function gemini(prompt: string) {
     const j = await r.json().catch(() => ({}));
     if (r.ok) { const t = (j.candidates?.[0]?.content?.parts || []).map((p: any) => p.text || "").join(""); if (t.trim()) return { texto: t.trim(), modelo }; ultimo = "resposta vazia"; continue; }
     ultimo = `${r.status}: ${j.error?.message || "erro"}`.slice(0, 300);
-    if (r.status !== 404 && r.status !== 400) break;
+    if (r.status === 401 || r.status === 403) throw new Error("Gemini recusou a chave (" + ultimo + ")");
+  }
   }
   throw new Error("Gemini respondeu " + ultimo);
 }
