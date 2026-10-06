@@ -106,6 +106,13 @@ button.lnk.neg{color:var(--bad)}
 .kpi .sub{font:400 13px var(--mono)}
 button.ord{border:0;padding:0;background:none;color:inherit;font:inherit;letter-spacing:inherit;text-transform:inherit;white-space:nowrap}
 button.ord:hover{color:var(--fg)}
+.direita{display:flex;flex-wrap:wrap;gap:10px;align-items:center;justify-content:flex-end}
+.contaf{display:flex;gap:6px;flex-wrap:wrap}
+.contaf input{width:190px;background:transparent;color:var(--band-fg);border-color:var(--band-muted)}
+.contaf input::placeholder{color:var(--band-muted)}
+#conta-dentro{color:var(--band-muted);font-size:14px}
+.faixa .neg{color:var(--warn)} .sub2{color:var(--band-muted)}
+.so-leitor{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}
 .rodape{font-size:12px;color:var(--muted);border-top:1px solid var(--line);padding-top:14px}
 </style>
 </head>
@@ -120,8 +127,15 @@ button.ord:hover{color:var(--fg)}
     <p id="cart-status">Buscando preços…</p>
     <p id="atualizado" hidden>Buscando taxas…</p>
   </div>
-  <button id="recarregar" type="button">Atualizar</button>
-</div></header>
+  <div class="direita">
+    <div id="conta" hidden>
+      <div id="conta-fora"><form id="conta-form" class="contaf"><label class="so-leitor" for="conta-campo">Seu e-mail</label><input id="conta-campo" type="email" placeholder="seu@email.com" required autocomplete="email"><button type="submit">Entrar</button></form></div>
+      <div id="conta-dentro" hidden><span id="conta-email"></span> <button type="button" id="conta-sair">Sair</button></div>
+    </div>
+    <button id="recarregar" type="button">Atualizar</button>
+  </div>
+</div>
+<div class="in"><p id="conta-msg" hidden></p></div></header>
 <main>
   <div id="area-carteira" class="area">
     <div class="abas" role="tablist" id="cabas">
@@ -177,7 +191,9 @@ button.ord:hover{color:var(--fg)}
         <div class="scroll"><table><thead><tr><th>Data</th><th>Ativo</th><th>Operação</th><th>Quantidade</th><th>Preço (US$)</th><th>Total (US$)</th><th></th></tr></thead><tbody id="c-lanc"></tbody></table></div>
         <p style="margin-top:14px"><button type="button" id="c-exportar" class="sec">Salvar cópia de segurança</button> <label class="arq sec">Restaurar cópia<input type="file" id="c-importar" accept="application/json,.json" hidden></label></p>
       </div>
-      <p class="note">Os lançamentos ficam guardados só neste navegador. Eles não aparecem em outro aparelho nem para outras pessoas, e somem se você limpar os dados do navegador. Salve uma cópia de segurança de vez em quando.</p>
+      <p class="aviso" id="c-migrar" hidden><span id="c-migrar-txt"></span> <button type="button" id="c-migrar-ok" class="sec">Enviar para a minha conta</button></p>
+      <p class="note" id="c-nota-nuvem" hidden>Os lançamentos ficam guardados na sua conta: só você vê, e aparecem em qualquer aparelho onde você entrar.</p>
+      <p class="note" id="c-nota-local">Os lançamentos ficam guardados só neste navegador. Eles não aparecem em outro aparelho nem para outras pessoas, e somem se você limpar os dados do navegador. Salve uma cópia de segurança de vez em quando.</p>
     </section>
 
     <section id="cj-mercado" hidden>
@@ -191,6 +207,8 @@ button.ord:hover{color:var(--fg)}
   </div>
 
   <div id="area-funding" class="area" hidden>
+    <div class="box" id="funding-bloq" hidden><h2>Área restrita a assinantes</h2><p class="sub" id="funding-bloq-txt"></p></div>
+    <div id="funding-conteudo" class="area">
   <section class="box controles" aria-label="Parâmetros">
     <label>Capital (US$)<input id="capital" type="number" min="1" step="1" value="100"></label>
     <label>Alavancagem<select id="alav"><option value="1">1x</option><option value="2">2x</option><option value="3">3x</option></select></label>
@@ -279,9 +297,12 @@ button.ord:hover{color:var(--fg)}
     </section>
   </div>
   <p class="rodape">Dados públicos de Binance, Bybit, OKX, Bitget, Gate, Hyperliquid e dYdX. Taxas anualizadas a partir do funding de cada período. Esta página não envia ordens nem acessa contas. Não é recomendação de investimento.</p>
+    </div>
   </div>
 </main>
 
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js"></script>
+<script src="config.js"></script>
 <script>
 var VENUES=[["binance","Binance"],["bybit","Bybit"],["okx","OKX"],["bitget","Bitget"],["gate","Gate"],["hyper","Hyperliquid"],["dydx","dYdX"]];
 var NOME={}; VENUES.forEach(function(v){NOME[v[0]]=v[1];});
@@ -541,7 +562,7 @@ $("recarregar").addEventListener("click",function(){iniciar(); cPrecos();});
 var CHAVE="carteira_v1", CART={lanc:[],exemplo:false}, PRECOS={}, EDIT=null, FILTRO=null;
 var PRINCIPAIS=["BTC","ETH","SOL","BNB","XRP","DOGE","ADA","TRX","AVAX","LINK","SUI","LTC","DOT","NEAR","UNI","AAVE","HYPE","TON"];
 function cLer(){ try{ var j=JSON.parse(localStorage.getItem(CHAVE)); if(j&&Array.isArray(j.lanc)) CART=j; }catch(e){} }
-function cGravar(){ try{ localStorage.setItem(CHAVE,JSON.stringify(CART)); return true; }catch(e){ return false; } }
+function cGravar(){ if(typeof USUARIO!=="undefined"&&USUARIO) return true; try{ localStorage.setItem(CHAVE,JSON.stringify(CART)); return true; }catch(e){ return false; } }
 function num(v,c){ return v.toLocaleString("pt-BR",{maximumFractionDigits:c==null?8:c}); }
 function prc(p){ return p==null?"sem preço":p>0&&p<0.01?p.toLocaleString("pt-BR",{maximumSignificantDigits:4}):usd(p,p<1?4:2); }
 function precoDe(a){ if(a==="USDT"||a==="USDC") return {p:1,v:0}; return PRECOS[a]||null; }
@@ -588,7 +609,7 @@ function cDesenha(){
   $("c-filtro").hidden=!FILTRO; $("c-filtro").textContent=""; if(FILTRO){ $("c-filtro").appendChild(document.createTextNode("Mostrando só "+FILTRO+". ")); var bf=el("button","lnk","Mostrar todos"); bf.type="button"; bf.addEventListener("click",function(){FILTRO=null; cDesenha();}); $("c-filtro").appendChild(bf); }
   ls.forEach(function(l){ var tr=el("tr"); cel(tr,l.data.split("-").reverse().join("/")); cel(tr,l.ativo); cel(tr,l.tipo==="compra"?"Compra":"Venda","txt "+(l.tipo==="compra"?"pos":"neg")); cel(tr,num(l.qtd)); cel(tr,prc(l.preco)); cel(tr,usd(l.qtd*l.preco));
     var td=cel(tr,"","txt"); var be=el("button","lnk","Editar"); be.type="button"; be.addEventListener("click",function(){editar(l);}); td.appendChild(be); td.appendChild(document.createTextNode("  "));
-    var br=el("button","lnk neg","Remover"); br.type="button"; br.addEventListener("click",function(){ if(br.dataset.ok){ CART.lanc=CART.lanc.filter(function(x){return x.id!==l.id;}); cGravar(); cDesenha(); } else { br.dataset.ok="1"; br.textContent="Confirmar remoção"; } }); td.appendChild(br); tl.appendChild(tr); });
+    var br=el("button","lnk neg","Remover"); br.type="button"; br.addEventListener("click",function(){ if(br.dataset.ok){ CART.lanc=CART.lanc.filter(function(x){return x.id!==l.id;}); nuvem("remove",l).catch(nuvemFalhou); cGravar(); cDesenha(); } else { br.dataset.ok="1"; br.textContent="Confirmar remoção"; } }); td.appendChild(br); tl.appendChild(tr); });
   if(!ls.length) semLinhas(tl,7,"Nenhum lançamento ainda.");
   var semPreco=L.filter(function(p){return p.preco==null;}).map(function(p){return p.ativo;});
   $("cart-status").textContent=(Object.keys(PRECOS).length?"Preços atualizados em "+new Date().toLocaleTimeString("pt-BR")+". ":"Buscando preços… ")+(semPreco.length?"Sem preço na Binance: "+semPreco.join(", ")+".":"");
@@ -633,8 +654,9 @@ $("c-form").addEventListener("submit",function(ev){ ev.preventDefault();
   if(!msg&&t==="venda"){ var disp=0; CART.lanc.forEach(function(l){ if(l.ativo===a&&l.id!==EDIT) disp+=l.tipo==="compra"?l.qtd:-l.qtd; }); if(q>disp+1e-9) msg="Você só tem "+num(Math.max(0,disp))+" "+a+" cadastrado para vender."; }
   if(msg){ er.textContent=msg; er.hidden=false; return; }
   if(CART.exemplo){ CART={lanc:[],exemplo:false}; }
-  var novo={id:EDIT||Date.now(),ativo:a,tipo:t,qtd:q,preco:p,data:d};
+  var novo={id:EDIT||Date.now(),ativo:a,tipo:t,qtd:q,preco:p,data:d}, eraEdicao=!!EDIT;
   if(EDIT) CART.lanc=CART.lanc.map(function(l){return l.id===EDIT?novo:l;}); else CART.lanc.push(novo);
+  nuvem(eraEdicao?"altera":"novo",novo).then(function(salvo){ if(salvo.id!==novo.id){ CART.lanc=CART.lanc.map(function(l){return l.id===novo.id?salvo:l;}); cDesenha(); } }).catch(nuvemFalhou);
   if(!cGravar()){ er.textContent="Este navegador não deixou guardar os dados. O lançamento vale só até você fechar a página."; er.hidden=false; } 
   var manter=er.hidden; limpaForm(); if(!manter) er.hidden=false; cDesenha(); });
 $("f-cancelar").addEventListener("click",limpaForm);
@@ -642,9 +664,54 @@ $("c-ir-lanc").addEventListener("click",function(){janela("lanc"); $("f-ativo").
 $("c-exemplo").addEventListener("click",function(){ CART={exemplo:true,lanc:[{id:1,ativo:"BTC",tipo:"compra",qtd:0.02,preco:62000,data:"2026-03-10"},{id:2,ativo:"BTC",tipo:"compra",qtd:0.01,preco:91000,data:"2026-07-02"},{id:3,ativo:"ETH",tipo:"compra",qtd:0.5,preco:3100,data:"2026-04-18"},{id:4,ativo:"SOL",tipo:"compra",qtd:6,preco:95,data:"2026-05-05"},{id:5,ativo:"SOL",tipo:"venda",qtd:2,preco:140,data:"2026-08-20"},{id:6,ativo:"LINK",tipo:"compra",qtd:25,preco:18,data:"2026-06-11"}]}; cDesenha(); });
 $("c-limpa-ex").addEventListener("click",function(){ CART={lanc:[],exemplo:false}; cGravar(); cDesenha(); });
 $("c-exportar").addEventListener("click",function(){ var a=document.createElement("a"); a.href=URL.createObjectURL(new Blob([JSON.stringify(CART,null,1)],{type:"application/json"})); a.download="carteira-"+new Date().toISOString().slice(0,10)+".json"; document.body.appendChild(a); a.click(); a.remove(); });
-$("c-importar").addEventListener("change",function(ev){ var f=ev.target.files[0]; if(!f) return; var rd=new FileReader(); rd.onload=function(){ try{ var j=JSON.parse(rd.result); if(!j||!Array.isArray(j.lanc)) throw 0; CART={exemplo:false,lanc:j.lanc.filter(function(l){return l&&l.ativo&&l.qtd>0&&l.preco>=0&&l.data;}).map(function(l,i){return {id:l.id||Date.now()+i,ativo:String(l.ativo).toUpperCase(),tipo:l.tipo==="venda"?"venda":"compra",qtd:+l.qtd,preco:+l.preco,data:String(l.data)};})}; cGravar(); cDesenha(); $("f-erro").hidden=true; }catch(e){ $("f-erro").textContent="Esse arquivo não é uma cópia de segurança da carteira."; $("f-erro").hidden=false; } ev.target.value=""; }; rd.readAsText(f); });
+$("c-importar").addEventListener("change",function(ev){ var f=ev.target.files[0]; if(!f) return; var rd=new FileReader(); rd.onload=function(){ try{ var j=JSON.parse(rd.result); if(!j||!Array.isArray(j.lanc)) throw 0; CART={exemplo:false,lanc:j.lanc.filter(function(l){return l&&l.ativo&&l.qtd>0&&l.preco>=0&&l.data;}).map(function(l,i){return {id:l.id||Date.now()+i,ativo:String(l.ativo).toUpperCase(),tipo:l.tipo==="venda"?"venda":"compra",qtd:+l.qtd,preco:+l.preco,data:String(l.data)};})}; cGravar(); cDesenha(); $("f-erro").hidden=true; if(SB&&USUARIO) SB.from("lancamentos").insert(CART.lanc.map(paraNuvem)).then(function(r){ if(r.error) nuvemFalhou(); else nuvemCarrega(); }); }catch(e){ $("f-erro").textContent="Esse arquivo não é uma cópia de segurança da carteira."; $("f-erro").hidden=false; } ev.target.value=""; }; rd.readAsText(f); });
 document.querySelectorAll("#cabas button").forEach(function(b){b.addEventListener("click",function(){janela(b.dataset.cj);});});
 document.querySelectorAll("#areas button").forEach(function(b){b.addEventListener("click",function(){area(b.dataset.area);});});
+/* ---------- Conta (Supabase) ---------- */
+var CFG=window.PAINEL_CONFIG||{}, SB=null, USUARIO=null, PLANO=null;
+function contaMsg(t,erro){ var m=$("conta-msg"); m.textContent=t||""; m.hidden=!t; m.className=erro?"neg":"sub2"; }
+function contaDesenha(){
+  if(!SB){ $("conta").hidden=true; return; }
+  $("conta").hidden=false; $("conta-fora").hidden=!!USUARIO; $("conta-dentro").hidden=!USUARIO;
+  if(USUARIO){ $("conta-email").textContent=USUARIO.email+(PLANO&&PLANO!=="gratis"?" · "+(PLANO==="admin"?"administrador":"assinante"):""); }
+  var bloq=!!(SB&&CFG.exigirAssinatura&&PLANO!=="assinante"&&PLANO!=="admin");
+  $("funding-bloq").hidden=!bloq; $("funding-conteudo").hidden=bloq;
+  $("funding-bloq-txt").textContent=USUARIO?"Sua conta ainda não tem acesso a esta área. Fale com o administrador para liberar.":"Entre com a sua conta para ver esta área.";
+  $("c-nota-local").hidden=!!USUARIO; $("c-nota-nuvem").hidden=!USUARIO;
+}
+function deNuvem(r){ return {id:r.id,ativo:r.ativo,tipo:r.tipo,qtd:+r.qtd,preco:+r.preco,data:r.data}; }
+function paraNuvem(l){ return {ativo:l.ativo,tipo:l.tipo,qtd:l.qtd,preco:l.preco,data:l.data}; }
+function nuvemCarrega(){
+  return SB.from("lancamentos").select("*").then(function(r){ if(r.error) throw r.error;
+    var local=[]; try{ var j=JSON.parse(localStorage.getItem(CHAVE)); if(j&&!j.exemplo&&Array.isArray(j.lanc)) local=j.lanc; }catch(e){}
+    CART={lanc:r.data.map(deNuvem),exemplo:false}; $("c-migrar").hidden=!(local.length&&!r.data.length); $("c-migrar").dataset.n=local.length;
+    $("c-migrar-txt").textContent="Este navegador tem "+local.length+" lançamento(s) guardado(s) fora da conta."; cDesenha(); });
+}
+function nuvem(op,l){
+  if(!SB||!USUARIO) return Promise.resolve(l);
+  var q=op==="novo"?SB.from("lancamentos").insert(paraNuvem(l)).select().single():op==="altera"?SB.from("lancamentos").update(paraNuvem(l)).eq("id",l.id).select().single():SB.from("lancamentos").delete().eq("id",l.id);
+  return q.then(function(r){ if(r.error) throw r.error; return r.data?deNuvem(r.data):l; });
+}
+function nuvemFalhou(){ $("f-erro").textContent="Não consegui salvar na sua conta. Recarreguei os lançamentos; tente de novo."; $("f-erro").hidden=false; nuvemCarrega().catch(function(){}); }
+function sessao(s){
+  USUARIO=s?s.user:null; PLANO=null;
+  if(!USUARIO){ cLer(); contaDesenha(); cDesenha(); return; }
+  contaDesenha();
+  SB.from("perfis").select("plano").eq("user_id",USUARIO.id).maybeSingle().then(function(r){ PLANO=r.data?r.data.plano:"gratis"; contaDesenha(); });
+  nuvemCarrega().catch(function(){ $("cart-status").textContent="Não consegui ler os lançamentos da sua conta."; });
+}
+if(CFG.supabaseUrl&&CFG.supabaseAnonKey&&window.supabase){
+  SB=window.supabase.createClient(CFG.supabaseUrl,CFG.supabaseAnonKey);
+  SB.auth.getSession().then(function(r){ sessao(r.data.session); });
+  SB.auth.onAuthStateChange(function(ev,s){ if(ev==="SIGNED_IN"||ev==="SIGNED_OUT") sessao(s); });
+}
+$("conta-form").addEventListener("submit",function(ev){ ev.preventDefault(); var e=$("conta-campo").value.trim(); if(!e) return;
+  contaMsg("Enviando…"); SB.auth.signInWithOtp({email:e,options:{emailRedirectTo:location.origin+location.pathname}}).then(function(r){
+    if(r.error) contaMsg("Não consegui enviar o link: "+r.error.message,true); else contaMsg("Enviei um link de acesso para "+e+". Abra o e-mail neste aparelho e clique no link."); }); });
+$("conta-sair").addEventListener("click",function(){ SB.auth.signOut(); });
+$("c-migrar-ok").addEventListener("click",function(){ var local=[]; try{ local=JSON.parse(localStorage.getItem(CHAVE)).lanc||[]; }catch(e){}
+  SB.from("lancamentos").insert(local.map(paraNuvem)).then(function(r){ if(r.error){ nuvemFalhou(); return; } $("c-migrar").hidden=true; nuvemCarrega(); }); });
+contaDesenha();
 cLer(); limpaForm(); area(location.hash==="#funding"?"funding":"carteira"); cDesenha(); mDesenha(); cPrecos(); setInterval(cPrecos,60000);
 
 iniciar(); carregaSim();
