@@ -239,7 +239,7 @@ button.aula.atual{border-color:var(--accent);font-weight:600}
       </div>
       <div class="box" style="margin-top:20px"><h2>O que está acontecendo</h2><ul id="g-texto"></ul><p class="note" id="g-quando"></p></div>
       <div class="duas" style="margin-top:20px">
-        <div class="box"><h2>Próximos eventos de alto impacto</h2><div class="scroll"><table><thead><tr><th>Quando</th><th>Moeda</th><th>Evento</th></tr></thead><tbody id="g-eventos"></tbody></table></div></div>
+        <div class="box"><h2>Próximos eventos dos EUA (3 estrelas)</h2><div class="scroll"><table><thead><tr><th>Quando</th><th>Evento</th></tr></thead><tbody id="g-eventos"></tbody></table></div></div>
         <div class="box"><h2>Últimas notícias</h2><ul class="nots" id="g-nots"></ul></div>
       </div>
     </section>
@@ -251,14 +251,13 @@ button.aula.atual{border-color:var(--accent);font-weight:600}
       <p class="note">Títulos e links dos sites de origem, atualizados de hora em hora. Clique para ler a matéria no site que a publicou.</p>
     </section>
     <section id="mj-calendario" class="box" hidden>
-      <h2>Calendário econômico</h2>
+      <h2>Calendário econômico dos Estados Unidos</h2>
+      <p class="sub">Só os eventos de impacto alto (3 estrelas).</p>
       <div class="controles" style="margin:10px 0">
-        <label>Impacto<select id="cal-imp"><option value="alto">Só alto</option><option value="medio" selected>Alto e médio</option><option value="todos">Todos</option></select></label>
-        <label>Moeda<select id="cal-moeda"><option value="">Todas</option></select></label>
         <label>Período<select id="cal-per"><option value="futuro" selected>De hoje em diante</option><option value="tudo">Semana inteira</option></select></label>
       </div>
-      <div class="scroll"><table><thead><tr><th>Dia</th><th>Hora</th><th>Moeda</th><th>Impacto</th><th>Evento</th><th>Previsão</th><th>Anterior</th></tr></thead><tbody id="cal-tb"></tbody></table></div>
-      <p class="note">Horários no fuso do seu aparelho. Cobre a semana atual e, quando disponível, a seguinte. Os nomes dos eventos vêm em inglês da fonte (Forex Factory).</p>
+      <div class="scroll"><table><thead><tr><th>Dia</th><th>Hora</th><th>Evento</th><th>Previsão</th><th>Anterior</th></tr></thead><tbody id="cal-tb"></tbody></table></div>
+      <p class="note">Horários no fuso do seu aparelho. Mostra só eventos dos Estados Unidos classificados como impacto alto. Cobre a semana atual e, quando disponível, a seguinte. Os nomes dos eventos vêm em inglês da fonte (Forex Factory).</p>
     </section>
   </div>
 
@@ -754,8 +753,8 @@ function mercResumo(){
   if(liq.length>1) frases.push("Maior alta entre os ativos líquidos: "+liq[0]+" ("+pct(PRECOS[liq[0]].v)+"). Maior queda: "+liq[liq.length-1]+" ("+pct(PRECOS[liq[liq.length-1]].v)+").");
   if(MERC&&MERC.panorama){ var g=MERC.panorama; frases.push("O mercado cripto inteiro vale "+grande(g.cap)+", "+pct(g.var24/100)+" em 24 horas, com o Bitcoin respondendo por "+usd(g.dom_btc,1)+"% desse valor."); }
   if(MERC&&MERC.fng) frases.push("O índice de medo e ganância está em "+MERC.fng.valor+" de 100 ("+(FNG_PT[MERC.fng.classe]||MERC.fng.classe)+").");
-  if(MERC&&MERC.calendario){ var agora=Date.now(), prox=MERC.calendario.filter(function(e){return e.impacto==="High"&&Date.parse(e.data)>agora;}).sort(function(a,b){return Date.parse(a.data)-Date.parse(b.data);})[0];
-    if(prox) frases.push("Próximo evento de alto impacto: "+prox.titulo+" ("+prox.moeda+"), "+new Date(prox.data).toLocaleString("pt-BR",{weekday:"long",day:"2-digit",month:"2-digit",hour:"2-digit",minute:"2-digit"})+"."); }
+  if(MERC&&MERC.calendario){ var agora=Date.now(), prox=MERC.calendario.filter(function(e){return e.impacto==="High"&&e.moeda==="USD"&&Date.parse(e.data)>agora;}).sort(function(a,b){return Date.parse(a.data)-Date.parse(b.data);})[0];
+    if(prox) frases.push("Próximo evento de 3 estrelas dos EUA: "+prox.titulo+", "+new Date(prox.data).toLocaleString("pt-BR",{weekday:"long",day:"2-digit",month:"2-digit",hour:"2-digit",minute:"2-digit"})+"."); }
   if(!frases.length) frases.push("Buscando os dados do mercado…");
   frases.forEach(function(f){ul.appendChild(el("li",null,f));});
 }
@@ -767,21 +766,20 @@ function mercDesenha(){
   var nots=MERC.noticias||[], gn=$("g-nots"); gn.textContent=""; nots.slice(0,6).forEach(function(n){gn.appendChild(notItem(n));}); if(!nots.length) gn.appendChild(el("li","vazio","Ainda sem notícias coletadas."));
   var sf=$("n-fonte"), atual=sf.value; if(sf.options.length<2){ var fs={}; nots.forEach(function(n){fs[n.fonte]=1;}); Object.keys(fs).sort().forEach(function(f){var o=el("option",null,f); o.value=f; sf.appendChild(o);}); sf.value=atual; }
   var nl=$("n-lista"); nl.textContent=""; nots.filter(function(n){return !sf.value||n.fonte===sf.value;}).forEach(function(n){nl.appendChild(notItem(n));}); if(!nl.children.length) nl.appendChild(el("li","vazio","Ainda sem notícias coletadas."));
-  var ev=(MERC.calendario||[]).slice().sort(function(a,b){return Date.parse(a.data)-Date.parse(b.data);}), agora=Date.now();
-  var ge=$("g-eventos"); ge.textContent=""; ev.filter(function(e){return e.impacto==="High"&&Date.parse(e.data)>agora;}).slice(0,6).forEach(function(e){ var tr=el("tr"); cel(tr,new Date(e.data).toLocaleString("pt-BR",{weekday:"short",day:"2-digit",month:"2-digit",hour:"2-digit",minute:"2-digit"}),"txt"); cel(tr,e.moeda); cel(tr,e.titulo,"txt quebra"); ge.appendChild(tr); });
-  if(!ge.children.length) semLinhas(ge,3,"Nenhum evento de alto impacto pela frente nesta semana.");
-  var sm=$("cal-moeda"); if(sm.options.length<2){ var ms={}; ev.forEach(function(e){ if(e.moeda) ms[e.moeda]=1; }); Object.keys(ms).sort().forEach(function(m){var o=el("option",null,m); o.value=m; sm.appendChild(o);}); }
-  var imp=$("cal-imp").value, per=$("cal-per").value, hoje=new Date(); hoje.setHours(0,0,0,0);
+  var ev=(MERC.calendario||[]).filter(function(e){return e.impacto==="High"&&e.moeda==="USD";}).sort(function(a,b){return Date.parse(a.data)-Date.parse(b.data);}), agora=Date.now();
+  var ge=$("g-eventos"); ge.textContent=""; ev.filter(function(e){return Date.parse(e.data)>agora;}).slice(0,6).forEach(function(e){ var tr=el("tr"); cel(tr,new Date(e.data).toLocaleString("pt-BR",{weekday:"short",day:"2-digit",month:"2-digit",hour:"2-digit",minute:"2-digit"}),"txt"); cel(tr,e.titulo,"txt quebra"); ge.appendChild(tr); });
+  if(!ge.children.length) semLinhas(ge,2,"Nenhum evento de 3 estrelas dos EUA pela frente nesta semana.");
+  var per=$("cal-per").value, hoje=new Date(); hoje.setHours(0,0,0,0);
   var tb=$("cal-tb"); tb.textContent=""; var diaAnt="";
-  ev.filter(function(e){ if(sm.value&&e.moeda!==sm.value) return false; if(imp==="alto"&&e.impacto!=="High") return false; if(imp==="medio"&&e.impacto!=="High"&&e.impacto!=="Medium") return false; return per==="tudo"||Date.parse(e.data)>=hoje.getTime(); })
+  ev.filter(function(e){ return per==="tudo"||Date.parse(e.data)>=hoje.getTime(); })
     .forEach(function(e){ var d=new Date(e.data), dia=d.toLocaleDateString("pt-BR",{weekday:"short",day:"2-digit",month:"2-digit"}), tr=el("tr"); if(Date.parse(e.data)<agora) tr.className="passado";
-      cel(tr,dia===diaAnt?"":dia,"txt"); diaAnt=dia; cel(tr,d.toLocaleTimeString("pt-BR",{hour:"2-digit",minute:"2-digit"})); cel(tr,e.moeda); var i=IMP[e.impacto]||[e.impacto,"neutro"]; var td=cel(tr,"","txt"); td.appendChild(el("span","selo "+i[1],i[0])); cel(tr,e.titulo,"txt quebra"); cel(tr,e.previsao||"–"); cel(tr,e.anterior||"–"); tb.appendChild(tr); });
-  if(!tb.children.length) semLinhas(tb,7,ev.length?"Nenhum evento com esses filtros.":"O calendário ainda não foi coletado.");
+      cel(tr,dia===diaAnt?"":dia,"txt"); diaAnt=dia; cel(tr,d.toLocaleTimeString("pt-BR",{hour:"2-digit",minute:"2-digit"})); cel(tr,e.titulo,"txt quebra"); cel(tr,e.previsao||"–"); cel(tr,e.anterior||"–"); tb.appendChild(tr); });
+  if(!tb.children.length) semLinhas(tb,5,(MERC.calendario||[]).length?"Nenhum evento de 3 estrelas dos EUA neste período.":"O calendário ainda não foi coletado.");
 }
 function mercCarrega(){ if(window.SNAP) return; fetch("mercado.json?t="+Date.now()).then(function(r){ if(!r.ok) throw 0; return r.json(); }).then(function(j){ MERC=j; mercDesenha(); }).catch(function(){ $("g-quando").textContent="Notícias e calendário ainda não foram coletados. Eles aparecem depois da primeira rodada do robô."; mercResumo(); }); }
 function mjanela(j){ document.querySelectorAll("#mabas button").forEach(function(o){ var on=o.dataset.mj===j; o.setAttribute("aria-selected",on?"true":"false"); $("mj-"+o.dataset.mj).hidden=!on; }); }
 document.querySelectorAll("#mabas button").forEach(function(b){b.addEventListener("click",function(){mjanela(b.dataset.mj);});});
-["n-fonte","cal-imp","cal-moeda","cal-per"].forEach(function(id){$(id).addEventListener("change",mercDesenha);});
+["n-fonte","cal-per"].forEach(function(id){$(id).addEventListener("change",mercDesenha);});
 $("mj-ativos").appendChild($("cj-mercado")); $("cj-mercado").hidden=false;
 
 /* ---------- Aulas ---------- */
