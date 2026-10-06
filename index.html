@@ -1020,7 +1020,7 @@ function perfDesenha(){
   $("pf-status").textContent="Calculando o histórico…";
   perfCalcula().then(function(p){ PERF=p; if(!p) return; $("pf-caixa").hidden=false;
     var alvo=$("pf-grafico");
-    if(!PCHART){ PCHART=LightweightCharts.createChart(alvo,{autoSize:true,layout:{background:{color:"transparent"},textColor:cor("--muted"),fontFamily:"IBM Plex Mono, monospace"},grid:{vertLines:{color:cor("--line")},horzLines:{color:cor("--line")}},rightPriceScale:{borderColor:cor("--line")},timeScale:{borderColor:cor("--line")},localization:{locale:"pt-BR",priceFormatter:function(v){return (v>=0?"+":"")+v.toFixed(1).replace(".",",")+"%";}},handleScale:{axisPressedMouseMove:false}}); PSERIES={}; }
+    if(!PCHART){ PCHART=LightweightCharts.createChart(alvo,{autoSize:true,layout:{background:{color:"transparent"},textColor:cor("--muted"),fontFamily:"IBM Plex Mono, monospace"},grid:{vertLines:{color:cor("--line")},horzLines:{color:cor("--line")}},rightPriceScale:{borderColor:cor("--line")},timeScale:{borderColor:cor("--line")},localization:{locale:"pt-BR",priceFormatter:function(v){return (v>=0?"+":"")+v.toFixed(1).replace(".",",")+"%";}},handleScroll:{mouseWheel:false,vertTouchDrag:false},handleScale:{axisPressedMouseMove:false,mouseWheel:false}}); PSERIES={}; }
     var corte=PPER?dia(Date.now()-PPER*864e5):"0000";
     var lg=$("pf-leg"), tb=$("pf-tb"); lg.textContent=""; tb.textContent="";
     PDEF.forEach(function(d){ var k=d[0], s=p[k]; if(PSERIES[k]){ PCHART.removeSeries(PSERIES[k]); delete PSERIES[k]; } if(!s||!s.length) return;
