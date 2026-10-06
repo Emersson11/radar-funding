@@ -126,6 +126,74 @@ def referencias():
     return out
 
 
+MACRO = {"ouro": "GC=F", "brent": "BZ=F", "dxy": "DX-Y.NYB", "us3m": "%5EIRX", "us5y": "%5EFVX", "us10y": "%5ETNX", "us30y": "%5ETYX",
+         "sp500": "%5EGSPC", "nasdaq": "%5EIXIC", "ibov": "%5EBVSP", "usdbrl": "BRL=X"}
+ETFS = [("SPY", "S&P 500 (EUA)"), ("QQQ", "Nasdaq 100 (EUA)"), ("IWM", "Small caps dos EUA"), ("EEM", "Mercados emergentes"), ("EWZ", "Brasil em dólar"),
+        ("GLD", "Ouro"), ("TLT", "Títulos longos do Tesouro dos EUA"), ("SHY", "Títulos curtos do Tesouro dos EUA"), ("VNQ", "Imóveis dos EUA"),
+        ("IBIT", "Bitcoin à vista (BlackRock)"), ("ETHA", "Ethereum à vista (BlackRock)"),
+        ("BOVA11.SA", "Ibovespa (B3)"), ("IVVB11.SA", "S&P 500 em reais (B3)"), ("SMAL11.SA", "Small caps do Brasil (B3)"), ("HASH11.SA", "Cesta de cripto (B3)"), ("GOLD11.SA", "Ouro em reais (B3)")]
+
+
+def _yahoo(simbolo, faixa="1y"):
+    from datetime import datetime, timezone
+    r = S.get(f"https://query1.finance.yahoo.com/v8/finance/chart/{simbolo}?range={faixa}&interval=1d", timeout=30).json()["chart"]["result"][0]
+    fech = r["indicators"]["quote"][0]["close"]
+    return [[datetime.fromtimestamp(t, timezone.utc).strftime("%Y-%m-%d"), round(c, 4)] for t, c in zip(r["timestamp"], fech) if c]
+
+
+def macro():
+    """Juros, ouro, petróleo, dólar, bolsas e ETFs. Cada série é independente; o que falhar mantém o dado anterior."""
+    from datetime import datetime, timedelta, timezone
+    out = {"series": {}, "etfs": []}
+    for chave, simbolo in MACRO.items():
+        try:
+            out["series"][chave] = _yahoo(simbolo)
+        except Exception:
+            pass
+        time.sleep(0.25)
+    for simbolo, nome in ETFS:
+        try:
+            s = _yahoo(simbolo)
+            u = s[-1][1]
+            ret = lambda n: round(u / s[-1 - n][1] - 1, 4) if len(s) > n else None
+            out["etfs"].append({"s": simbolo.replace(".SA", ""), "nome": nome, "moeda": "BRL" if simbolo.endswith(".SA") else "USD",
+                                "p": u, "d1": ret(1), "m1": ret(21), "m3": ret(63), "a1": round(u / s[0][1] - 1, 4), "data": s[-1][0]})
+        except Exception:
+            pass
+        time.sleep(0.25)
+    hoje = datetime.now(timezone.utc)
+    ini = (hoje - timedelta(days=365 * 6)).strftime("%d/%m/%Y")
+    for chave, serie in (("selic", 432), ("ipca12", 13522)):
+        try:
+            d = S.get(f"https://api.bcb.gov.br/dados/serie/bcdata.sgs.{serie}/dados?formato=json&dataInicial={ini}&dataFinal={hoje.strftime('%d/%m/%Y')}", timeout=30).json()
+            pts, ant = [], None
+            for x in d:
+                v = float(x["valor"])
+                if v != ant:
+                    pts.append(["-".join(reversed(x["data"].split("/"))), v])
+                    ant = v
+            pts.append(["-".join(reversed(d[-1]["data"].split("/"))), float(d[-1]["valor"])])
+            out["series"][chave] = pts
+        except Exception:
+            pass
+    try:
+        d = S.get("https://markets.newyorkfed.org/api/rates/unsecured/effr/last/1300.json", timeout=30).json()["refRates"]
+        pts, ant = [], None
+        for x in reversed(d):
+            alvo = x.get("targetRateTo")
+            if alvo is not None and alvo != ant:
+                pts.append([x["effectiveDate"], alvo])
+                ant = alvo
+        pts.append([d[0]["effectiveDate"], d[0].get("targetRateTo")])
+        out["series"]["fed"] = pts
+        out["fed"] = {"de": d[0].get("targetRateFrom"), "ate": d[0].get("targetRateTo"), "efetiva": d[0].get("percentRate"), "data": d[0]["effectiveDate"]}
+    except Exception:
+        pass
+    if not out["series"]:
+        raise RuntimeError("nenhuma série macro respondeu")
+    return out
+
+
 FONTES_PT = {"Portal do Bitcoin", "Livecoins", "Cointelegraph Brasil"}
 
 
@@ -193,6 +261,13 @@ def main():
         erros += ["referência sem resposta: " + k for k in ("cdi", "ibov", "spx") if k not in novo]
     except Exception as e:
         erros.append(f"referencias: {e}")
+    try:
+        novo = macro()
+        ant = m.get("macro") or {}
+        m["macro"] = {"series": {**ant.get("series", {}), **novo["series"]}, "etfs": novo["etfs"] or ant.get("etfs", []), "fed": novo.get("fed") or ant.get("fed")}
+        erros += ["macro sem resposta: " + k for k in list(MACRO) + ["selic", "fed"] if k not in novo["series"]]
+    except Exception as e:
+        erros.append(f"macro: {e}")
     try:
         traduz_tudo(m)
     except Exception as e:
