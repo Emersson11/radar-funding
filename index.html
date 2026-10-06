@@ -140,7 +140,14 @@ textarea{font:400 15px var(--sans);padding:9px;border:1px solid var(--line);bord
 input.pm{width:110px;padding:4px 6px;text-align:right}
 .contaf input[type=password]{width:130px}
 button.lnkb{border:0;padding:8px 4px;color:var(--band-muted);text-decoration:underline;text-underline-offset:3px;font-weight:400}
-#conta-senha-bt{font-size:13px;padding:5px 10px}
+#perfil-bt{width:40px;height:40px;border-radius:50%;padding:0;font:600 16px var(--sans);background:var(--band-fg);color:var(--band,#0b2545);border:0;text-transform:uppercase}
+#perfil-menu{position:absolute;right:0;top:48px;z-index:30;width:260px;background:var(--surface);color:var(--fg);border:1px solid var(--line);border-radius:4px;box-shadow:0 8px 24px rgba(0,0,0,.18);padding:14px;display:flex;flex-direction:column;gap:10px;text-align:left}
+#perfil-menu[hidden]{display:none}
+#perfil-menu button{width:100%;text-align:left;color:var(--fg);border-color:var(--line);background:transparent}
+#perfil-menu #conta-email{font-size:13px;color:var(--muted);overflow-wrap:anywhere;padding-bottom:10px;border-bottom:1px solid var(--line)}
+#perfil-menu label{display:flex;flex-direction:column;gap:4px;font-size:12px;color:var(--muted)} #perfil-menu select,#perfil-menu input{width:100%}
+#perfil-menu form{display:flex;flex-direction:column;gap:6px} #perfil-acoes{display:flex;flex-direction:column;gap:10px}
+#conta-sair{color:var(--bad)!important}
 button.mini{font-size:12px;color:var(--muted)}
 .estr3{color:var(--bad);letter-spacing:1px} .estr2{color:var(--warn);letter-spacing:1px}
 .pfgraf{height:360px;margin:10px 0 14px}
@@ -173,8 +180,15 @@ button.mini{font-size:12px;color:var(--muted)}
   <div class="direita">
     <div id="conta" hidden>
       <div id="conta-fora"><form id="conta-form" class="contaf"><label class="so-leitor" for="conta-campo">Seu e-mail</label><input id="conta-campo" type="email" placeholder="seu@email.com" required autocomplete="email"><label class="so-leitor" for="conta-senha">Sua senha</label><input id="conta-senha" type="password" placeholder="senha" autocomplete="current-password" minlength="6"><button type="submit">Entrar</button><button type="button" id="conta-criar">Criar conta</button><button type="button" id="conta-link" class="lnkb">Entrar por link no e-mail</button></form></div>
-      <div id="conta-dentro" hidden><span id="conta-email"></span> <label id="ver-como-rot" hidden style="display:inline-flex;gap:6px;align-items:center;color:inherit">Ver como <select id="ver-como"><option value="admin">Administrador</option><option value="assinante">Assinante</option><option value="gratis">Usuário gratuito</option></select></label> <button type="button" id="conta-senha-bt">Definir senha</button> <button type="button" id="conta-sair">Sair</button>
-        <form id="conta-senha-form" class="contaf" hidden style="margin-top:8px"><label class="so-leitor" for="conta-nova">Nova senha</label><input id="conta-nova" type="password" placeholder="nova senha (6 ou mais)" autocomplete="new-password" minlength="6" required><button type="submit">Salvar senha</button></form></div>
+      <div id="conta-dentro" hidden style="position:relative">
+        <button type="button" id="perfil-bt" aria-haspopup="true" aria-expanded="false" aria-label="Abrir o menu da conta"></button>
+        <div id="perfil-menu" hidden>
+          <p id="conta-email"></p>
+          <label id="ver-como-rot" hidden>Ver o site como<select id="ver-como"><option value="admin">Administrador</option><option value="assinante">Assinante</option><option value="gratis">Usuário gratuito</option></select></label>
+          <div id="perfil-acoes"><button type="button" id="conta-senha-bt">Definir senha</button></div>
+          <form id="conta-senha-form" hidden><label class="so-leitor" for="conta-nova">Nova senha</label><input id="conta-nova" type="password" placeholder="nova senha (6 ou mais)" autocomplete="new-password" minlength="6" required><button type="submit">Salvar senha</button></form>
+          <button type="button" id="conta-sair">Sair</button>
+        </div></div>
     </div>
     <button id="recarregar" type="button">Atualizar</button>
   </div>
@@ -1102,12 +1116,13 @@ document.addEventListener("DOMContentLoaded",function(){ $("ver-como").addEventL
 function contaDesenha(){
   if(!SB){ $("conta").hidden=true; return; }
   $("conta").hidden=false; $("conta-fora").hidden=!!USUARIO; $("conta-dentro").hidden=!USUARIO;
+  var rc=$("recarregar"); if(USUARIO){ if(rc.parentNode.id!=="perfil-acoes") $("perfil-acoes").insertBefore(rc,$("perfil-acoes").firstChild); rc.textContent="Atualizar dados"; $("perfil-bt").textContent=(USUARIO.email||"?").charAt(0); } else if(rc.parentNode.id==="perfil-acoes"){ document.querySelector(".direita").appendChild(rc); rc.textContent="Atualizar"; $("perfil-menu").hidden=true; }
   if(USUARIO){ $("conta-email").textContent=USUARIO.email+(PLANO&&PLANO!=="gratis"?" · "+(PLANO==="admin"?"administrador":"assinante"):""); }
   var bloq=!!(SB&&CFG.exigirAssinatura&&PLANO!=="assinante"&&PLANO!=="admin");
   $("funding-bloq").hidden=!bloq; $("funding-conteudo").hidden=bloq;
   $("funding-bloq-txt").textContent=USUARIO?"Sua conta ainda não tem acesso a esta área. Fale com o administrador para liberar.":"Entre com a sua conta para ver esta área.";
   $("c-nota-local").hidden=!!USUARIO; $("c-nota-nuvem").hidden=!USUARIO;
-  $("ver-como-rot").hidden=PLANOREAL!=="admin"; $("ver-como-rot").style.display=PLANOREAL==="admin"?"inline-flex":"none";
+  $("ver-como-rot").hidden=PLANOREAL!=="admin"; $("ver-como-rot").style.display=PLANOREAL==="admin"?"flex":"none";
   if(PLANO!=="admin"&&!$("area-admin").hidden) area("carteira");
   $("bt-admin").hidden=PLANO!=="admin"; if(!$("area-admin").hidden) admCarrega();
 }
@@ -1240,6 +1255,10 @@ $("conta-link").addEventListener("click",function(){ var e=$("conta-campo").valu
 $("conta-senha-bt").addEventListener("click",function(){ $("conta-senha-form").hidden=!$("conta-senha-form").hidden; if(!$("conta-senha-form").hidden) $("conta-nova").focus(); });
 $("conta-senha-form").addEventListener("submit",function(ev){ ev.preventDefault(); var p=$("conta-nova").value; if(p.length<6) return;
   SB.auth.updateUser({password:p}).then(function(r){ if(r.error) contaMsg(erroLogin(r.error.message),true); else { $("conta-nova").value=""; $("conta-senha-form").hidden=true; contaMsg("Senha salva. Da próxima vez, entre com e-mail e senha."); } }); });
+function perfilMenu(ab){ $("perfil-menu").hidden=!ab; $("perfil-bt").setAttribute("aria-expanded",ab?"true":"false"); }
+$("perfil-bt").addEventListener("click",function(ev){ ev.stopPropagation(); perfilMenu($("perfil-menu").hidden); });
+document.addEventListener("click",function(ev){ if(!$("perfil-menu").hidden&&!$("perfil-menu").contains(ev.target)) perfilMenu(false); });
+document.addEventListener("keydown",function(ev){ if(ev.key==="Escape"&&!$("perfil-menu").hidden){ perfilMenu(false); $("perfil-bt").focus(); } });
 $("conta-sair").addEventListener("click",function(){ SB.auth.signOut(); });
 $("c-migrar-ok").addEventListener("click",function(){ var local=[]; try{ local=JSON.parse(localStorage.getItem(CHAVE)).lanc||[]; }catch(e){}
   SB.from("lancamentos").insert(local.map(paraNuvem)).then(function(r){ if(r.error){ nuvemFalhou(); return; } $("c-migrar").hidden=true; nuvemCarrega(); }); });
