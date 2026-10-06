@@ -1,0 +1,15 @@
+{
+ "saldo": 100.0,
+ "posicao": {
+  "ativo": "ETH",
+  "vender": "hyper",
+  "comprar": "gate",
+  "valor": 50.0,
+  "aberto_em": 1791293554.8984776,
+  "ultimo": 1791293554.8984776,
+  "funding": 0.0,
+  "taxas": 0.05,
+  "d30": 0.058355757133333346
+ },
+ "historico": []
+}
