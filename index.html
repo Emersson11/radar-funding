@@ -399,6 +399,7 @@ button.mini{font-size:12px;color:var(--muted)}
       <div class="box" style="margin-top:20px">
         <h2>Nome do site</h2>
         <form class="controles" id="adm-nome-form" style="margin-top:10px"><label>Nome que aparece no topo e na aba do navegador<input id="adm-nome" type="text" maxlength="40" style="width:260px"></label><button type="submit">Salvar nome</button></form>
+        <h2 style="margin-top:22px;font-size:17px">Abas do menu</h2><p class="sub">Mude o nome e a ordem das abas. A primeira da lista é a que abre quando alguém entra no site.</p><div id="adm-abas" style="display:flex;flex-direction:column;gap:8px;margin-top:10px;max-width:460px"></div><p style="margin-top:10px"><button type="button" id="adm-abas-salvar">Salvar abas</button> <button type="button" class="sec" id="adm-abas-padrao">Voltar ao padrão</button> <span class="sub" id="adm-abas-msg"></span></p>
       </div>
       <div class="box" style="margin-top:20px">
         <h2>Módulos e aulas</h2>
@@ -960,7 +961,7 @@ function rotPreco(){ var sm=$("f-moeda").value==="BRL"?"R$":"US$", total=$("f-mo
 function limpaForm(){ EDIT=null; var mo=$("f-moeda").value, cl=$("f-classe").value, md=$("f-modo").value; $("c-form").reset(); $("f-moeda").value=mo; $("f-classe").value=cl; $("f-modo").value=md; rotPreco(); if(DOLAR) $("f-cambio").value=DOLAR.toFixed(4); $("f-data").value=new Date().toISOString().slice(0,10); $("f-salvar").textContent="Adicionar"; $("f-cancelar").hidden=true; $("f-erro").hidden=true; }
 var TITULOS={carteira:"Minha Carteira",mercado:"Mercado",funding:"Estratégias",aulas:"Aulas",admin:"Administração"};
 var AUTHURL=/access_token=|refresh_token=|error_description=|type=(signup|magiclink|recovery)/.test(location.hash)||/[?&](code|token_hash)=/.test(location.search);
-function area(a){ if(!TITULOS[a]) a="mercado"; Object.keys(TITULOS).forEach(function(x){ $("area-"+x).hidden=x!==a; }); document.querySelectorAll("#areas button").forEach(function(o){o.setAttribute("aria-current",o.dataset.area===a?"page":"false");});
+function area(a){ if(!TITULOS[a]) a=(typeof ABAINI!=="undefined"&&ABAINI)||"mercado"; Object.keys(TITULOS).forEach(function(x){ $("area-"+x).hidden=x!==a; }); document.querySelectorAll("#areas button").forEach(function(o){o.setAttribute("aria-current",o.dataset.area===a?"page":"false");});
   $("titulo").textContent=TITULOS[a]; $("atualizado").hidden=a!=="funding"; $("cart-status").hidden=a==="funding"||a==="aulas"||a==="admin"; if(a==="admin"&&typeof admCarrega==="function") admCarrega(); if(!AUTHURL){ try{history.replaceState(null,"","#"+a);}catch(e){} } }
 $("c-form").addEventListener("submit",function(ev){ ev.preventDefault();
   var a=$("f-ativo").value.trim().toUpperCase().replace(/[^A-Z0-9 ]/g,"").replace(/ +/g," "), q=+$("f-qtd").value, pd=($("f-modo").value==="total"&&+$("f-qtd").value>0)?vnum("f-preco")/(+$("f-qtd").value):vnum("f-preco"), mo=$("f-moeda").value, cb=+$("f-cambio").value, p=mo==="BRL"?(cb>0?pd/cb:NaN):pd, d=$("f-data").value, t=$("f-tipo").value, er=$("f-erro");
@@ -1214,7 +1215,7 @@ function nuvem(op,l){
 function nuvemFalhou(){ $("f-erro").textContent="Não consegui salvar na sua conta. Recarreguei os lançamentos; tente de novo."; $("f-erro").hidden=false; nuvemCarrega().catch(function(){}); }
 function sessao(s){
   var antes=USUARIO, primeira=!sessao.ja; sessao.ja=true;
-  USUARIO=s?s.user:null; PLANO=null; PLANOREAL=null; if(USUARIO&&!antes&&!primeira) area("mercado");
+  USUARIO=s?s.user:null; PLANO=null; PLANOREAL=null; if(USUARIO&&!antes&&!primeira) area(ABAINI);
   if(!USUARIO){ cLer(); contaDesenha(); cDesenha(); comCarrega(); return; }
   contaDesenha();
   SB.from("perfis").select("plano").eq("user_id",USUARIO.id).maybeSingle().then(function(r){ PLANOREAL=r.data?r.data.plano:"gratis"; var vc="admin"; try{ vc=sessionStorage.getItem("ver_como")||"admin"; }catch(e){} PLANO=PLANOREAL==="admin"?vc:PLANOREAL; $("ver-como").value=PLANO; contaDesenha(); comCarrega(); });
@@ -1224,6 +1225,18 @@ function sessao(s){
 var MODS=[], EDM=null, EDA=null;
 function ytId(v){ v=(v||"").trim(); var m=v.match(/(?:v=|youtu\.be\/|embed\/|shorts\/)([\w-]{6,20})/); return m?m[1]:(/^[\w-]{6,20}$/.test(v)?v:""); }
 function admErro(t){ $("adm-c-erro").textContent=t||""; $("adm-c-erro").hidden=!t; }
+var ABASP=[["mercado","Mercado"],["carteira","Carteira"],["funding","Estratégias"],["aulas","Aulas"]], ABAS=ABASP.map(function(x){return {id:x[0],nome:x[1]};});
+function abasAplica(l){ var ok=[], nav=$("areas"); (Array.isArray(l)?l:[]).forEach(function(x){ if(x&&ABASP.some(function(p){return p[0]===x.id;})&&!ok.some(function(o){return o.id===x.id;})) ok.push({id:x.id,nome:String(x.nome||"").trim().slice(0,24)||ABASP.filter(function(p){return p[0]===x.id;})[0][1]}); });
+  ABASP.forEach(function(p){ if(!ok.some(function(o){return o.id===p[0];})) ok.push({id:p[0],nome:p[1]}); }); ABAS=ok;
+  ABAS.forEach(function(a){ var b=nav.querySelector('button[data-area="'+a.id+'"]'); if(!b) return; b.textContent=a.nome; nav.insertBefore(b,$("bt-admin")); TITULOS[a.id]=a.id==="carteira"&&a.nome==="Carteira"?"Minha Carteira":a.nome; if(!$("area-"+a.id).hidden) $("titulo").textContent=TITULOS[a.id]; });
+  ABAINI=ABAS[0].id; abasAdm(); }
+var ABAINI="mercado";
+function abasAdm(){ var box=$("adm-abas"); if(!box) return; box.textContent=""; ABAS.forEach(function(a,i){ var r=el("div"); r.style.cssText="display:flex;gap:6px;align-items:center";
+    [[-1,"▲","Subir "],[1,"▼","Descer "]].forEach(function(c){ var b=el("button","mv",c[1]); b.type="button"; b.disabled=i+c[0]<0||i+c[0]>=ABAS.length; b.setAttribute("aria-label",c[2]+a.nome); b.addEventListener("click",function(){ abasLe(); var x=ABAS[i]; ABAS[i]=ABAS[i+c[0]]; ABAS[i+c[0]]=x; abasAdm(); $("adm-abas-msg").textContent="Ordem alterada. Clique em Salvar abas."; }); r.appendChild(b); });
+    var inp=el("input"); inp.type="text"; inp.maxLength=24; inp.value=a.nome; inp.dataset.id=a.id; inp.style.width="240px"; inp.setAttribute("aria-label","Nome da aba "+a.nome); r.appendChild(inp); box.appendChild(r); }); }
+function abasLe(){ [].forEach.call(document.querySelectorAll("#adm-abas input"),function(inp){ ABAS.forEach(function(a){ if(a.id===inp.dataset.id) a.nome=inp.value.trim()||a.nome; }); }); }
+function abasSalva(l){ var v=JSON.stringify(l); SB.from("config_site").upsert({chave:"abas",valor:v}).then(function(r){ if(r.error){ $("adm-abas-msg").textContent="Não consegui salvar as abas."; return; } try{ localStorage.setItem("abas_menu",v); }catch(e){} abasAplica(l); $("adm-abas-msg").textContent="Abas salvas."; }); }
+document.addEventListener("DOMContentLoaded",function(){ $("adm-abas-salvar").addEventListener("click",function(){ abasLe(); abasSalva(ABAS); }); $("adm-abas-padrao").addEventListener("click",function(){ abasSalva(ABASP.map(function(x){return {id:x[0],nome:x[1]};})); }); abasAdm(); });
 function nomeSite(n){ if(!n) return; document.title=n; $("marca").textContent=n; $("marca").hidden=false; if($("adm-nome")) $("adm-nome").value=n; }
 function conteudoCarrega(){
   if(!SB) return Promise.resolve(false);
@@ -1231,7 +1244,7 @@ function conteudoCarrega(){
     if(r[0].error||r[1].error) return false;
     var ord=function(a,b){return a.ordem-b.ordem||a.id-b.id;};
     MODS=(r[0].data||[]).slice().sort(ord).map(function(m){ return {id:m.id,titulo:m.titulo,descricao:m.descricao||"",ordem:m.ordem,aulas:(r[1].data||[]).filter(function(a){return a.modulo_id===m.id;}).sort(ord)}; });
-    if(!r[2].error) (r[2].data||[]).forEach(function(c){ if(c.chave==="nome") nomeSite(c.valor); });
+    if(!r[2].error) (r[2].data||[]).forEach(function(c){ if(c.chave==="nome") nomeSite(c.valor); if(c.chave==="abas"){ try{ abasAplica(JSON.parse(c.valor)); localStorage.setItem("abas_menu",c.valor); }catch(e){} } });
     admConteudo();
     if(!MODS.length) return false;
     AULAS=[]; MODS.forEach(function(m){ m.aulas.forEach(function(a){ AULAS.push({id:a.id,modulo:m.titulo,titulo:a.titulo,youtube:a.youtube||"",duracao:a.duracao||"",descricao:a.descricao||""}); }); });
@@ -1325,6 +1338,7 @@ $("conta-sair").addEventListener("click",function(){ SB.auth.signOut(); });
 $("c-migrar-ok").addEventListener("click",function(){ var local=[]; try{ local=JSON.parse(localStorage.getItem(CHAVE)).lanc||[]; }catch(e){}
   SB.from("lancamentos").insert(local.map(paraNuvem)).then(function(r){ if(r.error){ nuvemFalhou(); return; } $("c-migrar").hidden=true; nuvemCarrega(); }); });
 contaDesenha();
+try{ var _ab=localStorage.getItem("abas_menu"); if(_ab) abasAplica(JSON.parse(_ab)); }catch(e){}
 cLer(); limpaForm(); area(location.hash.slice(1)); cDesenha(); mDesenha(); cPrecos(); setInterval(function(){ if(!WSOK) cPrecos(); },60000); vivoLiga();
 
 iniciar(); carregaSim();
