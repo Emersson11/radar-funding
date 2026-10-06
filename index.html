@@ -97,7 +97,9 @@ details{padding:10px 18px} summary{cursor:pointer;font-size:13px;color:var(--mut
 #lado .marca{font:600 26px/1.15 var(--serif);letter-spacing:0;text-transform:none;color:var(--band-fg);margin-bottom:12px}
 #lado button{background:none}
 #lado-bt{display:none}
-.faixa{position:relative} #marca-topo{font:600 clamp(30px,3.4vw,46px)/1.1 var(--serif);color:var(--band-fg);text-align:center;margin-bottom:12px}
+.faixa{position:relative} #marca-topo{display:flex;align-items:center;justify-content:center;gap:14px;font:300 clamp(22px,2.2vw,30px)/1 var(--sans);letter-spacing:.22em;text-transform:uppercase;color:var(--band-fg);margin-bottom:14px}
+#marca-topo[hidden]{display:none} #marca-topo b{font-weight:700} #marca-topo .mt-txt{padding:10px 0 9px;border-block:1px solid rgba(255,255,255,.28);margin-right:-.22em;padding-right:.22em}
+#marca-topo svg{width:38px;height:38px;flex:none}
 @media (min-width:1100px){ #marca-topo{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);margin:0;white-space:nowrap;pointer-events:none} }
 @media (min-width:900px){ body{padding-left:56px} #lado{position:fixed;left:0;top:0;bottom:0;width:56px;box-sizing:border-box;padding:14px 8px;overflow:hidden;border-right:1px solid rgba(255,255,255,.12);z-index:25;transition:width .18s ease,box-shadow .18s ease}
   #lado-bt{display:block;width:40px;height:40px;padding:0;font-size:20px;line-height:1;border:0;color:var(--band-fg);margin-bottom:18px}
@@ -1241,7 +1243,9 @@ function abasLe(){ [].forEach.call(document.querySelectorAll("#adm-abas input"),
 function abasSalva(l){ var v=JSON.stringify(l); SB.from("config_site").upsert({chave:"abas",valor:v}).then(function(r){ if(r.error){ $("adm-abas-msg").textContent="Não consegui salvar as abas."; return; } try{ localStorage.setItem("abas_menu",v); }catch(e){} abasAplica(l); $("adm-abas-msg").textContent="Abas salvas."; }); }
 document.addEventListener("DOMContentLoaded",function(){ $("adm-abas-salvar").addEventListener("click",function(){ abasLe(); abasSalva(ABAS); }); $("adm-abas-padrao").addEventListener("click",function(){ abasSalva(ABASP.map(function(x){return {id:x[0],nome:x[1]};})); }); abasAdm(); });
 function nomeMenu(n){ $("marca").textContent=n||"Menu"; $("marca").hidden=false; if($("adm-nome-menu")) $("adm-nome-menu").value=n||""; }
-function nomeSite(n){ if(!n) return; document.title=n; $("marca-topo").textContent=n; $("marca-topo").hidden=false; if($("marca").hidden) nomeMenu(""); if($("adm-nome")) $("adm-nome").value=n; }
+function nomeSite(n){ if(!n) return; document.title=n; var mt=$("marca-topo"), ps=n.trim().split(/\s+/), tx=el("span","mt-txt"); mt.textContent="";
+  mt.insertAdjacentHTML("afterbegin",'<svg viewBox="0 0 40 40" aria-hidden="true"><rect x="1" y="1" width="38" height="38" rx="9" fill="none" stroke="#7fb0ea" stroke-width="1.5"/><path d="M8 27l7-8 5 5 6-11 6 7" fill="none" stroke="#7fb0ea" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/><circle cx="26" cy="13" r="2.6" fill="#f2f5f9"/></svg>');
+  tx.appendChild(el("b",null,ps[0])); if(ps.length>1) tx.appendChild(document.createTextNode(" "+ps.slice(1).join(" "))); mt.appendChild(tx); mt.setAttribute("aria-label",n); mt.hidden=false; if($("marca").hidden) nomeMenu(""); if($("adm-nome")) $("adm-nome").value=n; }
 function conteudoCarrega(){
   if(!SB) return Promise.resolve(false);
   return Promise.all([SB.from("modulos").select("*"),SB.from("aulas").select("*"),SB.from("config_site").select("*")]).then(function(r){
