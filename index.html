@@ -440,7 +440,7 @@ input.pm{width:110px;padding:4px 6px;text-align:right}
 </main>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js"></script>
-<script src="config.js"></script>
+<script>document.write('<script src="config.js?v='+Math.floor(Date.now()/60000)+'"><\/script>');</script>
 <script>
 var VENUES=[["binance","Binance"],["bybit","Bybit"],["okx","OKX"],["bitget","Bitget"],["gate","Gate"],["hyper","Hyperliquid"],["dydx","dYdX"]];
 var NOME={}; VENUES.forEach(function(v){NOME[v[0]]=v[1];});
