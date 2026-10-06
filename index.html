@@ -108,6 +108,18 @@ details{padding:10px 18px} summary{cursor:pointer;font-size:13px;color:var(--mut
   #lado:hover,#lado:focus-within,#lado.aberto{width:232px;padding-inline:13px;box-shadow:6px 0 24px rgba(0,0,0,.28);overflow-y:auto}
   #lado:hover .marca,#lado:hover .areas,#lado:focus-within .marca,#lado:focus-within .areas,#lado.aberto .marca,#lado.aberto .areas{opacity:1;pointer-events:auto}
   #lado .marca{font-size:28px;margin-bottom:26px;padding-left:14px;white-space:nowrap} #lado .areas{flex-direction:column;gap:4px} #lado .areas button{width:100%;text-align:left;padding:11px 14px;font-size:15px} }
+@media (max-width:899px){
+  #lado{position:fixed;top:0;left:0;right:0;z-index:40;padding:0;height:54px;border-bottom:1px solid rgba(255,255,255,.14)}
+  #lado-bt{display:block;position:absolute;left:8px;top:7px;width:40px;height:40px;padding:0;font-size:21px;line-height:1;border:0;color:var(--band-fg);background:none}
+  #lado .marca{display:none}
+  #lado .areas{display:none;position:absolute;top:54px;left:0;right:0;flex-direction:column;gap:2px;background:var(--band);padding:10px 12px 14px;box-shadow:0 12px 24px rgba(0,0,0,.35);max-height:calc(100vh - 54px);overflow-y:auto}
+  #lado.aberto .areas{display:flex} #lado .areas button{width:100%;text-align:left;padding:12px 14px;font-size:16px}
+  body{padding-top:54px} #marca-topo{position:fixed;top:11px;left:50%;transform:translateX(-50%);z-index:41;margin:0;pointer-events:none} #marca-topo img{width:150px}
+  .faixa{padding-block:14px} .faixa h1{font-size:22px} .faixa p{font-size:13px}
+  #conta-dentro{position:fixed!important;top:8px;right:10px;z-index:42} #perfil-bt{width:36px;height:36px;font-size:14px} #perfil-menu{top:44px}
+  .abas{flex-wrap:nowrap;overflow-x:auto;scrollbar-width:none;-webkit-overflow-scrolling:touch} .abas::-webkit-scrollbar{display:none} .abas button{white-space:nowrap;flex:none;padding:10px 13px}
+  main{padding-inline:12px} .box{padding:14px} .tiles{grid-template-columns:repeat(2,1fr)} .relbar{top:54px}
+}
 @media (prefers-reduced-motion:reduce){ #lado,#lado .marca,#lado .areas{transition:none} }
 .areas button{border:1px solid transparent;color:var(--band-muted);padding:6px 14px;font-weight:500}
 .areas button[aria-current="page"]{border-color:var(--band-fg);color:var(--band-fg);font-weight:600}
@@ -126,12 +138,16 @@ button.mv{padding:2px 7px;font-size:12px;line-height:1.2;margin-right:3px} butto
 .tiles{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:1px;background:var(--line);border:1px solid var(--line);border-radius:3px;overflow:hidden}
 .tiles>div{background:var(--surface);padding:16px 18px;min-width:0} .tiles .rot{display:block;margin-bottom:8px} .tiles strong{font:500 22px/1.2 var(--mono);display:block} .tiles small{font:400 13px var(--mono);color:var(--muted)}
 .graf{height:300px;margin-top:12px}
-.gmarca{position:relative} .gmarca::after{content:"";position:absolute;inset:0;background:url(logo_claro.png) center/min(46%,340px) no-repeat;opacity:.09;pointer-events:none;z-index:3}
+.gmarca{position:relative} .gmarca::after{content:"";position:absolute;inset:0;background:url(logo_claro.png) center 46%/min(52%,380px) no-repeat;opacity:.17;pointer-events:none;z-index:3}
 :root[data-theme="dark"] .gmarca::after{background-image:url(logo_escuro.png)} @media (prefers-color-scheme:dark){ :root:not([data-theme="light"]) .gmarca::after{background-image:url(logo_escuro.png)} }
 .gmarca .gbaixa{position:absolute;top:6px;right:64px;z-index:5;font-size:12px;padding:3px 9px;background:var(--surface);color:var(--muted);border:1px solid var(--line);opacity:.0;transition:opacity .15s} .gmarca:hover .gbaixa,.gmarca .gbaixa:focus{opacity:1}
 .gmarca .gleg{position:absolute;top:6px;left:8px;z-index:5;font:500 12px var(--mono);color:var(--fg);background:color-mix(in srgb,var(--surface) 82%,transparent);padding:2px 6px;border-radius:3px;pointer-events:none} .gmarca .gleg:empty{display:none}
 @media (hover:none){ .gmarca .gbaixa{opacity:1} }
 .g3{display:grid;grid-template-columns:repeat(auto-fit,minmax(340px,1fr));gap:20px} .g3>.box{display:flex;flex-direction:column;min-width:0} .g3>.box[hidden]{display:none} .g3 .graf{height:260px}
+.heroi{border-top:4px solid var(--accent);padding:26px 28px} .heroi h2{font:600 clamp(22px,2.4vw,32px)/1.2 var(--serif);margin:8px 0 12px;max-width:26em;text-wrap:balance}
+.prosa p{font-size:16px;line-height:1.65;max-width:78ch;margin:0 0 10px;color:var(--fg)}
+.temas{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:16px} .tema{background:var(--surface);border:1px solid var(--line);border-left:3px solid var(--accent);border-radius:4px;padding:16px 18px;display:flex;flex-direction:column;gap:6px}
+.tema h3{font:600 18px/1.25 var(--serif);margin:0} .tema p{font-size:14px;line-height:1.55;color:var(--muted);max-width:none;flex:1} .tema button{align-self:flex-start;font-size:13px}
 .g21{display:grid;grid-template-columns:minmax(0,2fr) minmax(0,1fr);gap:20px;align-items:stretch} @media (max-width:1000px){.g21{grid-template-columns:1fr}}
 .g21>.box,.duas>.box{display:flex;flex-direction:column;min-width:0} .g21>.box>.graf,.duas>.box>.graf{flex:1 1 auto;min-height:300px;height:auto}
 #mj-defi,#mj-onchain,#mj-etfs{display:flex;flex-direction:column;gap:0} #mj-defi[hidden],#mj-onchain[hidden],#mj-etfs[hidden]{display:none}
@@ -155,6 +171,7 @@ table.tprot .chip{display:inline-block;font-size:12px;padding:2px 9px;border-rad
 .docrel{max-width:980px;padding:36px 40px} .docrel h1{font:600 28px/1.2 var(--serif);margin:0} .docrel h2{margin:26px 0 8px;padding-bottom:6px;border-bottom:2px solid var(--accent);font-size:19px} .docrel h3{font:600 14px var(--sans);margin:14px 0 4px}
 .docrel p,.docrel li{font-size:14px;line-height:1.5;max-width:none} .docrel ul{margin:6px 0;padding-left:20px} .docrel table{font-size:13px;margin-top:6px} .docrel .cab{display:flex;justify-content:space-between;align-items:flex-end;gap:16px;border-bottom:3px solid var(--fg);padding-bottom:12px} .docrel .rk{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-top:10px} .docrel .rk div{border:1px solid var(--line);padding:10px 12px;border-radius:3px} .docrel .rk b{display:block;font:500 17px var(--mono)} .docrel .rk span{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.06em} .docrel svg{width:100%;height:auto;margin-top:8px} .docrel .leg{display:flex;flex-wrap:wrap;gap:6px 16px;font-size:12px;margin-top:6px} .docrel .leg i{display:inline-block;width:14px;height:3px;vertical-align:middle;margin-right:5px}
 @media (max-width:700px){.docrel{padding:18px} .docrel .rk{grid-template-columns:repeat(2,1fr)}}
+.nconf{border-bottom:2px dotted var(--warn,#b7791f);cursor:help} .selo{border:1px solid var(--line);border-left:4px solid var(--good);border-radius:4px;padding:10px 14px;margin:0 0 18px;font-size:13px} .selo.medio{border-left-color:var(--warn,#b7791f)} .selo.ruim{border-left-color:var(--bad)}
 .docrel sup.cit{font-size:10px;color:var(--muted)} .docrel sup.cit a{color:var(--accent);text-decoration:none} .docrel .rfontes{font-size:12px;padding-left:22px} .docrel .rfontes li{font-size:12px;margin:3px 0;overflow-wrap:anywhere}
 @media print{ body.so-an{padding:0!important;background:#fff;-webkit-print-color-adjust:exact;print-color-adjust:exact} body.so-an #lado,body.so-an header,body.so-an .no-print,body.so-an #grafico{display:none!important} body.so-an main{padding:0;max-width:none} body.so-an main>.area:not(#area-analises){display:none!important} body.so-an #area-analises>*:not(#an-res),body.so-an #an-res>*:not(#an-doc){display:none!important} body.so-an .docrel{border:0;max-width:none;padding:0;margin:0!important;background:#fff} body.so-an .docrel .rcab{margin:0 0 20px;border-radius:0} body.so-an .docrel h2,body.so-an .docrel h3{break-after:avoid} }
 @media print{ body.so-rel{padding:0!important;background:#fff} body.so-rel #lado,body.so-rel header,body.so-rel #mabas,body.so-rel .no-print,body.so-rel #grafico{display:none!important} body.so-rel main{padding:0;max-width:none} body.so-rel main>.area:not(#area-relatorio){display:none!important} body.so-rel{-webkit-print-color-adjust:exact;print-color-adjust:exact} body.so-rel .docrel{border:0;max-width:none;padding:0;margin:0!important;box-shadow:none;background:#fff} body.so-rel .docrel h2{break-after:avoid} body.so-rel .docrel table,body.so-rel .docrel svg,body.so-rel .docrel .rk{break-inside:avoid} @page{margin:16mm 14mm} }
@@ -233,6 +250,7 @@ button.mini{font-size:12px;color:var(--muted)}
     <button type="button" id="lado-bt" aria-label="Abrir ou fechar o menu" aria-expanded="false">☰</button>
     <div class="marca" id="marca" hidden></div>
     <nav class="areas" id="areas" aria-label="Áreas do painel">
+      <button type="button" data-area="inicio" aria-current="false">Início</button>
       <button type="button" data-area="mercado" aria-current="false">Mercado</button>
       <button type="button" data-area="carteira" aria-current="page">Carteira</button>
       <button type="button" data-area="funding" aria-current="false">Estratégias</button>
@@ -267,6 +285,30 @@ button.mini{font-size:12px;color:var(--muted)}
 </div>
 <div class="in"><p id="conta-msg" hidden></p></div></header>
 <main>
+  <div id="area-inicio" class="area" hidden>
+    <section class="box heroi">
+      <span class="rot">Análise do dia · <span id="in-data"></span></span>
+      <h2 id="in-titulo">Carregando o panorama do dia…</h2>
+      <div id="in-resumo" class="prosa"></div>
+      <p class="note" id="in-quando"></p>
+    </section>
+    <div class="tiles" id="in-tiles"></div>
+    <div class="g21">
+      <div class="box"><h2>Bitcoin</h2><p class="sub">Preço em dólares. O último ponto acompanha a cotação ao vivo.</p><div class="pers" id="in-per"><button type="button" data-d="30">30 dias</button><button type="button" data-d="90">90 dias</button><button type="button" data-d="365" aria-pressed="true">1 ano</button><button type="button" data-d="0">Tudo</button></div><div class="graf" id="in-g-btc"></div></div>
+      <div class="box"><h2>Agenda dos Estados Unidos</h2><p class="sub">Dados que mexem com juros, dólar e bolsas.</p><div class="scroll"><table><tbody id="in-agenda"></tbody></table></div></div>
+    </div>
+    <div class="duas">
+      <div class="box"><h2>Taxa de juros: Selic e Fed</h2><p class="sub">A taxa básica do Brasil e o teto da faixa definida pelo banco central dos Estados Unidos, em % ao ano.</p><div class="graf" id="in-g-juros"></div></div>
+      <div class="box"><h2>Treasury de 10 anos</h2><p class="sub">Quanto paga, em % ao ano, o título de 10 anos do Tesouro dos Estados Unidos.</p><div class="graf" id="in-g-t10"></div></div>
+    </div>
+    <section><h2 style="margin-bottom:10px">O dia em cada mercado</h2><div class="temas" id="in-temas"></div></section>
+    <div class="g21">
+      <section class="box"><h2>ETFs com melhor desempenho</h2><p class="sub">Fundos negociados em bolsa, dos EUA e do Brasil, ordenados pelo resultado em 1 mês. Clique no título de uma coluna para mudar a ordem.</p>
+        <div class="scroll"><table><thead><tr><th class="txt">Código</th><th class="txt">O que acompanha</th><th>Preço</th><th>Dia</th><th>1 mês</th><th>3 meses</th><th>12 meses</th></tr></thead><tbody id="in-etfs"></tbody></table></div>
+        <p class="note">Lista fixa de ETFs conhecidos, com o desempenho passado de cada um. Resultado passado não garante resultado futuro e esta tabela não é recomendação de investimento: a escolha depende do seu objetivo, prazo e tolerância a risco.</p></section>
+      <section class="box"><h2>Notícias do dia</h2><ul class="nots" id="in-nots"></ul></section>
+    </div>
+  </div>
   <div id="area-carteira" class="area">
     <div class="ordbot" role="group" aria-label="Moeda de exibição da carteira" style="margin-top:0">
       <button type="button" data-ver="USD" aria-pressed="true">Ver em dólar</button>
@@ -387,6 +429,7 @@ button.mini{font-size:12px;color:var(--muted)}
         <div class="box"><h2>Próximos eventos importantes dos EUA</h2><div class="scroll"><table><thead><tr><th>Quando</th><th>Importância</th><th>Evento</th></tr></thead><tbody id="g-eventos"></tbody></table></div></div>
         <div class="box"><h2>Últimas notícias</h2><ul class="nots" id="g-nots"></ul></div>
       </div>
+      <div class="box" style="margin-top:20px"><h2>Resumo de cada painel</h2><p class="sub">O essencial das outras subguias de Mercado, em uma leitura só. Clique no título para abrir o painel.</p><div class="temas" id="g-paineis" style="margin-top:14px"></div></div>
     </section>
     <section id="mj-ativos" hidden></section>
     <section id="mj-noticias" class="box" hidden>
@@ -472,7 +515,7 @@ button.mini{font-size:12px;color:var(--muted)}
       <section class="box" style="margin-top:20px"><h2>O que as fontes publicaram</h2><p class="sub" id="an-docs-txt"></p><ul class="nots" id="an-docs" style="max-height:640px;overflow-y:auto"></ul></section>
       <section class="box no-print" style="margin-top:20px"><h2>Análise escrita</h2><p class="sub">Texto completo em nove seções (introdução, o que é, como funciona, quem está por trás, produtos, token, números, riscos e conclusão), escrito por inteligência artificial a partir das publicações acima e dos números de mercado.</p>
         <p class="sub" id="an-esc-status" style="margin-top:8px"></p>
-        <div id="an-esc-adm" hidden style="margin-top:12px"><label style="display:block;font-size:12px;color:var(--muted)">Links de relatórios para incluir (opcional, um por linha)<textarea id="an-links" rows="2" placeholder="https://…"></textarea></label><p style="margin-top:10px"><button type="button" id="an-escrever">Escrever análise com IA</button></p><p class="note">Leva de 2 a 5 minutos. A função lê cada publicação na hora, sem guardar o texto, e só o administrador pode gerar.</p></div>
+        <div id="an-esc-adm" hidden style="margin-top:12px"><label style="display:block;font-size:12px;color:var(--muted)">Links de relatórios para incluir (opcional, um por linha)<textarea id="an-links" rows="2" placeholder="https://…"></textarea></label><p style="margin-top:10px"><button type="button" id="an-escrever">Escrever análise com IA</button></p><p class="note">Leva de 3 a 8 minutos. A análise só é escrita se houver pelo menos 3 publicações com texto sobre o ativo, e no fim cada número do texto é conferido contra as fontes.</p></div>
         <p style="margin-top:10px"><button type="button" class="sec" id="an-pdf" hidden>⤓ Baixar PDF da análise</button></p></section>
       <article id="an-doc" class="docrel" hidden style="margin-top:20px"></article>
     </div>
@@ -642,7 +685,7 @@ button.mini{font-size:12px;color:var(--muted)}
       </ul>
     </section>
   </div>
-  <p class="rodape">Dados públicos de Binance, Bybit, OKX, Bitget, Gate, Hyperliquid e dYdX. Taxas anualizadas a partir do funding de cada período. Esta página não envia ordens nem acessa contas. Não é recomendação de investimento.</p>
+  <p class="rodape">Gráficos desenhados com TradingView Lightweight Charts. Dados públicos de Binance, Bybit, OKX, Bitget, Gate, Hyperliquid e dYdX. Taxas anualizadas a partir do funding de cada período. Esta página não envia ordens nem acessa contas. Não é recomendação de investimento.</p>
   </div>
   <div id="est-pools" class="area" hidden>
     <section class="box">
@@ -1078,9 +1121,9 @@ function vnum(i){ var t=String($(i).value).trim().replace(/[^0-9.,]/g,""); if(t.
 function rotPreco(){ var sm=$("f-moeda").value==="BRL"?"R$":"US$", total=$("f-modo").value==="total"; $("f-preco-rot").textContent=(total?"Total pago (":"Preço de 1 unidade (")+sm+")";
   var q=+$("f-qtd").value, v=vnum("f-preco"), a=$("f-ativo").value.trim().toUpperCase()||"unidade"; $("f-conta").textContent=(q>0&&v>0)?(total?"Preço por "+a+": "+sm+" "+prc(v/q)+".":"Total da operação: "+sm+" "+usd(v*q)+"."):""; }
 function limpaForm(){ EDIT=null; var mo=$("f-moeda").value, cl=$("f-classe").value, md=$("f-modo").value; $("c-form").reset(); $("f-moeda").value=mo; $("f-classe").value=cl; $("f-modo").value=md; rotPreco(); if(DOLAR) $("f-cambio").value=DOLAR.toFixed(4); $("f-data").value=new Date().toISOString().slice(0,10); $("f-salvar").textContent="Adicionar"; $("f-cancelar").hidden=true; $("f-erro").hidden=true; }
-var TITULOS={carteira:"Minha Carteira",mercado:"Mercado",funding:"Estratégias",aulas:"Aulas",analises:"Análises",relatorio:"Relatório",admin:"Administração"};
+var TITULOS={inicio:"Início",carteira:"Minha Carteira",mercado:"Mercado",funding:"Estratégias",aulas:"Aulas",analises:"Análises",relatorio:"Relatório",admin:"Administração"};
 var AUTHURL=/access_token=|refresh_token=|error_description=|type=(signup|magiclink|recovery)/.test(location.hash)||/[?&](code|token_hash)=/.test(location.search);
-function area(a){ if(!TITULOS[a]) a=(typeof ABAINI!=="undefined"&&ABAINI)||"mercado"; Object.keys(TITULOS).forEach(function(x){ $("area-"+x).hidden=x!==a; }); document.querySelectorAll("#areas button").forEach(function(o){o.setAttribute("aria-current",o.dataset.area===a?"page":"false");});
+function area(a){ if(!TITULOS[a]) a=(typeof ABAINI!=="undefined"&&ABAINI)||"inicio"; Object.keys(TITULOS).forEach(function(x){ $("area-"+x).hidden=x!==a; }); document.querySelectorAll("#areas button").forEach(function(o){o.setAttribute("aria-current",o.dataset.area===a?"page":"false");});
   $("titulo").textContent=TITULOS[a]; $("atualizado").hidden=a!=="funding"; $("cart-status").hidden=a==="funding"||a==="aulas"||a==="admin"; if(a==="admin"&&typeof admCarrega==="function") admCarrega(); if(!AUTHURL){ try{history.replaceState(null,"","#"+a);}catch(e){} } }
 $("c-form").addEventListener("submit",function(ev){ ev.preventDefault();
   var a=$("f-ativo").value.trim().toUpperCase().replace(/[^A-Z0-9 ]/g,"").replace(/ +/g," "), q=+$("f-qtd").value, pd=($("f-modo").value==="total"&&+$("f-qtd").value>0)?vnum("f-preco")/(+$("f-qtd").value):vnum("f-preco"), mo=$("f-moeda").value, cb=+$("f-cambio").value, p=mo==="BRL"?(cb>0?pd/cb:NaN):pd, d=$("f-data").value, t=$("f-tipo").value, er=$("f-erro");
@@ -1127,7 +1170,7 @@ function mercResumo(){
   frases.forEach(function(f){ul.appendChild(el("li",null,f));});
 }
 function mercDesenha(){
-  mercResumo(); if(!MERC) return;
+  mercResumo(); if(typeof inicioDes==="function") try{ inicioDes(); }catch(e){} if(!MERC) return;
   if(MERC.panorama){ var g=MERC.panorama; $("g-cap").textContent=grande(g.cap); $("g-var").textContent=pct(g.var24/100)+" em 24h"; $("g-var").className="sub "+cls(g.var24); $("g-vol").textContent=grande(g.vol); $("g-dom").textContent=usd(g.dom_btc,1)+"%"; }
   if(MERC.fng){ $("g-fng").textContent=MERC.fng.valor+" / 100"; $("g-fngc").textContent=FNG_PT[MERC.fng.classe]||MERC.fng.classe; }
   $("g-quando").textContent="Panorama, notícias e calendário coletados "+haQuanto(MERC.t)+"; a coleta se repete a cada 10 minutos. Preços ao vivo.";
@@ -1269,7 +1312,7 @@ function perfDesenha(){
   $("pf-status").textContent="Calculando o histórico…";
   perfCalcula().then(function(p){ PERF=p; if(!p) return; $("pf-caixa").hidden=false;
     var alvo=$("pf-grafico");
-    if(!PCHART){ PCHART=LightweightCharts.createChart(alvo,{autoSize:true,layout:{background:{color:"transparent"},textColor:cor("--muted"),fontFamily:"IBM Plex Mono, monospace"},grid:{vertLines:{color:cor("--line")},horzLines:{color:cor("--line")}},rightPriceScale:{borderColor:cor("--line")},timeScale:{borderColor:cor("--line")},localization:{locale:"pt-BR",priceFormatter:function(v){return (v>=0?"+":"")+v.toFixed(1).replace(".",",")+"%";}},handleScroll:{mouseWheel:false,vertTouchDrag:false},handleScale:{axisPressedMouseMove:false,mouseWheel:false}}); PSERIES={}; if(typeof grafExtras==="function") grafExtras("pf-grafico",PCHART,function(v){return (v>=0?"+":"")+v.toFixed(1).replace(".",",")+"%";}); }
+    if(!PCHART){ PCHART=LightweightCharts.createChart(alvo,typeof grafOpc==="function"?grafOpc(function(v){return (v>=0?"+":"")+v.toFixed(1).replace(".",",")+"%";}):{autoSize:true}); PSERIES={}; if(typeof grafExtras==="function") grafExtras("pf-grafico",PCHART,function(v){return (v>=0?"+":"")+v.toFixed(1).replace(".",",")+"%";}); }
     var corte=PPER?dia(Date.now()-PPER*864e5):"0000";
     var lg=$("pf-leg"), tb=$("pf-tb"); lg.textContent=""; tb.textContent="";
     PDEF.forEach(function(d){ var k=d[0], s=p[k]; if(PSERIES[k]){ PCHART.removeSeries(PSERIES[k]); delete PSERIES[k]; } if(!s||!s.length) return;
@@ -1353,12 +1396,12 @@ function sessao(s){
 var MODS=[], EDM=null, EDA=null;
 function ytId(v){ v=(v||"").trim(); var m=v.match(/(?:v=|youtu\.be\/|embed\/|shorts\/)([\w-]{6,20})/); return m?m[1]:(/^[\w-]{6,20}$/.test(v)?v:""); }
 function admErro(t){ $("adm-c-erro").textContent=t||""; $("adm-c-erro").hidden=!t; }
-var ABASP=[["mercado","Mercado"],["carteira","Carteira"],["funding","Estratégias"],["aulas","Aulas"],["analises","Análises"],["relatorio","Relatório"]], ABAS=ABASP.map(function(x){return {id:x[0],nome:x[1]};});
+var ABASP=[["inicio","Início"],["mercado","Mercado"],["carteira","Carteira"],["funding","Estratégias"],["aulas","Aulas"],["analises","Análises"],["relatorio","Relatório"]], ABAS=ABASP.map(function(x){return {id:x[0],nome:x[1]};});
 function abasAplica(l){ var ok=[], nav=$("areas"); (Array.isArray(l)?l:[]).forEach(function(x){ if(x&&ABASP.some(function(p){return p[0]===x.id;})&&!ok.some(function(o){return o.id===x.id;})) ok.push({id:x.id,nome:String(x.nome||"").trim().slice(0,24)||ABASP.filter(function(p){return p[0]===x.id;})[0][1]}); });
-  ABASP.forEach(function(p){ if(!ok.some(function(o){return o.id===p[0];})) ok.push({id:p[0],nome:p[1]}); }); ABAS=ok;
+  ABASP.forEach(function(p){ if(!ok.some(function(o){return o.id===p[0];})){ if(p[0]==="inicio") ok.unshift({id:p[0],nome:p[1]}); else ok.push({id:p[0],nome:p[1]}); } }); ABAS=ok;
   ABAS.forEach(function(a){ var b=nav.querySelector('button[data-area="'+a.id+'"]'); if(!b) return; b.textContent=a.nome; nav.insertBefore(b,$("bt-admin")); TITULOS[a.id]=a.id==="carteira"&&a.nome==="Carteira"?"Minha Carteira":a.nome; if(!$("area-"+a.id).hidden) $("titulo").textContent=TITULOS[a.id]; });
   ABAINI=ABAS[0].id; abasAdm(); }
-var ABAINI="mercado";
+var ABAINI="inicio";
 function abasAdm(){ var box=$("adm-abas"); if(!box) return; box.textContent=""; ABAS.forEach(function(a,i){ var r=el("div"); r.style.cssText="display:flex;gap:6px;align-items:center";
     [[-1,"▲","Subir "],[1,"▼","Descer "]].forEach(function(c){ var b=el("button","mv",c[1]); b.type="button"; b.disabled=i+c[0]<0||i+c[0]>=ABAS.length; b.setAttribute("aria-label",c[2]+a.nome); b.addEventListener("click",function(){ abasLe(); var x=ABAS[i]; ABAS[i]=ABAS[i+c[0]]; ABAS[i+c[0]]=x; abasAdm(); $("adm-abas-msg").textContent="Ordem alterada. Clique em Salvar abas."; }); r.appendChild(b); });
     var inp=el("input"); inp.type="text"; inp.maxLength=24; inp.value=a.nome; inp.dataset.id=a.id; inp.style.width="240px"; inp.setAttribute("aria-label","Nome da aba "+a.nome); r.appendChild(inp); box.appendChild(r); }); }
@@ -1451,6 +1494,7 @@ $("conta-senha-bt").addEventListener("click",function(){ $("conta-senha-form").h
 $("conta-senha-form").addEventListener("submit",function(ev){ ev.preventDefault(); var p=$("conta-nova").value; if(p.length<6) return;
   SB.auth.updateUser({password:p}).then(function(r){ if(r.error) contaMsg(erroLogin(r.error.message),true); else { $("conta-nova").value=""; $("conta-senha-form").hidden=true; contaMsg("Senha salva. Da próxima vez, entre com e-mail e senha."); } }); });
 function temaDesenha(){ var e=escuro(), fixo=document.documentElement.getAttribute("data-theme"); [].forEach.call(document.querySelectorAll(".tema-bt"),function(b){ b.textContent=e?"☀ Tema claro":"☾ Tema escuro"; }); [].forEach.call(document.querySelectorAll(".tema-sis"),function(b){ b.hidden=!fixo; }); $("tema-fora").hidden=!!USUARIO;
+  if(typeof M2!=="undefined"){ try{ if(!$("mj-defi").hidden) defiDes(); if(!$("mj-onchain").hidden) ocDes(); if(!$("mj-etfs").hidden) etfDes(); if(typeof inicioGraf==="function") inicioGraf(); if(typeof AN!=="undefined"&&AN.nomes.length&&!$("area-analises").hidden) anNumeros(AN.nomes); }catch(x){} }
   if(typeof PCHART!=="undefined"&&PCHART){ try{ PCHART.remove(); }catch(x){} PCHART=null; if(typeof perfDesenha==="function"&&!$("cj-desempenho").hidden) perfDesenha(); } }
 function temaPoe(t){ try{ if(t) localStorage.setItem("tema",t); else localStorage.removeItem("tema"); }catch(x){} if(t) document.documentElement.setAttribute("data-theme",t); else document.documentElement.removeAttribute("data-theme"); temaDesenha(); }
 [].forEach.call(document.querySelectorAll(".tema-bt"),function(b){ b.addEventListener("click",function(){ temaPoe(escuro()?"light":"dark"); }); });
@@ -1545,22 +1589,28 @@ function dinG(v){ if(v==null||isNaN(v)) return "–"; var a=Math.abs(v), s=v<0?"
 function varP(a,b){ return (a==null||!b)?null:a/b-1; }
 function tile(box,rot,val,sub,c){ var d=el("div"); d.appendChild(el("span","rot",rot)); d.appendChild(el("strong",null,val)); if(sub) d.appendChild(el("small",c||"",sub)); box.appendChild(d); }
 function grafFaz(id,series,fmt){ var alvo=$(id); if(!alvo||!window.LightweightCharts) return; if(M2.g[id]){ try{ M2.g[id].remove(); }catch(e){} delete M2.g[id]; } alvo.textContent="";
-  var ch=LightweightCharts.createChart(alvo,{autoSize:true,layout:{background:{color:"transparent"},textColor:cor("--muted"),fontFamily:"IBM Plex Mono, monospace"},grid:{vertLines:{color:cor("--line")},horzLines:{color:cor("--line")}},rightPriceScale:{borderColor:cor("--line")},timeScale:{borderColor:cor("--line")},localization:{locale:"pt-BR",priceFormatter:fmt||function(v){return usd(v,0);}},handleScroll:{mouseWheel:false,vertTouchDrag:false},handleScale:{axisPressedMouseMove:false,mouseWheel:false}});
+  var ch=LightweightCharts.createChart(alvo,grafOpc(fmt));
   series.forEach(function(s){ if(!s.dados||!s.dados.length) return; var o={color:s.cor,priceLineVisible:false,lastValueVisible:true,title:s.titulo||""}, sr;
-    if(s.tipo==="barras") sr=ch.addHistogramSeries(o); else if(s.tipo==="area") sr=ch.addAreaSeries({lineColor:s.cor,topColor:s.cor+"55",bottomColor:s.cor+"05",lineWidth:2,priceLineVisible:false,title:s.titulo||""}); else { o.lineWidth=2; sr=ch.addLineSeries(o); }
+    if(s.tipo==="barras") sr=ch.addHistogramSeries(o); else if(s.tipo==="area") sr=ch.addAreaSeries({lineColor:s.cor,topColor:s.cor+"55",bottomColor:s.cor+"05",lineWidth:2,priceLineVisible:false,title:s.titulo||""}); else { o.lineWidth=2; if(s.degrau) o.lineType=1; sr=ch.addLineSeries(o); }
     sr.setData(s.dados); }); ch.timeScale().fitContent(); M2.g[id]=ch; grafExtras(id,ch,fmt); }
+function grafOpc(fmt){ var e=escuro(); return {autoSize:true,layout:{background:{color:"transparent"},textColor:e?"#9fb0c6":"#4a586b",fontFamily:"IBM Plex Sans, sans-serif",fontSize:12,attributionLogo:false},
+  grid:{vertLines:{visible:false},horzLines:{color:e?"rgba(159,176,198,.10)":"rgba(14,26,43,.07)",style:0}},rightPriceScale:{borderVisible:false,scaleMargins:{top:.12,bottom:.08}},timeScale:{borderColor:e?"rgba(159,176,198,.22)":"rgba(14,26,43,.16)",fixLeftEdge:true,fixRightEdge:true},
+  crosshair:{mode:1,vertLine:{color:e?"rgba(159,176,198,.45)":"rgba(14,26,43,.35)",width:1,style:3,labelBackgroundColor:"#0b2545"},horzLine:{color:e?"rgba(159,176,198,.45)":"rgba(14,26,43,.35)",width:1,style:3,labelBackgroundColor:"#0b2545"}},
+  localization:{locale:"pt-BR",priceFormatter:fmt||function(v){return usd(v,0);}},handleScroll:{mouseWheel:false,vertTouchDrag:false,pressedMouseMove:true},handleScale:{axisPressedMouseMove:false,mouseWheel:false,pinch:true}}; }
 var LOGOS={}; ["claro","escuro"].forEach(function(k){ var i=new Image(); i.src="logo_"+k+".png"; LOGOS[k]=i; });
 function grafExtras(id,ch,fmt){ var alvo=$(id); if(!alvo||!ch) return; alvo.classList.add("gmarca"); [].forEach.call(alvo.querySelectorAll(".gbaixa,.gleg"),function(x){x.remove();});
   var leg=el("div","gleg"), bt=el("button","gbaixa","⤓ Baixar"); bt.type="button"; bt.title="Baixar este gráfico como imagem"; alvo.appendChild(leg); alvo.appendChild(bt);
   var f=fmt||function(v){return usd(v,2);};
   ch.subscribeCrosshairMove(function(pm){ if(!pm||!pm.time||!pm.seriesData||!pm.seriesData.size){ leg.textContent=""; return; } var d=typeof pm.time==="string"?pm.time.split("-").reverse().join("/"):new Date(pm.time*1000).toLocaleDateString("pt-BR"), vs=[]; pm.seriesData.forEach(function(v){ var x=v&&(v.value!=null?v.value:v.close); if(x!=null) vs.push(f(x)); }); leg.textContent=d+"  ·  "+vs.join("  ·  "); });
   bt.addEventListener("click",function(){ var box=alvo.closest(".box"), h2=box?box.querySelector("h2"):null, titulo=h2?h2.textContent:"Gráfico", shot; try{ shot=ch.takeScreenshot(); }catch(e){ return; }
-    var esc=escuro(), W=shot.width, cabH=Math.round(W*0.075), rodH=Math.round(W*0.035), c=document.createElement("canvas"); c.width=W; c.height=shot.height+cabH+rodH; var g=c.getContext("2d");
-    g.fillStyle=esc?"#111a27":"#ffffff"; g.fillRect(0,0,c.width,c.height); g.fillStyle="#0b2545"; g.fillRect(0,0,W,cabH); g.fillStyle="#7fb0ea"; g.fillRect(0,cabH-Math.max(2,Math.round(W*0.003)),W,Math.max(2,Math.round(W*0.003)));
-    var lg=LOGOS.escuro; if(lg.complete&&lg.naturalWidth){ var lh=cabH*0.62, lw=lh*lg.naturalWidth/lg.naturalHeight; g.drawImage(lg,cabH*0.3,(cabH-lh)/2,lw,lh); }
-    g.fillStyle="#f2f5f9"; g.textAlign="right"; g.textBaseline="middle"; g.font="600 "+Math.round(cabH*0.3)+"px 'IBM Plex Sans',sans-serif"; g.fillText(titulo,W-cabH*0.3,cabH/2,W*0.55);
-    g.drawImage(shot,0,cabH); var wm=esc?LOGOS.escuro:LOGOS.claro; if(wm.complete&&wm.naturalWidth){ var ww=W*0.42, wh=ww*wm.naturalHeight/wm.naturalWidth; g.globalAlpha=0.1; g.drawImage(wm,(W-ww)/2,cabH+(shot.height-wh)/2,ww,wh); g.globalAlpha=1; }
-    g.fillStyle=esc?"#93a0b3":"#5a6678"; g.textAlign="left"; g.font="400 "+Math.round(rodH*0.42)+"px 'IBM Plex Sans',sans-serif"; g.fillText("Alpha Radar · Mercado Global · "+new Date().toLocaleString("pt-BR",{day:"2-digit",month:"2-digit",year:"numeric",hour:"2-digit",minute:"2-digit"}),cabH*0.3,cabH+shot.height+rodH/2);
+    var esc=escuro(), W=shot.width, m=Math.round(W*0.035), cabH=Math.round(W*0.105), rodH=Math.round(W*0.05), c=document.createElement("canvas"); c.width=W+2*m; c.height=shot.height+cabH+rodH+m; var g=c.getContext("2d"), tinta=esc?"#e4e9f0":"#0e1a2b", suave=esc?"#93a0b3":"#5a6678";
+    g.fillStyle=esc?"#0d1726":"#ffffff"; g.fillRect(0,0,c.width,c.height); g.fillStyle="#0b2545"; g.fillRect(0,0,c.width,Math.max(6,Math.round(W*0.012))); g.fillStyle="#3ebed6"; g.fillRect(0,Math.max(6,Math.round(W*0.012)),Math.round(c.width*0.22),Math.max(2,Math.round(W*0.004)));
+    g.fillStyle=tinta; g.textAlign="left"; g.textBaseline="alphabetic"; g.font="600 "+Math.round(W*0.034)+"px 'Source Serif 4',Georgia,serif"; g.fillText(titulo,m,Math.round(cabH*0.62),W*0.62);
+    var sub=box?box.querySelector("p.sub"):null; g.fillStyle=suave; g.font="400 "+Math.round(W*0.0175)+"px 'IBM Plex Sans',sans-serif"; if(sub&&sub.textContent) g.fillText(sub.textContent.slice(0,110),m,Math.round(cabH*0.86),W*0.62);
+    var lg=esc?LOGOS.escuro:LOGOS.claro; if(lg.complete&&lg.naturalWidth){ var lw=W*0.26, lh=lw*lg.naturalHeight/lg.naturalWidth; g.drawImage(lg,c.width-m-lw,Math.round(cabH*0.56-lh/2),lw,lh); }
+    g.drawImage(shot,m,cabH); if(lg.complete&&lg.naturalWidth){ var ww=W*0.5, wh=ww*lg.naturalHeight/lg.naturalWidth; g.globalAlpha=esc?0.16:0.13; g.drawImage(lg,m+(W-ww)/2,cabH+(shot.height-wh)*0.45,ww,wh); g.globalAlpha=1; }
+    g.strokeStyle=esc?"rgba(159,176,198,.25)":"rgba(14,26,43,.15)"; g.lineWidth=1; g.beginPath(); g.moveTo(m,cabH+shot.height+rodH*0.3); g.lineTo(c.width-m,cabH+shot.height+rodH*0.3); g.stroke();
+    g.fillStyle=suave; g.font="400 "+Math.round(W*0.016)+"px 'IBM Plex Sans',sans-serif"; g.textBaseline="middle"; g.fillText("Fonte: Alpha Radar, com dados públicos de mercado. Gerado em "+new Date().toLocaleString("pt-BR",{day:"2-digit",month:"2-digit",year:"numeric",hour:"2-digit",minute:"2-digit"})+".",m,cabH+shot.height+rodH*0.72); g.textAlign="right"; g.fillText("alpha radar · mercado global",c.width-m,cabH+shot.height+rodH*0.72);
     c.toBlob(function(b){ var a=document.createElement("a"); a.href=URL.createObjectURL(b); a.download="alpha-radar-"+semAcento(titulo).replace(/[^a-z0-9]+/g,"-").replace(/^-|-$/g,"").slice(0,50)+"-"+dia(Date.now())+".png"; document.body.appendChild(a); a.click(); a.remove(); setTimeout(function(){URL.revokeObjectURL(a.href);},2000); },"image/png"); }); }
 function dsec(t){ return dia(t*1000); }
 function corte(l,dias){ if(!dias) return l; var c=dia(Date.now()-dias*864e5); return l.filter(function(x){return x.time>=c;}); }
@@ -1752,9 +1802,21 @@ $("rel-pdf").addEventListener("click",function(){ var go=function(){ var th=docu
 
 ORD["df-prot"]={c:null,d:-1};
 pers("df-per","dfPer","d",defiDes); pers("ef-per","efPer","d",etfDes); pers("ef-un","efUn","u",etfDes);
-function m2Abre(j){ if(j==="defi") defiDes(); else if(j==="onchain") ocDes(); else if(j==="etfs") etfDes(); }
+function mercPaineis(){ var bx=$("g-paineis"); if(!bx||$("area-mercado").hidden||$("mj-resumo").hidden) return;
+  Promise.all([defiCarrega().catch(function(){return null;}),ocCarrega().catch(function(){return null;}),etfCarrega().catch(function(){return null;})]).then(function(r){ var d=r[0], o=r[1], e=r[2]; bx.textContent="";
+    var C=function(aba,tema,titulo,linhas){ var c=el("article","tema"); c.appendChild(el("span","rot",tema)); var h=el("h3"), b=el("button","lnk",titulo); b.type="button"; b.style.font="inherit"; b.addEventListener("click",function(){ mjanela(aba); window.scrollTo({top:0,behavior:"smooth"}); }); h.appendChild(b); c.appendChild(h); var u=el("ul"); u.style.cssText="margin:0;padding-left:18px;display:flex;flex-direction:column;gap:4px;font-size:14px;color:var(--muted)"; linhas.forEach(function(x){ if(x) u.appendChild(el("li",null,x)); }); c.appendChild(u); bx.appendChild(c); };
+    var liq=Object.keys(PRECOS).filter(function(k){return PRECOS[k].vol>=2e7;}).sort(function(a,b){return PRECOS[b].v-PRECOS[a].v;}), pr=PRINCIPAIS.filter(function(a){return PRECOS[a];});
+    if(pr.length) C("ativos","Ativos",pr.filter(function(a){return PRECOS[a].v>0;}).length+" de "+pr.length+" principais em alta",[PRECOS.BTC?"Bitcoin: US$ "+usd(PRECOS.BTC.p,0)+" ("+pct(PRECOS.BTC.v)+")":"",PRECOS.ETH?"Ethereum: US$ "+usd(PRECOS.ETH.p,0)+" ("+pct(PRECOS.ETH.v)+")":"",liq.length>1?"Maior alta: "+liq[0]+" ("+pct(PRECOS[liq[0]].v)+")":"",liq.length>1?"Maior queda: "+liq[liq.length-1]+" ("+pct(PRECOS[liq[liq.length-1]].v)+")":""]);
+    var nt=((MERC&&MERC.noticias)||[]), n24=nt.filter(function(n){return n.t*1000>Date.now()-864e5;}), fs={}; n24.forEach(function(n){fs[n.fonte]=1;}); if(nt.length) C("noticias","Notícias",n24.length+" publicações em 24 horas",["De "+Object.keys(fs).length+" fontes diferentes"].concat(n24.slice(0,3).map(function(n){return n.titulo;})));
+    var ev=((MERC&&MERC.calendario)||[]).filter(function(x){return (x.impacto==="High"||x.impacto==="Medium")&&x.moeda==="USD"&&Date.parse(x.data)>Date.now();}).sort(function(a,b){return Date.parse(a.data)-Date.parse(b.data);}); C("calendario","Calendário",ev.length?ev.length+" eventos importantes à frente":"Semana sem eventos importantes",ev.slice(0,4).map(function(x){return (x.impacto==="High"?"★★★ ":"★★ ")+x.titulo+", "+new Date(x.data).toLocaleString("pt-BR",{weekday:"short",day:"2-digit",month:"2-digit",hour:"2-digit",minute:"2-digit"});}));
+    if(d){ var u=d.tvl[d.tvl.length-1].value, v7=varP(u,atras(d.tvl,7)), v30=varP(u,atras(d.tvl,30)), su=d.stb.length?d.stb[d.stb.length-1].value:null, sr=0; d.redes.forEach(function(c){sr+=c.tvl;}); C("defi","DeFi","Valor travado: "+dinG(u),["Variação: "+(v7==null?"–":pct(v7))+" em 7 dias, "+(v30==null?"–":pct(v30))+" em 30 dias",su!=null?"Stablecoins em circulação: "+dinG(su):"",d.dex?"Volume em corretoras descentralizadas: "+dinG(d.dex.v)+" em 24h":"",d.redes.length?"Maior rede: "+d.redes[0].name+" ("+usd(d.redes[0].tvl/(sr||u)*100,1)+"%)":"",d.prot.length?"Maior protocolo: "+d.prot[0].name+" ("+dinG(d.prot[0].tvl)+")":""]); }
+    if(o){ var ab=serie(o.btc,"AdrActCnt"), mv=serie(o.btc,"CapMVRVCur"); C("onchain","On-chain",o.hash&&o.hash.currentHashrate?"Hashrate do Bitcoin: "+usd(o.hash.currentHashrate/1e18,0)+" EH/s":"Dados das redes",[o.dif?"Próximo ajuste de dificuldade: "+pct(o.dif.difficultyChange/100):"",o.taxa?"Taxa para confirmar rápido: "+o.taxa.fastestFee+" sat/vB":"",o.fila?"Transações na fila: "+usd(o.fila.count,0):"",ab.length?"Endereços ativos do Bitcoin: "+usd(ab[ab.length-1].value,0):"",mv.length?"MVRV do Bitcoin: "+usd(mv[mv.length-1].value,2)+(mv[mv.length-1].value>=3.5?" (euforia)":mv[mv.length-1].value<1?" (capitulação)":" (zona neutra)"):""]); }
+    if(e&&e.fl&&e.fl.length){ var q=function(n){ var x=0; e.fl.slice(-n).forEach(function(y){x+=y.usd;}); return x; }, ul=e.fl[e.fl.length-1]; C("etfs","ETFs de Bitcoin","Saldo do mês: "+dinG(q(21)),["Último dia ("+ul.time.split("-").reverse().slice(0,2).join("/")+"): "+dinG(ul.usd),"Última semana: "+dinG(q(5)),e.tot.length?"Bitcoin guardado pelos fundos: "+usd(e.tot[e.tot.length-1].value,0)+" BTC":"","Notícias sobre ETFs no feed: "+etfNots().length]); }
+  }); }
+function m2Abre(j){ if(j==="resumo") mercPaineis(); if(j==="defi") defiDes(); else if(j==="onchain") ocDes(); else if(j==="etfs") etfDes(); }
 [].forEach.call(document.querySelectorAll('#areas button[data-area="relatorio"]'),function(b){ b.addEventListener("click",function(){ setTimeout(relGera,50); }); }); if(location.hash==="#relatorio") setTimeout(relGera,2500);
-setInterval(function(){ if($("area-mercado").hidden) return; if(!$("mj-defi").hidden) defiDes(); if(!$("mj-onchain").hidden) ocDes(); if(!$("mj-etfs").hidden) etfDes(); },120000);
+setTimeout(mercPaineis,4000); [].forEach.call(document.querySelectorAll('#areas button[data-area="mercado"]'),function(b){ b.addEventListener("click",function(){ setTimeout(mercPaineis,200); }); });
+setInterval(function(){ if($("area-mercado").hidden) return; mercPaineis(); if(!$("mj-defi").hidden) defiDes(); if(!$("mj-onchain").hidden) ocDes(); if(!$("mj-etfs").hidden) etfDes(); },120000);
 </script>
 <script>
 /* ---------- Acervo de fontes e Análises de ativos ---------- */
@@ -1801,14 +1863,19 @@ function anNumeros(nomes){ var q=nomes[0], ficha=$("an-ficha"); ficha.textConten
     if(!ficha.children.length) ficha.appendChild(el("p","sub","Não encontrei esse ativo na CoinGecko nem na DefiLlama. Confira o nome ou tente o código do token.")); }); }
 /* ---------- Análise escrita pela IA (função do Supabase + Gemini) ---------- */
 function anEsc(t){ return String(t).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;"); }
-function anMd(txt,fontes){ var h="", lista=false, fecha=function(){ if(lista){ h+="</ul>"; lista=false; } };
-  var cit=function(s){ return anEsc(s).replace(/\*\*([^*]+)\*\*/g,"<strong>$1</strong>").replace(/\[(\d+(?:\s*,\s*\d+)*)\]/g,function(m,ns){ return '<sup class="cit">'+ns.split(",").map(function(n){ n=n.trim(); return fontes&&fontes[+n-1]?'<a href="#an-f'+n+'">'+n+'</a>':n; }).join(", ")+"</sup>"; }); };
+function anNums(t){ var o=[]; String(t||"").replace(/\[\d+(?:\s*,\s*\d+)*\]/g," ").replace(/\d[\d.,]*\d|\d/g,function(m){ var d=m.replace(/\D/g,""); if(d.length>=2&&!/^(19|20)\d{2}$/.test(m)) o.push([m,d.replace(/0+$/,"")||"0"]); return m; }); return o; }
+function anConfere(texto,ev){ var tem={}; (ev||[]).forEach(function(e){ anNums(e.texto+" "+e.titulo).forEach(function(x){ tem[x[1]]=1; }); }); var ns=anNums(texto), nao={}, ok=0; ns.forEach(function(x){ if(tem[x[1]]) ok++; else nao[x[0]]=1; }); return {tipo:"conferencia",total:ns.length,ok:ok,nao:Object.keys(nao).slice(0,150)}; }
+function anMd(txt,fontes,nao){ var h="", lista=false, fecha=function(){ if(lista){ h+="</ul>"; lista=false; } };
+  var naoRe=nao&&nao.length?new RegExp("(^|[^\\d.,])("+nao.map(function(x){return x.replace(/[.*+?^${}()|[\]\\]/g,"\\$&");}).sort(function(a,b){return b.length-a.length;}).join("|")+")(?![\\d]|[.,]\\d)","g"):null;
+  var cit=function(s){ s=anEsc(s); if(naoRe) s=s.replace(naoRe,function(m,a,n){ return a+'<span class="nconf" title="Número não encontrado nas fontes: confira antes de usar">'+n+"</span>"; }); return s.replace(/\*\*([^*]+)\*\*/g,"<strong>$1</strong>").replace(/\[(\d+(?:\s*,\s*\d+)*)\]/g,function(m,ns){ return '<sup class="cit">'+ns.split(",").map(function(n){ n=n.trim(); return fontes&&fontes[+n-1]?'<a href="#an-f'+n+'">'+n+'</a>':n; }).join(", ")+"</sup>"; }); };
   String(txt||"").replace(/[—–]/g,",").split(/\n+/).forEach(function(l){ l=l.trim(); if(!l||/^\[\[/.test(l)) return;
     if(/^###\s+/.test(l)){ fecha(); h+="<h3>"+cit(l.replace(/^###\s+/,""))+"</h3>"; } else if(/^##\s+/.test(l)){ fecha(); h+="<h2>"+cit(l.replace(/^##\s+/,""))+"</h2>"; } else if(/^#\s+/.test(l)){ fecha(); h+="<h2>"+cit(l.replace(/^#\s+/,""))+"</h2>"; }
     else if(/^[-*•]\s+/.test(l)){ if(!lista){ h+="<ul>"; lista=true; } h+="<li>"+cit(l.replace(/^[-*•]\s+/,""))+"</li>"; } else { fecha(); h+="<p>"+cit(l)+"</p>"; } }); fecha(); return h; }
 function anMostra(a){ var doc=$("an-doc"); doc.textContent=""; if(!a){ doc.hidden=true; $("an-pdf").hidden=true; return; } doc.hidden=false; $("an-pdf").hidden=false;
   var cab=el("div","rcab"), mk=el("div","rmarca"); mk.innerHTML=$("marca-topo").innerHTML; cab.appendChild(mk); var ct=el("div","rtit"); ct.appendChild(el("h1",null,"Análise: "+a.ativo)); ct.appendChild(el("p",null,new Date(a.criado_em||Date.now()).toLocaleDateString("pt-BR",{day:"2-digit",month:"long",year:"numeric"}))); cab.appendChild(ct); doc.appendChild(cab);
-  var corpo=el("div"); corpo.innerHTML=anMd(a.texto,a.fontes); doc.appendChild(corpo);
+  var conf=(a.fontes||[]).filter(function(f){return f&&f.tipo==="conferencia";})[0]||null; a.fontes=(a.fontes||[]).filter(function(f){return !(f&&f.tipo==="conferencia");});
+  if(conf){ var pc=conf.total?Math.round(conf.ok/conf.total*100):100, sel=el("div","selo "+(pc>=90?"bom":pc>=70?"medio":"ruim")); sel.appendChild(el("strong",null,"Conferência automática: "+conf.ok+" de "+conf.total+" números do texto foram encontrados nas fontes ("+pc+"%).")); sel.appendChild(el("span",null,conf.nao.length?" Os "+conf.nao.length+" números sublinhados em pontilhado não foram encontrados e precisam ser conferidos antes de usar.":" Nenhum número ficou sem fonte.")); doc.appendChild(sel); }
+  var corpo=el("div"); corpo.innerHTML=anMd(a.texto,a.fontes,conf?conf.nao:null); doc.appendChild(corpo);
   if(a.fontes&&a.fontes.length){ doc.appendChild(el("h2",null,"Fontes")); var ol=el("ol","rfontes"); a.fontes.forEach(function(f,i){ var li=el("li"); li.id="an-f"+(i+1); if(/^https?:\/\//.test(f.url||"")){ var x=el("a",null,f.titulo||f.url); x.href=f.url; x.target="_blank"; x.rel="noopener noreferrer"; li.appendChild(x); } else li.appendChild(document.createTextNode(f.titulo||"")); li.appendChild(document.createTextNode(" · "+f.casa+(f.data?" · "+String(f.data).slice(0,10).split("-").reverse().join("/"):""))); ol.appendChild(li); }); doc.appendChild(ol); }
   doc.appendChild(el("p","note","Análise escrita por inteligência artificial ("+(a.modelo||"Gemini")+") a partir das publicações listadas e de dados de mercado, com a voz da Alpha Radar. Confira os números nas fontes antes de usar. Documento informativo; não é recomendação de investimento.")); }
 function anSalva(){ if(typeof SB==="undefined"||!SB||!AN.nomes.length) return; SB.from("analises").select("*").ilike("ativo",AN.nomes[0]).order("criado_em",{ascending:false}).limit(1).then(function(r){ anMostra(r.data&&r.data[0]?r.data[0]:null); if(!(r.data&&r.data[0])) $("an-esc-status").textContent=PLANO==="admin"?"Ainda não há análise escrita para este ativo.":"Ainda não há análise escrita para este ativo. O administrador pode gerar uma."; else $("an-esc-status").textContent="Última análise gerada em "+new Date(r.data[0].criado_em).toLocaleString("pt-BR",{day:"2-digit",month:"2-digit",year:"numeric",hour:"2-digit",minute:"2-digit"})+"."; }); }
@@ -1821,15 +1888,72 @@ function anEscreve(){ if(AN.ocupado||!AN.nomes.length) return; AN.ocupado=true; 
   $("an-links").value.split(/\s+/).filter(function(u){return /^https?:\/\//.test(u);}).slice(0,8).forEach(function(u){ docs.unshift({url:u,fonte:"",titulo:"",data:dia(Date.now()),trecho:"",manual:true}); });
   var ficha=[].map.call($("an-ficha").children,function(c){ return c.innerText.replace(/\n+/g,": ").trim(); }).join("\n");
   st.textContent="Lendo "+docs.length+" publicações, uma por vez. Isso leva até 2 minutos…"; var ev=null, partes=[], modelo="";
-  var parte=function(n){ st.textContent="Escrevendo a parte "+n+" de 3 ("+["","introdução, o que é e como funciona","quem está por trás, produtos, token e números","riscos e conclusão"][n]+")…"; var tenta=function(k){ return anChama({acao:"parte",n:n,ativo:ativo,evidencias:ev,anteriores:partes.join("\n\n")}).catch(function(e){ if(k>=3) throw e; st.textContent="O modelo de IA está sobrecarregado. Tentando de novo a parte "+n+" em 15 segundos ("+k+" de 3)…"; return new Promise(function(r){setTimeout(r,15000);}).then(function(){return tenta(k+1);}); }); }; return tenta(1).then(function(j){ partes.push(j.texto); modelo=j.modelo; anMostra({ativo:ativo,texto:partes.join("\n\n"),fontes:ev,modelo:modelo,criado_em:Date.now()}); }); };
-  anChama({acao:"evidencias",nomes:AN.nomes,docs:docs,ficha:ficha}).then(function(j){ ev=j.evidencias||[]; if(ev.length<2) throw new Error("Não consegui ler texto suficiente das publicações. Cole links de relatórios sobre o ativo no campo acima e tente de novo."); return parte(1); }).then(function(){ return parte(2); }).then(function(){ return parte(3); })
-  .then(function(){ var fontes=ev.map(function(e){ return {casa:e.casa,titulo:e.titulo,data:e.data,url:e.url}; }); return SB.from("analises").insert({ativo:AN.nomes[0],nomes:AN.nomes.join(", "),texto:partes.join("\n\n"),fontes:fontes,modelo:modelo}).then(function(r){ st.textContent=r.error?"Análise pronta, mas não consegui salvar: "+r.error.message:"Análise pronta e salva. "+ev.length+" evidências usadas."; }); })
+  var parte=function(n){ st.textContent="Escrevendo a parte "+n+" de 3 ("+["","introdução, o que é e como funciona","quem está por trás, produtos, token e números","riscos e conclusão"][n]+")…"; var tenta=function(k){ return anChama({acao:"parte",n:n,ativo:ativo,evidencias:ev,anteriores:partes.join("\n\n")}).catch(function(e){ if(k>=3) throw e; st.textContent="O modelo de IA está sobrecarregado. Tentando de novo a parte "+n+" em 15 segundos ("+k+" de 3)…"; return new Promise(function(r){setTimeout(r,15000);}).then(function(){return tenta(k+1);}); }); }; return tenta(1).then(function(j){ partes.push(j.texto); modelo=j.modelo; anMostra({ativo:ativo,texto:partes.join("\n\n"),fontes:ev.concat([anConfere(partes.join("\n\n"),ev)]),modelo:modelo,criado_em:Date.now()}); }); };
+  anChama({acao:"evidencias",nomes:AN.nomes,docs:docs,ficha:ficha}).then(function(j){ ev=j.evidencias||[]; var lidos=ev.filter(function(x){return x.url;}), chars=0; lidos.forEach(function(x){chars+=String(x.texto||"").length;}); if(lidos.length<3||chars<8000) throw new Error("Base insuficiente para uma análise confiável: só "+lidos.length+" publicação(ões) com "+usd(chars,0)+" caracteres de texto sobre o ativo (o mínimo é 3 publicações e 8.000 caracteres). Cole links de relatórios dedicados ao ativo no campo acima e tente de novo."); return parte(1); }).then(function(){ return parte(2); }).then(function(){ return parte(3); })
+  .then(function(){ var fontes=ev.map(function(e){ return {casa:e.casa,titulo:e.titulo,data:e.data,url:e.url}; }); fontes.push(anConfere(partes.join("\n\n"),ev)); return SB.from("analises").insert({ativo:AN.nomes[0],nomes:AN.nomes.join(", "),texto:partes.join("\n\n"),fontes:fontes,modelo:modelo}).then(function(r){ st.textContent=r.error?"Análise pronta, mas não consegui salvar: "+r.error.message:"Análise pronta e salva. "+ev.length+" evidências usadas."; }); })
   .catch(function(e){ st.textContent="Não consegui terminar a análise: "+(e&&e.message?e.message:e)+(partes.length?" As partes já escritas ficaram na tela.":""); }).then(function(){ AN.ocupado=false; bt.disabled=false; }); }
 document.addEventListener("DOMContentLoaded",function(){ $("an-escrever").addEventListener("click",anEscreve);
   $("an-pdf").addEventListener("click",function(){ var th=document.documentElement.getAttribute("data-theme"); document.documentElement.setAttribute("data-theme","light"); document.body.classList.add("so-an"); var volta=function(){ document.body.classList.remove("so-an"); if(th) document.documentElement.setAttribute("data-theme",th); else document.documentElement.removeAttribute("data-theme"); window.removeEventListener("afterprint",volta); }; window.addEventListener("afterprint",volta); setTimeout(function(){ window.print(); },150); }); });
 document.addEventListener("DOMContentLoaded",function(){ $("an-form").addEventListener("submit",function(ev){ ev.preventDefault(); anBusca(); }); try{ var u=localStorage.getItem("an_ult"); if(u) $("an-nomes").value=u; }catch(e){}
   [].forEach.call(document.querySelectorAll("#an-ex button"),function(b){ b.addEventListener("click",function(){ $("an-nomes").value=b.dataset.n; anBusca(); }); });
   ["n-tipo"].forEach(function(i){ $(i).addEventListener("change",mercDesenha); }); $("n-busca").addEventListener("input",mercDesenha); acervoCarrega(); setInterval(acervoCarrega,600000); });
+</script>
+<script>
+/* ---------- Início: análise do dia ---------- */
+var INI={per:365};
+function sUlt(s){ return s&&s.length?s[s.length-1][1]:null; }
+function sVar(s,n){ if(!s||s.length<2) return null; var a=s[Math.max(0,s.length-1-n)][1], b=s[s.length-1][1]; return a?b/a-1:null; }
+function sDif(s,n){ if(!s||s.length<2) return null; return s[s.length-1][1]-s[Math.max(0,s.length-1-n)][1]; }
+function sData(s){ return s&&s.length?s[s.length-1][0].split("-").reverse().join("/"):""; }
+function verbo(v,lim){ lim=lim||0.003; return v==null?"ficou sem dado":v>lim*4?"subiu forte":v>lim?"subiu":v<-lim*4?"caiu forte":v<-lim?"caiu":"ficou estável"; }
+function pp(v){ return (v>=0?"+":"−")+usd(Math.abs(v),2)+" p.p."; }
+function inicioDes(){ if($("area-inicio").hidden&&INI.feito) return; var M=(MERC&&MERC.macro)||{}, S=M.series||{}, btc=PRECOS.BTC, eth=PRECOS.ETH, g=MERC&&MERC.panorama, fng=MERC&&MERC.fng, agora=new Date();
+  $("in-data").textContent=agora.toLocaleDateString("pt-BR",{weekday:"long",day:"2-digit",month:"long",year:"numeric"});
+  var sp=sVar(S.sp500,1), ib=sVar(S.ibov,1), ou=sVar(S.ouro,1), br=sVar(S.brent,1), dol=sVar(S.usdbrl,1), t10=sUlt(S.us10y), t10d=sDif(S.us10y,1), selic=sUlt(S.selic), fed=M.fed, e=typeof M2!=="undefined"?M2.etf:null;
+  /* título */
+  var tit=[]; if(btc) tit.push("Bitcoin "+(btc.v>0.01?"sobe "+usd(btc.v*100,1)+"%":btc.v<-0.01?"cai "+usd(Math.abs(btc.v)*100,1)+"%":"anda de lado")+" a US$ "+usd(btc.p,0));
+  if(sp!=null) tit.push("bolsa americana "+(sp>0.002?"fecha em alta":sp<-0.002?"fecha em queda":"fecha estável")); if(ib!=null&&tit.length<3) tit.push("Ibovespa "+(ib>0.002?"avança":ib<-0.002?"recua":"fica estável"));
+  $("in-titulo").textContent=tit.length?tit.join(", ").replace(/, ([^,]*)$/," e $1")+".":"Carregando o panorama do dia…";
+  /* resumo executivo */
+  var ps=[], t="";
+  if(btc){ t="No mercado cripto, o Bitcoin "+verbo(btc.v,0.005)+" nas últimas 24 horas e vale US$ "+usd(btc.p,0)+(eth?"; o Ethereum está em US$ "+usd(eth.p,0)+" ("+pct(eth.v)+")":"")+". "; if(g) t+="Somando todas as moedas, o mercado vale "+grande(g.cap)+". "; if(fng) t+="O termômetro de sentimento marca "+fng.valor+" de 100, na faixa de "+(FNG_PT[fng.classe]||fng.classe)+(+fng.valor>=75?": muita gente otimista ao mesmo tempo costuma pedir cautela.":+fng.valor<=25?": muito medo costuma aparecer perto de boas oportunidades, mas também de mais quedas.":"."); ps.push(t); }
+  if(e&&e.fl&&e.fl.length){ var u=e.fl[e.fl.length-1], s5=0; e.fl.slice(-5).forEach(function(x){s5+=x.usd;}); ps.push("Os grandes investidores, que compram Bitcoin por meio dos ETFs nos Estados Unidos, "+(s5>=0?"colocaram":"retiraram")+" "+dinG(Math.abs(s5))+" na última semana de pregão. No último dia com dados ("+u.time.split("-").reverse().slice(0,2).join("/")+"), o saldo foi de "+dinG(u.usd)+". "+(s5>=0?"Quando esse dinheiro entra, ele ajuda a sustentar o preço.":"Quando esse dinheiro sai, o preço perde um apoio importante.")); }
+  t=""; if(fed&&fed.ate!=null) t+="Nos Estados Unidos, o banco central (Fed) mantém os juros entre "+usd(fed.de,2)+"% e "+usd(fed.ate,2)+"% ao ano. "; if(t10!=null) t+="O título de 10 anos do Tesouro americano, referência para o mundo todo, paga "+usd(t10,2)+"% ao ano"+(t10d!=null?" ("+pp(t10d)+" no dia)":"")+". Juros altos lá fora tiram dinheiro de investimentos de risco, como ações e cripto; juros caindo fazem o contrário. "; if(sp!=null) t+="O S&P 500, principal índice da bolsa americana, "+verbo(sp)+" ("+pct(sp)+") no último pregão."; if(t) ps.push(t);
+  t=""; if(selic!=null) t+="No Brasil, a Selic está em "+usd(selic,2)+"% ao ano"+(sUlt(S.ipca12)!=null?", com a inflação de 12 meses em "+usd(sUlt(S.ipca12),2)+"%":"")+". "; if(ib!=null) t+="O Ibovespa "+verbo(ib)+" ("+pct(ib)+") e fechou em "+usd(sUlt(S.ibov),0)+" pontos. "; if(dol!=null) t+="O dólar "+verbo(dol)+" e vale R$ "+usd(sUlt(S.usdbrl),2)+". "; if(t) ps.push(t);
+  t=""; if(ou!=null) t+="O ouro, procurado quando há medo no mercado, "+verbo(ou)+" e vale US$ "+usd(sUlt(S.ouro),0)+" a onça. "; if(br!=null) t+="O petróleo Brent "+verbo(br)+" e vale US$ "+usd(sUlt(S.brent),2)+" o barril; ele pesa no preço dos combustíveis e na inflação."; if(t) ps.push(t);
+  var bx=$("in-resumo"); bx.textContent=""; ps.forEach(function(x){ bx.appendChild(el("p",null,x)); }); if(!ps.length) bx.appendChild(el("p","sub","Os dados do dia ainda estão chegando."));
+  $("in-quando").textContent=(MERC&&MERC.t?"Bolsas, juros, ouro, petróleo e Selic coletados "+haQuanto(MERC.t)+" (valores de fechamento). ":"")+"Preços de cripto ao vivo.";
+  /* faixa de cotações */
+  var tk=$("in-tiles"); tk.textContent=""; var T=function(rot,val,v,sub){ if(val==null) return; tile(tk,rot,val,sub||(v==null?"":pct(v)+" no dia"),v==null?"":cls(v)); };
+  if(btc) T("Bitcoin","US$ "+usd(btc.p,0),btc.v,pct(btc.v)+" em 24h"); if(eth) T("Ethereum","US$ "+usd(eth.p,0),eth.v,pct(eth.v)+" em 24h");
+  if(S.sp500) T("S&P 500",usd(sUlt(S.sp500),0),sp); if(S.ibov) T("Ibovespa",usd(sUlt(S.ibov),0),ib); if(S.usdbrl) T("Dólar","R$ "+usd(sUlt(S.usdbrl),2),dol); if(S.ouro) T("Ouro","US$ "+usd(sUlt(S.ouro),0),ou); if(S.brent) T("Petróleo Brent","US$ "+usd(sUlt(S.brent),2),br);
+  if(t10!=null) T("Treasury de 10 anos",usd(t10,2)+"%",t10d==null?null:t10d,t10d==null?"":pp(t10d)+" no dia"); if(fed&&fed.ate!=null) T("Juros dos EUA (Fed)",usd(fed.de,2)+"% a "+usd(fed.ate,2)+"%",null,"faixa definida pelo Fed"); if(selic!=null) T("Selic",usd(selic,2)+"%",null,"ao ano, definida pelo Banco Central");
+  /* cartões por tema */
+  var cs=$("in-temas"); cs.textContent=""; var C=function(tema,titulo,texto,alvo){ var c=el("article","tema"); c.appendChild(el("span","rot",tema)); c.appendChild(el("h3",null,titulo)); c.appendChild(el("p",null,texto)); if(alvo){ var b=el("button","lnk",alvo[0]); b.type="button"; b.addEventListener("click",alvo[1]); c.appendChild(b); } cs.appendChild(c); };
+  var m30=function(s){ var v=sVar(s,21); return v==null?"":" No mês, a variação é de "+pct(v)+"."; };
+  if(btc) C("Cripto","Bitcoin a US$ "+usd(btc.p,0),"O Bitcoin "+verbo(btc.v,0.005)+" "+pct(btc.v)+" em 24 horas."+(g?" Ele responde por "+usd(g.dom_btc,1)+"% de todo o mercado cripto.":"")+(fng?" Sentimento: "+(FNG_PT[fng.classe]||fng.classe)+".":""),["Ver o mercado cripto",function(){ area("mercado"); }]);
+  if(e&&e.fl&&e.fl.length){ var s21=0; e.fl.slice(-21).forEach(function(x){s21+=x.usd;}); C("ETFs de Bitcoin",(s21>=0?"Entrada de ":"Saída de ")+dinG(Math.abs(s21))+" no mês","Os ETFs são fundos negociados em bolsa que compram Bitcoin de verdade. No último mês, "+(s21>=0?"entrou mais dinheiro do que saiu, sinal de procura de grandes investidores.":"saiu mais dinheiro do que entrou, sinal de menor apetite dos grandes investidores."),["Ver fluxos dos ETFs",function(){ area("mercado"); mjanela("etfs"); }]); }
+  if(fed&&fed.ate!=null){ var fs=S.fed||[], ant=fs.length>2?fs[fs.length-3]:null, mud=ant&&ant[1]!==fed.ate?(fed.ate<ant[1]?"A última mudança foi um corte":"A última mudança foi um aumento")+", em "+fs[fs.length-2][0].split("-").reverse().join("/")+".":""; C("Fed","Juros americanos em "+usd(fed.de,2)+"% a "+usd(fed.ate,2)+"%","O Fed é o banco central dos Estados Unidos. A taxa que ele define é o custo do dinheiro mais importante do mundo. "+mud+" Cortes costumam ajudar bolsas e cripto; aumentos costumam pesar."); }
+  if(t10!=null) C("Treasuries","Título de 10 anos paga "+usd(t10,2)+"%","Treasuries são os títulos da dívida dos EUA, vistos como o investimento mais seguro do mundo."+(sUlt(S.us3m)!=null?" O de 3 meses paga "+usd(sUlt(S.us3m),2)+"% e o de 30 anos, "+usd(sUlt(S.us30y),2)+"%.":"")+(sDif(S.us10y,21)!=null?" Em um mês, a taxa de 10 anos mudou "+pp(sDif(S.us10y,21))+".":""));
+  if(S.ouro) C("Ouro","Onça a US$ "+usd(sUlt(S.ouro),0),"O ouro "+verbo(ou)+" "+(ou==null?"":pct(ou))+" no último pregão."+m30(S.ouro)+" Ele costuma subir quando os investidores buscam proteção.");
+  if(S.brent) C("Petróleo","Brent a US$ "+usd(sUlt(S.brent),2),"O barril "+verbo(br)+" "+(br==null?"":pct(br))+" no último pregão."+m30(S.brent)+" Petróleo caro pressiona a inflação e, com ela, os juros.");
+  if(selic!=null){ var ss=S.selic||[], an=ss.length>2?ss[ss.length-3]:null; C("Brasil","Selic em "+usd(selic,2)+"% ao ano","A Selic é a taxa básica de juros do Brasil e define quanto rende a renda fixa."+(an&&an[1]!==selic?" A última decisão foi de "+(selic<an[1]?"corte":"aumento")+", de "+usd(an[1],2)+"% para "+usd(selic,2)+"%, em "+ss[ss.length-2][0].split("-").reverse().join("/")+".":"")+(sUlt(S.ipca12)!=null?" Descontada a inflação de "+usd(sUlt(S.ipca12),2)+"%, o juro real fica perto de "+usd(selic-sUlt(S.ipca12),1)+"% ao ano.":"")); }
+  if(S.ibov) C("Bolsa brasileira","Ibovespa em "+usd(sUlt(S.ibov),0)+" pontos","O principal índice da B3 "+verbo(ib)+" "+(ib==null?"":pct(ib))+" no último pregão."+m30(S.ibov)+(sVar(S.ibov,250)!=null?" Em 12 meses, "+pct(sVar(S.ibov,250))+".":""));
+  if(S.sp500) C("Bolsa americana","S&P 500 em "+usd(sUlt(S.sp500),0)+" pontos","O índice das 500 maiores empresas dos EUA "+verbo(sp)+" "+(sp==null?"":pct(sp))+" no último pregão."+m30(S.sp500)+(sVar(S.sp500,250)!=null?" Em 12 meses, "+pct(sVar(S.sp500,250))+".":""));
+  /* ETFs */
+  var tb=$("in-etfs"); tb.textContent=""; (M.etfs||[]).forEach(function(x){ var tr=el("tr"); cel(tr,x.s,"txt"); cel(tr,x.nome,"txt"); cel(tr,(x.moeda==="BRL"?"R$ ":"US$ ")+usd(x.p,2)); ["d1","m1","m3","a1"].forEach(function(k){ cel(tr,x[k]==null?"–":pct(x[k]),x[k]==null?"":cls(x[k])); }); tr._v=[x.s,x.nome,x.p,x.d1,x.m1,x.m3,x.a1]; tb.appendChild(tr); }); if(tb.rows.length) ordDom("in-etfs"); else semLinhas(tb,7,"Os dados dos ETFs chegam na próxima coleta.");
+  /* notícias e agenda */
+  var nl=$("in-nots"); nl.textContent=""; ((MERC&&MERC.noticias)||[]).filter(function(n){return (n.tipo||"noticias")==="noticias";}).slice(0,7).forEach(function(n){ nl.appendChild(notItem(n)); }); if(!nl.children.length) nl.appendChild(el("li","vazio","Ainda sem notícias coletadas."));
+  var ag=$("in-agenda"); ag.textContent=""; ((MERC&&MERC.calendario)||[]).filter(function(x){return (x.impacto==="High"||x.impacto==="Medium")&&x.moeda==="USD"&&Date.parse(x.data)>Date.now();}).sort(function(a,b){return Date.parse(a.data)-Date.parse(b.data);}).slice(0,6).forEach(function(x){ var tr=el("tr"); cel(tr,new Date(x.data).toLocaleString("pt-BR",{weekday:"short",day:"2-digit",month:"2-digit",hour:"2-digit",minute:"2-digit"}),"txt"); cel(tr,x.impacto==="High"?"★★★":"★★","txt"); cel(tr,x.titulo,"txt quebra"); ag.appendChild(tr); }); if(!ag.rows.length) semLinhas(ag,3,"Sem eventos importantes até o fim da semana.");
+  if(!INI.feito||!$("area-inicio").hidden) inicioGraf(); INI.feito=true; if(typeof etfCarrega==="function"&&!(e&&e.fl)) etfCarrega().then(function(x){ if(x&&x.fl&&!INI.etf){ INI.etf=true; inicioDes(); } }); }
+function inicioGraf(){ if($("area-inicio").hidden) return; var S=(MERC&&MERC.macro&&MERC.macro.series)||{}, pt=function(s){ return (s||[]).map(function(x){return {time:x[0],value:x[1]};}); };
+  var degrau=function(s){ var o=[]; (s||[]).forEach(function(x,i){ if(i&&o.length&&x[0]>o[o.length-1].time) o.push({time:x[0],value:x[1]}); else if(!i) o.push({time:x[0],value:x[1]}); }); return o; };
+  histDe("BTCUSDT").then(function(m){ var l=Object.keys(m).sort().map(function(d){return {time:d,value:m[d]};}); if(PRECOS.BTC&&l.length) l[l.length-1].value=PRECOS.BTC.p; grafFaz("in-g-btc",[{tipo:"area",cor:"#d98a00",dados:corte(l,INI.per)}],function(v){return usd(v,0);}); });
+  var corS=escuro()?"#5fcf95":"#1a7f4b", corF=escuro()?"#7fb0ea":"#1f4e8c";
+  if(S.selic||S.fed) grafFaz("in-g-juros",[{cor:corS,titulo:"Selic",dados:degrau(S.selic),degrau:true},{cor:corF,titulo:"Fed",dados:degrau(S.fed),degrau:true}],function(v){return usd(v,2)+"%";});
+  if(S.us10y) grafFaz("in-g-t10",[{tipo:"area",cor:corF,dados:pt(S.us10y)}],function(v){return usd(v,2)+"%";}); }
+document.addEventListener("DOMContentLoaded",function(){ pers("in-per","per","d",function(){}); [].forEach.call(document.querySelectorAll("#in-per button"),function(b){ b.addEventListener("click",function(){ INI.per=+b.dataset.d; inicioGraf(); }); });
+  [].forEach.call(document.querySelectorAll('#areas button[data-area="inicio"]'),function(b){ b.addEventListener("click",function(){ setTimeout(inicioDes,30); }); }); ORD["in-etfs"]={c:4,d:-1}; setTimeout(inicioDes,1500); setInterval(function(){ if(!$("area-inicio").hidden) inicioDes(); },60000); });
 </script>
 </body>
 </html>
