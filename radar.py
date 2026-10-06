@@ -193,10 +193,15 @@ def telegram(texto):
         return False
     if not chat:   # sem chat definido: usa a conversa mais recente que escreveu para o bot
         try:
-            ups = requests.get(f"https://api.telegram.org/bot{tok}/getUpdates", timeout=20).json().get("result", [])
-            chat = [u["message"]["chat"]["id"] for u in ups if "message" in u][-1]
+            resp = requests.get(f"https://api.telegram.org/bot{tok.strip()}/getUpdates", timeout=20).json()
+            if not resp.get("ok"):
+                print("[Telegram recusou o token: " + str(resp.get("description")) + "]\n" + texto)
+                return False
+            chat = [u["message"]["chat"]["id"] for u in resp.get("result", []) if "message" in u][-1]
         except Exception:
             print("[bot sem conversa: envie uma mensagem para ele]\n" + texto)
             return False
-    r = requests.post(f"https://api.telegram.org/bot{tok}/sendMessage", json={"chat_id": chat, "text": texto}, timeout=20)
+    tok = tok.strip()
+    r = requests.post(f"https://api.telegram.org/bot{tok.strip()}/sendMessage", json={"chat_id": chat, "text": texto}, timeout=20)
+    print("Telegram: enviado" if r.ok else "Telegram: falhou (" + str(r.json().get("description")) + ")")
     return r.ok
