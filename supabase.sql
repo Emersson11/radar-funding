@@ -143,3 +143,22 @@ drop policy if exists "avalia em seu nome" on public.avaliacoes;
 create policy "avalia em seu nome" on public.avaliacoes for insert with check (auth.uid() = user_id);
 drop policy if exists "muda a propria nota" on public.avaliacoes;
 create policy "muda a propria nota" on public.avaliacoes for update using (auth.uid() = user_id) with check (auth.uid() = user_id);
+
+-- ===== Análises de ativos escritas pela IA =====
+create table if not exists public.analises (
+  id bigint generated always as identity primary key,
+  ativo text not null,
+  nomes text not null default '',
+  texto text not null,
+  fontes jsonb not null default '[]',
+  modelo text not null default '',
+  user_id uuid not null default auth.uid() references auth.users on delete cascade,
+  criado_em timestamptz not null default now()
+);
+alter table public.analises enable row level security;
+drop policy if exists "todos leem analises" on public.analises;
+create policy "todos leem analises" on public.analises for select using (true);
+drop policy if exists "admin grava analises" on public.analises;
+create policy "admin grava analises" on public.analises for insert with check (public.eh_admin());
+drop policy if exists "admin apaga analises" on public.analises;
+create policy "admin apaga analises" on public.analises for delete using (public.eh_admin());
