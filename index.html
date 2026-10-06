@@ -122,6 +122,13 @@ button.lnk.neg{color:var(--bad)}
 td a{color:var(--accent);text-decoration:underline;text-underline-offset:3px}
 #av-estrelas button{border:0;background:none;padding:0 2px;font-size:26px;line-height:1;color:var(--line)} #av-estrelas button.on{color:#d99a00} #av-estrelas button:disabled{cursor:default}
 button.mv{padding:2px 7px;font-size:12px;line-height:1.2;margin-right:3px} button.mv:disabled{opacity:.3}
+.tiles{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:1px;background:var(--line);border:1px solid var(--line);border-radius:3px;overflow:hidden}
+.tiles>div{background:var(--surface);padding:16px 18px;min-width:0} .tiles .rot{display:block;margin-bottom:8px} .tiles strong{font:500 22px/1.2 var(--mono);display:block} .tiles small{font:400 13px var(--mono);color:var(--muted)}
+.graf{height:300px;margin-top:12px} .pers{display:flex;flex-wrap:wrap;gap:6px;margin-top:10px} .pers button{font-size:13px;padding:5px 11px;color:var(--muted);border-color:var(--line)} .pers button[aria-pressed="true"]{background:var(--accent);border-color:var(--accent);color:#fff}
+#rel-doc{max-width:980px;padding:36px 40px} #rel-doc h1{font:600 28px/1.2 var(--serif);margin:0} #rel-doc h2{margin:26px 0 8px;padding-bottom:6px;border-bottom:2px solid var(--accent);font-size:19px} #rel-doc h3{font:600 14px var(--sans);margin:14px 0 4px}
+#rel-doc p,#rel-doc li{font-size:14px;line-height:1.5;max-width:none} #rel-doc ul{margin:6px 0;padding-left:20px} #rel-doc table{font-size:13px;margin-top:6px} #rel-doc .cab{display:flex;justify-content:space-between;align-items:flex-end;gap:16px;border-bottom:3px solid var(--fg);padding-bottom:12px} #rel-doc .rk{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-top:10px} #rel-doc .rk div{border:1px solid var(--line);padding:10px 12px;border-radius:3px} #rel-doc .rk b{display:block;font:500 17px var(--mono)} #rel-doc .rk span{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.06em} #rel-doc svg{width:100%;height:auto;margin-top:8px} #rel-doc .leg{display:flex;flex-wrap:wrap;gap:6px 16px;font-size:12px;margin-top:6px} #rel-doc .leg i{display:inline-block;width:14px;height:3px;vertical-align:middle;margin-right:5px}
+@media (max-width:700px){#rel-doc{padding:18px} #rel-doc .rk{grid-template-columns:repeat(2,1fr)}}
+@media print{ body.so-rel{padding:0!important;background:#fff} body.so-rel #lado,body.so-rel header,body.so-rel #mabas,body.so-rel .no-print,body.so-rel #grafico{display:none!important} body.so-rel main{padding:0;max-width:none} body.so-rel main>.area:not(#area-mercado){display:none!important} body.so-rel #rel-doc{border:0;max-width:none;padding:0;margin:0!important;box-shadow:none} body.so-rel #rel-doc h2{break-after:avoid} body.so-rel #rel-doc table,body.so-rel #rel-doc svg,body.so-rel #rel-doc .rk{break-inside:avoid} @page{margin:16mm 14mm} }
 button.ord{border:0;padding:0;background:none;color:inherit;font:inherit;letter-spacing:inherit;text-transform:inherit;white-space:nowrap}
 button.ord:hover{color:var(--fg)}
 .direita{display:flex;flex-wrap:wrap;gap:10px;align-items:center;justify-content:flex-end}
@@ -333,6 +340,10 @@ button.mini{font-size:12px;color:var(--muted)}
       <button type="button" role="tab" data-mj="ativos" aria-selected="false">Ativos</button>
       <button type="button" role="tab" data-mj="noticias" aria-selected="false">Notícias</button>
       <button type="button" role="tab" data-mj="calendario" aria-selected="false">Calendário</button>
+      <button type="button" role="tab" data-mj="defi" aria-selected="false">DeFi</button>
+      <button type="button" role="tab" data-mj="onchain" aria-selected="false">On-chain</button>
+      <button type="button" role="tab" data-mj="etfs" aria-selected="false">ETFs</button>
+      <button type="button" role="tab" data-mj="relatorio" aria-selected="false">Relatório</button>
     </div>
     <section id="mj-resumo">
       <div class="kpis">
@@ -363,6 +374,52 @@ button.mini{font-size:12px;color:var(--muted)}
       </div>
       <div class="scroll"><table><thead><tr><th>Dia</th><th>Hora</th><th>Importância</th><th>Evento</th><th>Previsão</th><th>Anterior</th></tr></thead><tbody id="cal-tb"></tbody></table></div>
       <p class="note">Horários no fuso do seu aparelho. Mostra só eventos dos Estados Unidos de impacto alto e médio. Cobre a semana atual e, quando disponível, a seguinte. Os nomes dos eventos vêm em inglês da fonte (Forex Factory).</p>
+    </section>
+    <section id="mj-defi" hidden>
+      <div class="tiles" id="df-tiles"></div>
+      <p class="sub" id="df-status" style="margin:10px 0">Carregando…</p>
+      <div class="box"><h2>Valor total travado em DeFi (TVL)</h2><p class="sub">Soma, em dólares, de tudo que está depositado em protocolos DeFi de todas as redes.</p>
+        <div class="pers" id="df-per"><button type="button" data-d="90">90 dias</button><button type="button" data-d="365" aria-pressed="true">1 ano</button><button type="button" data-d="1095">3 anos</button><button type="button" data-d="0">Tudo</button></div>
+        <div class="graf" id="df-graf"></div></div>
+      <div class="duas" style="margin-top:20px">
+        <div class="box"><h2>Redes</h2><div class="scroll"><table><thead><tr><th class="txt">Rede</th><th>TVL</th><th>Participação</th></tr></thead><tbody id="df-redes"></tbody></table></div></div>
+        <div class="box"><h2>Stablecoins em circulação</h2><p class="sub" id="df-stb-txt"></p><div class="graf" id="df-stb"></div></div>
+      </div>
+      <div class="box" style="margin-top:20px"><h2>Maiores protocolos</h2><div class="scroll"><table><thead><tr><th class="txt">Protocolo</th><th class="txt">Categoria</th><th>TVL</th><th>24h</th><th>7 dias</th></tr></thead><tbody id="df-prot"></tbody></table></div>
+        <p class="note">Fonte: DeFiLlama. Atualiza sozinho a cada 10 minutos. Corretoras centralizadas e pontes ficam fora da lista de protocolos.</p></div>
+    </section>
+    <section id="mj-onchain" hidden>
+      <div class="tiles" id="oc-tiles"></div>
+      <p class="sub" id="oc-status" style="margin:10px 0">Carregando…</p>
+      <div class="duas">
+        <div class="box"><h2>Endereços ativos por dia</h2><p class="sub">Quantos endereços diferentes movimentaram a rede. Mostra o uso real.</p><div class="graf" id="oc-adr"></div></div>
+        <div class="box"><h2>MVRV do Bitcoin</h2><p class="sub">Preço de mercado dividido pelo preço médio em que as moedas foram movidas pela última vez. Acima de 3,5 costuma indicar euforia; abaixo de 1, capitulação.</p><div class="graf" id="oc-mvrv"></div></div>
+      </div>
+      <div class="duas" style="margin-top:20px">
+        <div class="box"><h2>Poder de mineração do Bitcoin (hashrate)</h2><p class="sub">Em EH/s. Quanto maior, mais segura a rede.</p><div class="graf" id="oc-hash"></div></div>
+        <div class="box"><h2>Transações por dia</h2><p class="sub">Bitcoin e Ethereum.</p><div class="graf" id="oc-tx"></div></div>
+      </div>
+      <p class="note">Fontes: mempool.space (taxas, fila e mineração, ao vivo) e Coin Metrics (endereços, transações e MVRV, com fechamento diário). Atualiza sozinho a cada 5 minutos.</p>
+    </section>
+    <section id="mj-etfs" hidden>
+      <div class="tiles" id="ef-tiles"></div>
+      <p class="sub" id="ef-status" style="margin:10px 0">Carregando…</p>
+      <div class="box"><h2>O que aconteceu com os ETFs de Bitcoin</h2><ul id="ef-resumo" style="margin:8px 0 0;padding-left:20px;display:flex;flex-direction:column;gap:6px"></ul></div>
+      <div class="box" style="margin-top:20px"><h2>Entradas e saídas por dia</h2><p class="sub">Barras verdes: os ETFs à vista dos EUA compraram Bitcoin no dia. Vermelhas: venderam.</p>
+        <div class="pers" id="ef-per"><button type="button" data-d="30">30 dias</button><button type="button" data-d="90" aria-pressed="true">90 dias</button><button type="button" data-d="365">1 ano</button><button type="button" data-d="0">Desde o início</button></div>
+        <div class="pers" id="ef-un"><button type="button" data-u="usd" aria-pressed="true">Em dólares</button><button type="button" data-u="btc">Em bitcoins</button></div>
+        <div class="graf" id="ef-graf"></div></div>
+      <div class="duas" style="margin-top:20px">
+        <div class="box"><h2>Bitcoin guardado pelos ETFs</h2><div class="graf" id="ef-total"></div></div>
+        <div class="box"><h2>Notícias sobre ETFs</h2><ul class="nots" id="ef-nots"></ul></div>
+      </div>
+      <p class="note">Fluxos: BGeometrics (bitcoin-data.com), soma dos ETFs à vista de Bitcoin dos EUA, publicada com 1 a 3 dias úteis de atraso. O valor em dólares usa o preço de fechamento do Bitcoin em cada dia. A página confere dados novos a cada 2 horas; as notícias, a cada 10 minutos.</p>
+    </section>
+    <section id="mj-relatorio" hidden>
+      <div class="box no-print"><h2>Relatório de mercado</h2><p class="sub">Junta o resumo das últimas 24 horas, DeFi, ETFs, on-chain, calendário, as notícias de todas as fontes e o desempenho da sua carteira contra as referências. É montado na hora, com os dados mais recentes.</p>
+        <p style="margin-top:12px"><button type="button" id="rel-gerar">Atualizar relatório</button> <button type="button" id="rel-pdf">Salvar em PDF</button> <span class="sub" id="rel-status"></span></p>
+        <p class="note">Em "Salvar em PDF", escolha "Salvar como PDF" no destino da impressão.</p></div>
+      <article id="rel-doc" class="box" style="margin-top:20px"></article>
     </section>
   </div>
 
@@ -1032,7 +1089,7 @@ function mercDesenha(){
 }
 var DADOS="https://raw.githubusercontent.com/Emersson11/radar-funding/dados/";
 function mercCarrega(){ if(window.SNAP) return; fetch(DADOS+"mercado.json?t="+Math.floor(Date.now()/60000)).then(function(r){ if(!r.ok) throw 0; return r.json(); }).catch(function(){ return fetch("mercado.json?t="+Date.now()).then(function(r){ if(!r.ok) throw 0; return r.json(); }); }).then(function(j){ MERC=j; mercDesenha(); }).catch(function(){ $("g-quando").textContent="Notícias e calendário ainda não foram coletados. Eles aparecem depois da primeira rodada do robô."; mercResumo(); }); }
-function mjanela(j){ document.querySelectorAll("#mabas button").forEach(function(o){ var on=o.dataset.mj===j; o.setAttribute("aria-selected",on?"true":"false"); $("mj-"+o.dataset.mj).hidden=!on; }); }
+function mjanela(j){ document.querySelectorAll("#mabas button").forEach(function(o){ var on=o.dataset.mj===j; o.setAttribute("aria-selected",on?"true":"false"); $("mj-"+o.dataset.mj).hidden=!on; }); if(typeof m2Abre==="function") m2Abre(j); }
 document.querySelectorAll("#mabas button").forEach(function(b){b.addEventListener("click",function(){mjanela(b.dataset.mj);});});
 ["n-fonte","cal-per","cal-imp"].forEach(function(id){$(id).addEventListener("change",mercDesenha);});
 $("mj-ativos").appendChild($("cj-mercado")); $("cj-mercado").hidden=false;
@@ -1415,6 +1472,145 @@ function estOpcoes(){ var a=$("op-ativo").value; $("op-status").textContent="Car
     $("op-status").textContent=l.length?a+" agora: US$ "+usd(spot||l[0].und,0)+". "+l.length+" vencimentos.":"Sem dados no momento."; })
   .catch(function(){ $("op-status").textContent="Não consegui buscar os dados da Deribit agora."; }); }
 $("op-ativo").addEventListener("change",estOpcoes);
+</script>
+<script>
+/* ---------- Mercado: DeFi, On-chain, ETFs, Relatório ---------- */
+var M2={g:{},defi:null,defiT:0,oc:null,ocT:0,etf:null,etfT:0,dfPer:365,efPer:90,efUn:"usd"};
+function gj(u){ return fetch(u).then(function(r){ if(!r.ok) throw 0; return r.json(); }).catch(function(){ return null; }); }
+function dinG(v){ if(v==null||isNaN(v)) return "–"; var a=Math.abs(v), s=v<0?"− ":""; return s+"US$ "+(a>=1e12?usd(a/1e12,2)+" tri":a>=1e9?usd(a/1e9,2)+" bi":a>=1e6?usd(a/1e6,1)+" mi":usd(a,0)); }
+function varP(a,b){ return (a==null||!b)?null:a/b-1; }
+function tile(box,rot,val,sub,c){ var d=el("div"); d.appendChild(el("span","rot",rot)); d.appendChild(el("strong",null,val)); if(sub) d.appendChild(el("small",c||"",sub)); box.appendChild(d); }
+function grafFaz(id,series,fmt){ var alvo=$(id); if(!alvo||!window.LightweightCharts) return; if(M2.g[id]){ try{ M2.g[id].remove(); }catch(e){} delete M2.g[id]; } alvo.textContent="";
+  var ch=LightweightCharts.createChart(alvo,{autoSize:true,layout:{background:{color:"transparent"},textColor:cor("--muted"),fontFamily:"IBM Plex Mono, monospace"},grid:{vertLines:{color:cor("--line")},horzLines:{color:cor("--line")}},rightPriceScale:{borderColor:cor("--line")},timeScale:{borderColor:cor("--line")},localization:{locale:"pt-BR",priceFormatter:fmt||function(v){return usd(v,0);}},handleScroll:{mouseWheel:false,vertTouchDrag:false},handleScale:{axisPressedMouseMove:false,mouseWheel:false}});
+  series.forEach(function(s){ if(!s.dados||!s.dados.length) return; var o={color:s.cor,priceLineVisible:false,lastValueVisible:true,title:s.titulo||""}, sr;
+    if(s.tipo==="barras") sr=ch.addHistogramSeries(o); else if(s.tipo==="area") sr=ch.addAreaSeries({lineColor:s.cor,topColor:s.cor+"55",bottomColor:s.cor+"05",lineWidth:2,priceLineVisible:false,title:s.titulo||""}); else { o.lineWidth=2; sr=ch.addLineSeries(o); }
+    sr.setData(s.dados); }); ch.timeScale().fitContent(); M2.g[id]=ch; }
+function dsec(t){ return dia(t*1000); }
+function corte(l,dias){ if(!dias) return l; var c=dia(Date.now()-dias*864e5); return l.filter(function(x){return x.time>=c;}); }
+function pers(id,chave,attr,redes){ [].forEach.call(document.querySelectorAll("#"+id+" button"),function(b){ b.addEventListener("click",function(){ M2[chave]=attr==="d"?+b.dataset.d:b.dataset.u; [].forEach.call(document.querySelectorAll("#"+id+" button"),function(o){o.setAttribute("aria-pressed",o===b?"true":"false");}); redes(); }); }); }
+
+/* DeFi */
+function defiCarrega(){ if(M2.defi&&Date.now()-M2.defiT<600000) return Promise.resolve(M2.defi); if(M2.defiP) return M2.defiP;
+  M2.defiP=Promise.all([gj("https://api.llama.fi/v2/historicalChainTvl"),gj("https://api.llama.fi/v2/chains"),gj("https://api.llama.fi/protocols"),gj("https://stablecoins.llama.fi/stablecoincharts/all"),gj("https://api.llama.fi/overview/dexs?excludeTotalDataChart=true&excludeTotalDataChartBreakdown=true")]).then(function(r){ M2.defiP=null; if(!r[0]&&!M2.defi) return null; if(!r[0]) return M2.defi;
+    var d={}; d.tvl=r[0].filter(function(x){return x.tvl>0;}).map(function(x){return {time:dsec(x.date),value:x.tvl};});
+    d.redes=(r[1]||[]).filter(function(x){return x.tvl>0;}).sort(function(a,b){return b.tvl-a.tvl;});
+    var fora={CEX:1,Chain:1,Bridge:1,"Canonical Bridge":1}; d.prot=(r[2]||[]).filter(function(p){return p.tvl>0&&!fora[p.category];}).sort(function(a,b){return b.tvl-a.tvl;}).slice(0,40);
+    d.nprot=(r[2]||[]).length; d.stb=(r[3]||[]).map(function(x){return {time:dsec(+x.date),value:(x.totalCirculatingUSD||{}).peggedUSD||0};}).filter(function(x){return x.value>0;});
+    d.dex=r[4]?{v:r[4].total24h,c:r[4].change_1d,v7:r[4].total7d}:null; M2.defi=d; M2.defiT=Date.now(); return d; }); return M2.defiP; }
+function atras(l,n){ return l.length>n?l[l.length-1-n].value:null; }
+function defiDes(){ defiCarrega().then(function(d){ if(!d){ $("df-status").textContent="Não consegui buscar os dados de DeFi agora. Tento de novo em instantes."; return; }
+    var t=$("df-tiles"), u=d.tvl[d.tvl.length-1].value, v1=varP(u,atras(d.tvl,1)), v7=varP(u,atras(d.tvl,7)), v30=varP(u,atras(d.tvl,30)), mx=Math.max.apply(null,d.tvl.map(function(x){return x.value;})); t.textContent="";
+    tile(t,"TVL total",dinG(u),v1==null?"":pct(v1)+" em 24h",cls(v1)); tile(t,"TVL em 7 e 30 dias",(v7==null?"–":pct(v7))+" / "+(v30==null?"–":pct(v30)),"recorde: "+dinG(mx));
+    if(d.stb.length){ var su=d.stb[d.stb.length-1].value, s7=varP(su,atras(d.stb,7)); tile(t,"Stablecoins",dinG(su),s7==null?"":pct(s7)+" em 7 dias",cls(s7)); $("df-stb-txt").textContent="Total de "+dinG(su)+". Quando cresce, entra dinheiro novo no mercado cripto."; }
+    if(d.dex) tile(t,"Volume em DEX (24h)",dinG(d.dex.v),d.dex.c==null?"":pct(d.dex.c/100)+" contra o dia anterior",cls(d.dex.c));
+    if(d.redes.length) tile(t,"Maior rede",d.redes[0].name,usd(d.redes[0].tvl/u*100,1)+"% do TVL");
+    $("df-status").textContent="Atualizado às "+new Date(M2.defiT).toLocaleTimeString("pt-BR")+". "+d.nprot+" protocolos acompanhados em "+d.redes.length+" redes.";
+    grafFaz("df-graf",[{tipo:"area",cor:cor("--accent"),dados:corte(d.tvl,M2.dfPer)}],function(v){return dinG(v).replace("US$ ","");});
+    grafFaz("df-stb",[{tipo:"area",cor:cor("--good")||"#1a7f4b",dados:corte(d.stb,365)}],function(v){return dinG(v).replace("US$ ","");});
+    var tb=$("df-redes"); tb.textContent=""; d.redes.slice(0,15).forEach(function(c){ var tr=el("tr"); cel(tr,c.name,"txt"); cel(tr,dinG(c.tvl)); cel(tr,usd(c.tvl/u*100,1)+"%"); tr._v=[c.name,c.tvl,c.tvl]; tb.appendChild(tr); }); ordDom("df-redes");
+    var tp=$("df-prot"); tp.textContent=""; d.prot.forEach(function(p){ var tr=el("tr"), td=cel(tr,"","txt"), a=el("a",null,p.name); a.href="https://defillama.com/protocol/"+encodeURIComponent(p.slug||p.name); a.target="_blank"; a.rel="noopener"; td.appendChild(a);
+      cel(tr,p.category||"–","txt"); cel(tr,dinG(p.tvl)); var c1=p.change_1d, c7=p.change_7d; cel(tr,c1==null?"–":pct(c1/100),c1==null?"":cls(c1)); cel(tr,c7==null?"–":pct(c7/100),c7==null?"":cls(c7)); tr._v=[p.name,p.category||"",p.tvl,c1,c7]; tp.appendChild(tr); }); ordDom("df-prot"); }); }
+
+/* On-chain */
+function cm(ativos,met,n){ return gj("https://community-api.coinmetrics.io/v4/timeseries/asset-metrics?assets="+ativos+"&metrics="+met+"&frequency=1d&page_size="+n+"&paging_from=end").then(function(j){ return j&&j.data?j.data.slice().sort(function(a,b){return a.time<b.time?-1:1;}):null; }); }
+function ocCarrega(){ if(M2.oc&&Date.now()-M2.ocT<300000) return Promise.resolve(M2.oc); if(M2.ocP) return M2.ocP;
+  M2.ocP=Promise.all([gj("https://mempool.space/api/v1/fees/recommended"),gj("https://mempool.space/api/mempool"),gj("https://mempool.space/api/v1/mining/hashrate/3m"),gj("https://mempool.space/api/v1/difficulty-adjustment"),gj("https://mempool.space/api/blocks/tip/height"),
+    M2.oc&&M2.oc.cmT&&Date.now()-M2.oc.cmT<3600000?Promise.resolve(M2.oc.btc):cm("btc","AdrActCnt,TxCnt,CapMVRVCur",400), M2.oc&&M2.oc.cmT&&Date.now()-M2.oc.cmT<3600000?Promise.resolve(M2.oc.eth):cm("eth","AdrActCnt,TxCnt",400)]).then(function(r){ M2.ocP=null;
+    var o={taxa:r[0],fila:r[1],hash:r[2],dif:r[3],bloco:r[4],btc:r[5]||(M2.oc&&M2.oc.btc)||null,eth:r[6]||(M2.oc&&M2.oc.eth)||null,cmT:(r[5]?Date.now():(M2.oc&&M2.oc.cmT)||0)}; M2.oc=o; M2.ocT=Date.now(); return o; }); return M2.ocP; }
+function serie(l,k){ return (l||[]).filter(function(x){return x[k]!=null;}).map(function(x){return {time:x.time.slice(0,10),value:+x[k]};}); }
+function ocDes(){ ocCarrega().then(function(o){ var t=$("oc-tiles"); t.textContent="";
+    if(o.bloco!=null) tile(t,"Bloco atual do Bitcoin",usd(+o.bloco,0),"");
+    if(o.taxa) tile(t,"Taxa para confirmar rápido",o.taxa.fastestFee+" sat/vB","em 1 hora: "+o.taxa.hourFee+" sat/vB");
+    if(o.fila) tile(t,"Transações na fila",usd(o.fila.count,0),usd(o.fila.vsize/1e6,1)+" MB esperando");
+    if(o.hash&&o.hash.currentHashrate) tile(t,"Hashrate",usd(o.hash.currentHashrate/1e18,0)+" EH/s","");
+    if(o.dif) tile(t,"Próximo ajuste de dificuldade",pct(o.dif.difficultyChange/100),"em "+new Date(o.dif.estimatedRetargetDate).toLocaleDateString("pt-BR"),cls(o.dif.difficultyChange));
+    var ab=serie(o.btc,"AdrActCnt"), ae=serie(o.eth,"AdrActCnt"), mv=serie(o.btc,"CapMVRVCur"), tb=serie(o.btc,"TxCnt"), te=serie(o.eth,"TxCnt");
+    if(ab.length){ var a7=varP(ab[ab.length-1].value,atras(ab,7)); tile(t,"Endereços ativos (BTC)",usd(ab[ab.length-1].value,0),a7==null?"":pct(a7)+" em 7 dias",cls(a7)); }
+    if(ae.length) tile(t,"Endereços ativos (ETH)",usd(ae[ae.length-1].value,0),"");
+    if(mv.length){ var m=mv[mv.length-1].value; tile(t,"MVRV do Bitcoin",usd(m,2),m>=3.5?"zona de euforia":m<1?"zona de capitulação":"zona neutra"); }
+    $("oc-status").textContent=(t.children.length?"Atualizado às "+new Date(M2.ocT).toLocaleTimeString("pt-BR")+".":"Não consegui buscar os dados on-chain agora.")+(ab.length?" Métricas diárias até "+ab[ab.length-1].time.split("-").reverse().join("/")+".":" As métricas diárias (endereços, MVRV) não responderam agora.");
+    var mil=function(v){return v>=1e6?usd(v/1e6,2)+" mi":usd(v/1e3,0)+" mil";};
+    grafFaz("oc-adr",[{cor:cor("--s2"),titulo:"BTC",dados:corte(ab,180)},{cor:cor("--s3"),titulo:"ETH",dados:corte(ae,180)}],mil);
+    grafFaz("oc-mvrv",[{cor:cor("--accent"),dados:mv}],function(v){return usd(v,2);});
+    grafFaz("oc-hash",[{tipo:"area",cor:cor("--s2"),dados:o.hash&&o.hash.hashrates?o.hash.hashrates.map(function(x){return {time:dsec(x.timestamp),value:x.avgHashrate/1e18};}):[]}],function(v){return usd(v,0);});
+    grafFaz("oc-tx",[{cor:cor("--s2"),titulo:"BTC",dados:corte(tb,180)},{cor:cor("--s3"),titulo:"ETH",dados:corte(te,180)}],mil); }); }
+
+/* ETFs */
+function etfCarrega(){ if(M2.etf&&Date.now()-M2.etfT<7200000) return Promise.resolve(M2.etf); if(M2.etfP) return M2.etfP;
+  var cache=null; try{ cache=JSON.parse(localStorage.getItem("etf_btc_v1")); }catch(e){}
+  var busca=cache&&Date.now()-cache.t<7200000?Promise.resolve([cache.f,cache.tot]):Promise.all([gj("https://bitcoin-data.com/v1/etf-flow-btc"),gj("https://bitcoin-data.com/v1/etf-btc-total")]);
+  M2.etfP=Promise.all([busca,histDe("BTCUSDT")]).then(function(r){ M2.etfP=null; var f=r[0][0], tot=r[0][1], px=r[1]||{};
+    if(!Array.isArray(f)){ if(cache){ f=cache.f; tot=cache.tot; } else return M2.etf; } else if(!(cache&&Date.now()-cache.t<7200000)){ try{ localStorage.setItem("etf_btc_v1",JSON.stringify({t:Date.now(),f:f,tot:tot})); }catch(e){} }
+    var ult=null, e={}; e.fl=f.map(function(x){ var p=ultimo(px,x.d)||ult||(PRECOS.BTC&&PRECOS.BTC.p)||0; ult=p; var b=+x.etfFlow; return {time:x.d,btc:b,usd:b*p}; });
+    e.tot=(Array.isArray(tot)?tot:[]).map(function(x){return {time:x.d,value:+x.etfBtcTotal};}); M2.etf=e; M2.etfT=Date.now(); return e; }); return M2.etfP; }
+function etfFrases(e){ var fl=e.fl, n=fl.length, fr=[]; if(!n) return fr; var u=fl[n-1], dt=function(d){return d.split("-").reverse().slice(0,2).join("/");}, soma=function(k,q){ var s=0; fl.slice(-q).forEach(function(x){s+=x[k];}); return s; };
+  fr.push("No último dia com dados ("+dt(u.time)+"), os ETFs "+(u.btc>=0?"compraram ":"venderam ")+usd(Math.abs(u.btc),0)+" BTC, cerca de "+dinG(Math.abs(u.usd))+(u.btc>=0?" de entrada.":" de saída."));
+  var seq=1; while(seq<n&&(fl[n-1-seq].btc>=0)===(u.btc>=0)) seq++; fr.push(seq>1?"É o "+seq+"º dia seguido de "+(u.btc>=0?"entrada":"saída")+" de dinheiro.":"O sentido virou: o dia anterior tinha sido de "+(u.btc>=0?"saída":"entrada")+".");
+  var s7=soma("usd",5), s30=soma("usd",21); fr.push("Na última semana de pregão o saldo foi de "+dinG(s7)+"; no último mês, "+dinG(s30)+".");
+  var m=fl.slice(-21), mai=m.slice().sort(function(a,b){return b.usd-a.usd;})[0], men=m.slice().sort(function(a,b){return a.usd-b.usd;})[0]; fr.push("Maior entrada do mês: "+dinG(mai.usd)+" em "+dt(mai.time)+". Maior saída: "+dinG(men.usd)+" em "+dt(men.time)+".");
+  var pos=m.filter(function(x){return x.btc>0;}).length; fr.push(pos+" dos últimos "+m.length+" pregões tiveram entrada líquida.");
+  if(e.tot.length){ var T=e.tot[e.tot.length-1].value, p=(PRECOS.BTC&&PRECOS.BTC.p)||0; fr.push("Somados, os ETFs guardam "+usd(T,0)+" BTC"+(p?" ("+dinG(T*p)+")":"")+", ou "+usd(T/21e6*100,2)+"% de todos os bitcoins que vão existir."); }
+  return fr; }
+function etfNots(){ return ((typeof MERC!=="undefined"&&MERC&&MERC.noticias)||[]).filter(function(n){return /\bETFs?\b|\bETP\b|BlackRock|IBIT|Grayscale/i.test(n.titulo);}).sort(function(a,b){return b.t-a.t;}); }
+function etfDes(){ var ul=$("ef-nots"); ul.textContent=""; var ns=etfNots().slice(0,12); ns.forEach(function(n){ var li=el("li"), a=el("a",null,n.titulo); a.href=n.link; a.target="_blank"; a.rel="noopener"; li.appendChild(a); li.appendChild(el("span","meta",n.fonte+" · "+new Date(n.t*1000).toLocaleString("pt-BR",{day:"2-digit",month:"2-digit",hour:"2-digit",minute:"2-digit"}))); ul.appendChild(li); }); if(!ns.length) ul.appendChild(el("li","vazio","Nenhuma notícia sobre ETFs nas últimas coletas."));
+  etfCarrega().then(function(e){ if(!e||!e.fl.length){ $("ef-status").textContent="A fonte dos fluxos de ETF não respondeu agora (ela limita o número de consultas por hora). Tento de novo sozinho."; return; }
+    var fl=e.fl, n=fl.length, u=fl[n-1], t=$("ef-tiles"), s=function(q){ var x=0; fl.slice(-q).forEach(function(y){x+=y.usd;}); return x; }; t.textContent="";
+    tile(t,"Último dia ("+u.time.split("-").reverse().slice(0,2).join("/")+")",dinG(u.usd),(u.btc>=0?"+":"− ")+usd(Math.abs(u.btc),0)+" BTC",cls(u.btc)); var s5=s(5), s21=s(21); tile(t,"Última semana",dinG(s5),"5 pregões",cls(s5)); tile(t,"Último mês",dinG(s21),"21 pregões",cls(s21));
+    if(e.tot.length){ var T=e.tot[e.tot.length-1].value, p=(PRECOS.BTC&&PRECOS.BTC.p)||0; tile(t,"Bitcoin guardado",usd(T,0)+" BTC",p?dinG(T*p):""); }
+    $("ef-status").textContent="Dados até "+u.time.split("-").reverse().join("/")+". Conferido às "+new Date(M2.etfT).toLocaleTimeString("pt-BR")+".";
+    var ur=$("ef-resumo"); ur.textContent=""; etfFrases(e).forEach(function(f){ ur.appendChild(el("li",null,f)); });
+    var k=M2.efUn, vd=cor("--good")||"#1a7f4b", vm=cor("--bad")||"#c0392b";
+    grafFaz("ef-graf",[{tipo:"barras",dados:corte(fl.map(function(x){return {time:x.time,value:x[k],color:x[k]>=0?vd:vm};}),M2.efPer)}],k==="usd"?function(v){return dinG(v).replace("US$ ","");}:function(v){return usd(v,0);});
+    grafFaz("ef-total",[{tipo:"area",cor:cor("--s2"),dados:e.tot}],function(v){return usd(v/1e3,0)+" mil";}); }); }
+
+/* Relatório */
+function svgLinhas(series){ var W=900,H=300,L=50,R=10,T=10,B=24, xs=[], lo=0, hi=0; series.forEach(function(s){ s.p.forEach(function(x){ if(xs.indexOf(x[0])<0) xs.push(x[0]); lo=Math.min(lo,x[1]); hi=Math.max(hi,x[1]); }); }); xs.sort(); if(xs.length<2) return ""; var pad=(hi-lo)*0.08||0.01; lo-=pad; hi+=pad;
+  var X=function(d){return L+(W-L-R)*xs.indexOf(d)/(xs.length-1);}, Y=function(v){return T+(H-T-B)*(1-(v-lo)/(hi-lo));}, o='<svg viewBox="0 0 '+W+' '+H+'" role="img" aria-label="Desempenho da carteira e das referências">';
+  for(var i=0;i<=4;i++){ var v=lo+(hi-lo)*i/4; o+='<line x1="'+L+'" x2="'+(W-R)+'" y1="'+Y(v)+'" y2="'+Y(v)+'" stroke="#d9dee6" stroke-width="1"/><text x="'+(L-6)+'" y="'+(Y(v)+4)+'" text-anchor="end" font-size="11" fill="#5a6678">'+(v*100).toFixed(0)+'%</text>'; }
+  o+='<line x1="'+L+'" x2="'+(W-R)+'" y1="'+Y(0)+'" y2="'+Y(0)+'" stroke="#5a6678" stroke-width="1"/>';
+  [0,Math.floor(xs.length/2),xs.length-1].forEach(function(i,j){ o+='<text x="'+X(xs[i])+'" y="'+(H-6)+'" text-anchor="'+(j===0?"start":j===2?"end":"middle")+'" font-size="11" fill="#5a6678">'+xs[i].split("-").reverse().join("/")+'</text>'; });
+  series.forEach(function(s){ o+='<polyline fill="none" stroke="'+s.c+'" stroke-width="'+(s.w||2)+'" stroke-linejoin="round" points="'+s.p.map(function(x){return X(x[0]).toFixed(1)+","+Y(x[1]).toFixed(1);}).join(" ")+'"/>'; }); return o+"</svg>"; }
+function relGera(){ var doc=$("rel-doc"); $("rel-status").textContent="Montando o relatório…";
+  var CORES={carteira:"#1f4e8c",cdi:"#1a7f4b",btc:"#d98a00",eth:"#7a5cc2",ibov:"#c0392b",spx:"#9a6b00",usd:"#6b7686"};
+  return Promise.all([defiCarrega().catch(function(){return null;}),ocCarrega().catch(function(){return null;}),etfCarrega().catch(function(){return null;}),(typeof perfCalcula==="function"&&CART.lanc.length&&!CART.exemplo?perfCalcula():Promise.resolve(null)).catch(function(){return null;})]).then(function(r){
+    var d=r[0], o=r[1], e=r[2], p=r[3], agora=new Date(); doc.textContent="";
+    var H=function(t){ doc.appendChild(el("h2",null,t)); }, P=function(t,c){ doc.appendChild(el("p",c||null,t)); }, UL=function(l){ var u=el("ul"); l.forEach(function(x){u.appendChild(el("li",null,x));}); doc.appendChild(u); },
+      KP=function(l){ var k=el("div","rk"); l.forEach(function(x){ var c=el("div"); c.appendChild(el("span",null,x[0])); c.appendChild(el("b",null,x[1])); if(x[2]) c.appendChild(el("span",null,x[2])); k.appendChild(c); }); doc.appendChild(k); },
+      TB=function(cab,linhas){ var sc=el("div","scroll"), t=el("table"), h=el("tr"); cab.forEach(function(c,i){h.appendChild(el("th",i===0?"txt":null,c));}); t.appendChild(h); linhas.forEach(function(l){ var tr=el("tr"); l.forEach(function(c,i){ var v=Array.isArray(c)?c:[c,""]; cel(tr,v[0],(i===0?"txt ":"")+v[1]); }); t.appendChild(tr); }); sc.appendChild(t); doc.appendChild(sc); };
+    var cab=el("div","cab"), esq=el("div"); esq.appendChild(el("span","rot",document.title||"Relatório")); esq.appendChild(el("h1",null,"Relatório de mercado cripto")); cab.appendChild(esq); cab.appendChild(el("p","sub",agora.toLocaleDateString("pt-BR",{weekday:"long",day:"2-digit",month:"long",year:"numeric"})+", "+agora.toLocaleTimeString("pt-BR",{hour:"2-digit",minute:"2-digit"}))); doc.appendChild(cab);
+    H("1. Resumo das últimas 24 horas"); var fr=[].map.call(document.querySelectorAll("#g-texto li"),function(li){return li.textContent;}); if(fr.length) UL(fr); else P("Sem dados de mercado no momento.");
+    var g=MERC&&MERC.panorama; if(g) KP([["Valor de mercado",grande(g.cap),pct(g.var24/100)+" em 24h"],["Volume em 24h",grande(g.vol)],["Dominância do Bitcoin",usd(g.dom_btc,1)+"%"],["Medo e ganância",MERC.fng?MERC.fng.valor+" / 100":"–",MERC.fng?(FNG_PT[MERC.fng.classe]||MERC.fng.classe):""]]);
+    var liq=Object.keys(PRECOS).filter(function(k){return PRECOS[k].vol>=2e7;}).sort(function(a,b){return PRECOS[b].v-PRECOS[a].v;});
+    if(liq.length>6){ H("2. Ativos"); var pr=PRINCIPAIS.filter(function(a){return PRECOS[a];}); doc.appendChild(el("h3",null,"Principais")); TB(["Ativo","Preço (US$)","24h"],pr.slice(0,10).map(function(a){return [a,prc(PRECOS[a].p),[pct(PRECOS[a].v),cls(PRECOS[a].v)]];}));
+      doc.appendChild(el("h3",null,"Maiores altas e quedas (volume acima de US$ 20 milhões)")); var lin=[]; for(var i=0;i<5;i++){ var a=liq[i], b=liq[liq.length-1-i]; lin.push([a,[pct(PRECOS[a].v),"pos"],b,[pct(PRECOS[b].v),"neg"]]); } TB(["Alta","24h","Queda","24h"],lin); }
+    H("3. ETFs de Bitcoin"); if(e&&e.fl.length){ UL(etfFrases(e)); TB(["Dia","Fluxo (BTC)","Fluxo (US$)"],e.fl.slice(-7).reverse().map(function(x){return [x.time.split("-").reverse().join("/"),[(x.btc>=0?"+":"− ")+usd(Math.abs(x.btc),0),cls(x.btc)],[dinG(x.usd),cls(x.usd)]];})); } else P("Os fluxos de ETF não estavam disponíveis na hora em que este relatório foi montado.");
+    var en=etfNots().slice(0,5); if(en.length){ doc.appendChild(el("h3",null,"Notícias sobre ETFs")); UL(en.map(function(n){return n.titulo+" ("+n.fonte+")";})); }
+    H("4. DeFi"); if(d){ var u=d.tvl[d.tvl.length-1].value, v1=varP(u,atras(d.tvl,1)), v7=varP(u,atras(d.tvl,7)), v30=varP(u,atras(d.tvl,30)), su=d.stb.length?d.stb[d.stb.length-1].value:null;
+      KP([["TVL total",dinG(u),v1==null?"":pct(v1)+" em 24h"],["TVL em 7 / 30 dias",(v7==null?"–":pct(v7))+" / "+(v30==null?"–":pct(v30))],["Stablecoins",dinG(su)],["Volume em DEX (24h)",d.dex?dinG(d.dex.v):"–"]]);
+      doc.appendChild(el("h3",null,"Maiores redes")); TB(["Rede","TVL","Participação"],d.redes.slice(0,6).map(function(c){return [c.name,dinG(c.tvl),usd(c.tvl/u*100,1)+"%"];}));
+      doc.appendChild(el("h3",null,"Maiores protocolos")); TB(["Protocolo","Categoria","TVL","24h","7 dias"],d.prot.slice(0,10).map(function(x){return [x.name,x.category||"–",dinG(x.tvl),[x.change_1d==null?"–":pct(x.change_1d/100),cls(x.change_1d||0)],[x.change_7d==null?"–":pct(x.change_7d/100),cls(x.change_7d||0)]];})); } else P("Os dados de DeFi não estavam disponíveis.");
+    H("5. On-chain"); if(o){ var ab=serie(o.btc,"AdrActCnt"), mv=serie(o.btc,"CapMVRVCur"), txb=serie(o.btc,"TxCnt"), k=[]; if(o.hash&&o.hash.currentHashrate) k.push(["Hashrate do Bitcoin",usd(o.hash.currentHashrate/1e18,0)+" EH/s"]); if(o.dif) k.push(["Próximo ajuste de dificuldade",pct(o.dif.difficultyChange/100)]); if(o.taxa) k.push(["Taxa rápida",o.taxa.fastestFee+" sat/vB"]); if(o.fila) k.push(["Transações na fila",usd(o.fila.count,0)]);
+      if(ab.length) k.push(["Endereços ativos (BTC)",usd(ab[ab.length-1].value,0)]); if(txb.length) k.push(["Transações por dia (BTC)",usd(txb[txb.length-1].value,0)]); if(mv.length) k.push(["MVRV do Bitcoin",usd(mv[mv.length-1].value,2)]); var ae=serie(o.eth,"AdrActCnt"); if(ae.length) k.push(["Endereços ativos (ETH)",usd(ae[ae.length-1].value,0)]); if(k.length) KP(k); else P("Os dados on-chain não estavam disponíveis."); } else P("Os dados on-chain não estavam disponíveis.");
+    H("6. Calendário econômico dos EUA"); var ev=((MERC&&MERC.calendario)||[]).filter(function(x){return (x.impacto==="High"||x.impacto==="Medium")&&x.moeda==="USD"&&Date.parse(x.data)>Date.now()-36e5;}).sort(function(a,b){return Date.parse(a.data)-Date.parse(b.data);});
+    if(ev.length) TB(["Quando","Importância","Evento"],ev.slice(0,14).map(function(x){return [new Date(x.data).toLocaleString("pt-BR",{weekday:"short",day:"2-digit",month:"2-digit",hour:"2-digit",minute:"2-digit"}),x.impacto==="High"?"★★★":"★★",x.titulo];})); else P("Nenhum evento importante dos EUA até o fim da semana.");
+    H("7. Notícias das últimas 24 horas, por fonte"); var nt=((MERC&&MERC.noticias)||[]).filter(function(n){return n.t*1000>Date.now()-864e5;}), fontes={}; nt.forEach(function(n){ (fontes[n.fonte]=fontes[n.fonte]||[]).push(n); });
+    var nf=Object.keys(fontes).sort(); if(!nf.length) P("Nenhuma notícia coletada nas últimas 24 horas."); nf.forEach(function(f){ doc.appendChild(el("h3",null,f+" ("+fontes[f].length+")")); UL(fontes[f].sort(function(a,b){return b.t-a.t;}).slice(0,5).map(function(n){return n.titulo;})); });
+    H("8. Sua carteira contra as referências"); if(p&&p.carteira&&p.carteira.length){ var ss=[], lin2=[], fimC=null; PDEF.forEach(function(df){ var s=p[df[0]]; if(!s||!s.length) return; var fim=s[s.length-1][1]; if(df[0]==="carteira") fimC=fim; ss.push({c:CORES[df[0]],w:df[0]==="carteira"?3:1.6,p:s,n:df[1]}); lin2.push([df[1],[pct(fim,2),cls(fim)],df[0]==="carteira"?"–":[pct(fimC-fim,2)+(fimC-fim>=0?" a favor":" contra"),cls(fimC-fim)]]); });
+      var v=p.valor&&p.valor.length?p.valor[p.valor.length-1][2]:null; P("Período: de "+p.dias[0].split("-").reverse().join("/")+" até hoje."+(v!=null?" Valor atual da carteira: "+simb()+usd(v)+".":""));
+      doc.insertAdjacentHTML("beforeend",svgLinhas(ss)); var lg=el("div","leg"); ss.forEach(function(s){ var sp=el("span"), i=el("i"); i.style.background=s.c; sp.appendChild(i); sp.appendChild(document.createTextNode(s.n)); lg.appendChild(sp); }); doc.appendChild(lg);
+      TB(["Referência","Rendimento no período","Carteira contra a referência"],lin2); P("A linha da carteira mede o rendimento das posições, descontando o efeito de novos aportes. CDI e Ibovespa em reais; S&P 500 em dólar.","note"); }
+    else P(CART.exemplo||!CART.lanc.length?"Cadastre suas compras em Carteira → Lançamentos para esta seção aparecer.":"Não consegui montar o histórico da carteira agora.");
+    P("Fontes: Binance, CoinGecko, Alternative.me, DeFiLlama, mempool.space, Coin Metrics, BGeometrics, Forex Factory, Banco Central do Brasil, Yahoo Finance e os portais de notícias listados na seção 7. Documento informativo, gerado automaticamente; não é recomendação de investimento.","note");
+    $("rel-status").textContent="Relatório montado às "+agora.toLocaleTimeString("pt-BR")+"."; }).catch(function(x){ $("rel-status").textContent="Não consegui montar o relatório agora. Tente de novo."; if(window.console) console.error(x); }); }
+$("rel-gerar").addEventListener("click",relGera);
+$("rel-pdf").addEventListener("click",function(){ var go=function(){ var th=document.documentElement.getAttribute("data-theme"); document.documentElement.setAttribute("data-theme","light"); document.body.classList.add("so-rel");
+    var volta=function(){ document.body.classList.remove("so-rel"); if(th) document.documentElement.setAttribute("data-theme",th); else document.documentElement.removeAttribute("data-theme"); window.removeEventListener("afterprint",volta); }; window.addEventListener("afterprint",volta); setTimeout(function(){ window.print(); },150); };
+  if($("rel-doc").children.length) go(); else relGera().then(go); });
+
+ORD["df-redes"]={c:null,d:-1}; ORD["df-prot"]={c:null,d:-1};
+pers("df-per","dfPer","d",defiDes); pers("ef-per","efPer","d",etfDes); pers("ef-un","efUn","u",etfDes);
+function m2Abre(j){ if(j==="defi") defiDes(); else if(j==="onchain") ocDes(); else if(j==="etfs") etfDes(); else if(j==="relatorio") relGera(); }
+setInterval(function(){ if($("area-mercado").hidden) return; if(!$("mj-defi").hidden) defiDes(); if(!$("mj-onchain").hidden) ocDes(); if(!$("mj-etfs").hidden) etfDes(); },120000);
 </script>
 </body>
 </html>
