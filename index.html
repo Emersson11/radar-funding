@@ -1074,6 +1074,8 @@ function nuvemPreco(ativo,preco){ if(!SB||!USUARIO) return; (preco==null?SB.from
 function nuvemCarrega(){
   return SB.from("lancamentos").select("*").then(function(r){ if(r.error) throw r.error;
     var local=[]; try{ var j=JSON.parse(localStorage.getItem(CHAVE)); if(j&&!j.exemplo&&Array.isArray(j.lanc)) local=j.lanc; }catch(e){}
+    if(local.length&&!r.data.length&&!nuvemCarrega.subiu){ nuvemCarrega.subiu=true;
+      return SB.from("lancamentos").insert(local.map(paraNuvem)).then(function(i){ if(i.error){ $("cart-status").textContent="Não consegui copiar os lançamentos deste navegador para a conta: "+i.error.message; throw i.error; } return nuvemCarrega(); }); }
     CART={lanc:r.data.map(deNuvem),exemplo:false,manual:{}};
     SB.from("precos_manuais").select("*").then(function(pm){ if(!pm.error){ (pm.data||[]).forEach(function(x){CART.manual[x.ativo]=+x.preco;}); cDesenha(); } });
     $("c-migrar").hidden=!(local.length&&!r.data.length); $("c-migrar").dataset.n=local.length;
