@@ -103,6 +103,29 @@ def calendario():
     return ev
 
 
+def referencias():
+    """Séries diárias para o gráfico de desempenho: CDI (% ao dia), Ibovespa e S&P 500 (fechamento)."""
+    from datetime import datetime, timedelta, timezone
+    hoje = datetime.now(timezone.utc)
+    ini = (hoje - timedelta(days=760)).strftime("%d/%m/%Y")
+    out = {}
+    try:
+        d = S.get(f"https://api.bcb.gov.br/dados/serie/bcdata.sgs.12/dados?formato=json&dataInicial={ini}&dataFinal={hoje.strftime('%d/%m/%Y')}", timeout=30).json()
+        out["cdi"] = [["-".join(reversed(x["data"].split("/"))), float(x["valor"])] for x in d]
+    except Exception:
+        pass
+    for chave, simbolo in (("ibov", "%5EBVSP"), ("spx", "%5EGSPC")):
+        try:
+            r = S.get(f"https://query1.finance.yahoo.com/v8/finance/chart/{simbolo}?range=2y&interval=1d", timeout=30).json()["chart"]["result"][0]
+            fech = r["indicators"]["quote"][0]["close"]
+            out[chave] = [[datetime.fromtimestamp(t, timezone.utc).strftime("%Y-%m-%d"), round(c, 2)] for t, c in zip(r["timestamp"], fech) if c]
+        except Exception:
+            pass
+    if not out:
+        raise RuntimeError("nenhuma referência respondeu")
+    return out
+
+
 def main():
     m = json.loads(ARQ.read_text()) if ARQ.exists() else {}
     erros = []
@@ -116,6 +139,12 @@ def main():
         erros += ["notícias sem resposta: " + f for f in falhas]
     except Exception as e:
         erros.append(f"noticias: {e}")
+    try:
+        novo = referencias()
+        m["bench"] = {**m.get("bench", {}), **novo}
+        erros += ["referência sem resposta: " + k for k in ("cdi", "ibov", "spx") if k not in novo]
+    except Exception as e:
+        erros.append(f"referencias: {e}")
     m["t"] = int(time.time())
     m["erros"] = erros
     ARQ.write_text(json.dumps(m, ensure_ascii=False))

@@ -136,6 +136,20 @@ textarea{font:400 15px var(--sans);padding:9px;border:1px solid var(--line);bord
 .pilha i{display:block;height:100%}
 .ponto{display:inline-block;width:10px;height:10px;border-radius:2px;margin-right:8px;vertical-align:baseline}
 input.pm{width:110px;padding:4px 6px;text-align:right}
+.contaf input[type=password]{width:130px}
+button.lnkb{border:0;padding:8px 4px;color:var(--band-muted);text-decoration:underline;text-underline-offset:3px;font-weight:400}
+#conta-senha-bt{font-size:13px;padding:5px 10px}
+button.mini{font-size:12px;color:var(--muted)}
+.estr3{color:var(--bad);letter-spacing:1px} .estr2{color:var(--warn);letter-spacing:1px}
+.pfgraf{height:360px;margin:10px 0 14px}
+.pfleg{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px}
+.pfleg button{border:1px solid var(--line);color:var(--muted);padding:5px 10px;font:500 13px var(--mono)}
+.pfleg button::before{content:"";display:inline-block;width:10px;height:10px;border-radius:2px;margin-right:7px;background:var(--line)}
+.pfleg button.on{color:var(--fg);border-color:var(--c)} .pfleg button.on::before{background:var(--c)}
+.sobre{position:fixed;inset:0;background:rgba(5,10,18,.72);z-index:50;display:flex;align-items:stretch;justify-content:center;padding:16px}
+.sobre-in{background:var(--surface);border:1px solid var(--line);border-radius:4px;width:min(1200px,100%);display:flex;flex-direction:column;min-height:0}
+.sobre-topo{display:flex;flex-wrap:wrap;gap:10px;align-items:center;justify-content:space-between;padding:12px 16px;border-bottom:1px solid var(--line)}
+.sobre-corpo{flex:1;min-height:320px;padding:0}
 .rodape{font-size:12px;color:var(--muted);border-top:1px solid var(--line);padding-top:14px}
 </style>
 </head>
@@ -156,8 +170,9 @@ input.pm{width:110px;padding:4px 6px;text-align:right}
   </div>
   <div class="direita">
     <div id="conta" hidden>
-      <div id="conta-fora"><form id="conta-form" class="contaf"><label class="so-leitor" for="conta-campo">Seu e-mail</label><input id="conta-campo" type="email" placeholder="seu@email.com" required autocomplete="email"><button type="submit">Entrar</button></form></div>
-      <div id="conta-dentro" hidden><span id="conta-email"></span> <button type="button" id="conta-sair">Sair</button></div>
+      <div id="conta-fora"><form id="conta-form" class="contaf"><label class="so-leitor" for="conta-campo">Seu e-mail</label><input id="conta-campo" type="email" placeholder="seu@email.com" required autocomplete="email"><label class="so-leitor" for="conta-senha">Sua senha</label><input id="conta-senha" type="password" placeholder="senha" autocomplete="current-password" minlength="6"><button type="submit">Entrar</button><button type="button" id="conta-criar">Criar conta</button><button type="button" id="conta-link" class="lnkb">Entrar por link no e-mail</button></form></div>
+      <div id="conta-dentro" hidden><span id="conta-email"></span> <button type="button" id="conta-senha-bt">Definir senha</button> <button type="button" id="conta-sair">Sair</button>
+        <form id="conta-senha-form" class="contaf" hidden style="margin-top:8px"><label class="so-leitor" for="conta-nova">Nova senha</label><input id="conta-nova" type="password" placeholder="nova senha (6 ou mais)" autocomplete="new-password" minlength="6" required><button type="submit">Salvar senha</button></form></div>
     </div>
     <button id="recarregar" type="button">Atualizar</button>
   </div>
@@ -173,6 +188,7 @@ input.pm{width:110px;padding:4px 6px;text-align:right}
     <div class="abas" role="tablist" id="cabas">
       <button type="button" role="tab" data-cj="resumo" aria-selected="true">Resumo</button>
       <button type="button" role="tab" data-cj="posicoes" aria-selected="false">Posições</button>
+      <button type="button" role="tab" data-cj="desempenho" aria-selected="false">Desempenho</button>
       <button type="button" role="tab" data-cj="lanc" aria-selected="false">Lançamentos</button>
     </div>
 
@@ -210,6 +226,20 @@ input.pm{width:110px;padding:4px 6px;text-align:right}
       <div class="scroll"><table><thead><tr><th>Ativo</th><th>Classe</th><th>Quantidade</th><th>Preço médio</th><th>Preço atual</th><th>24h</th><th>Investido</th><th>Valor atual</th><th>Resultado</th><th>Resultado %</th><th>Peso</th></tr></thead><tbody id="c-pos"></tbody></table></div>
     </section>
 
+    <section id="cj-desempenho" class="box" hidden>
+      <h2>Desempenho da carteira contra CDI e outras referências</h2>
+      <p class="sub" id="pf-status">Calculando…</p>
+      <div id="pf-caixa" hidden>
+        <div class="ordbot" id="pf-per" role="group" aria-label="Período">
+          <button type="button" data-d="30" aria-pressed="false">30 dias</button><button type="button" data-d="90" aria-pressed="false">90 dias</button><button type="button" data-d="365" aria-pressed="false">1 ano</button><button type="button" data-d="0" aria-pressed="true">Desde o início</button>
+        </div>
+        <div class="pfleg" id="pf-leg" role="group" aria-label="Linhas do gráfico"></div>
+        <div id="pf-grafico" class="pfgraf"></div>
+        <div class="scroll"><table><thead><tr><th>Referência</th><th>No período</th><th>Diferença para a carteira</th></tr></thead><tbody id="pf-tb"></tbody></table></div>
+      </div>
+      <p class="note">A linha da carteira mede o rendimento das posições, descontando o efeito de novos aportes. Usa o preço de fechamento diário da Binance e, no último ponto, o preço ao vivo. Ativos sem cotação automática contam pelo preço que você digitou ou pelo valor investido. CDI e Ibovespa rendem em reais; S&P 500 em dólar; Bitcoin, Ethereum e a carteira seguem a moeda escolhida no topo.</p>
+    </section>
+
     <section id="cj-lanc" hidden>
       <form class="box controles" id="c-form">
         <label>Ativo<input id="f-ativo" type="text" placeholder="BTC" required maxlength="12"></label>
@@ -217,12 +247,14 @@ input.pm{width:110px;padding:4px 6px;text-align:right}
         <label>Operação<select id="f-tipo"><option value="compra">Compra</option><option value="venda">Venda</option></select></label>
         <label>Quantidade<input id="f-qtd" type="number" step="any" min="0" required placeholder="0,05"></label>
         <label>Moeda da compra<select id="f-moeda"><option value="USD">Dólar (US$)</option><option value="BRL">Real (R$)</option></select></label>
-        <label><span id="f-preco-rot">Preço unitário (US$)</span><input id="f-preco" type="number" step="any" min="0" required placeholder="85000"></label>
+        <label>O valor informado é<select id="f-modo"><option value="total">O total que paguei</option><option value="unit">O preço de 1 unidade</option></select></label>
+        <label><span id="f-preco-rot">Total pago (US$)</span><input id="f-preco" type="number" step="any" min="0" required placeholder="500"></label>
         <label>Dólar no dia (R$)<input id="f-cambio" type="number" step="any" min="0" required placeholder="5,40"></label>
         <label>Data<input id="f-data" type="date" required></label>
         <button type="submit" id="f-salvar">Adicionar</button>
         <button type="button" id="f-cancelar" class="sec" hidden>Cancelar edição</button>
       </form>
+      <p class="sub" id="f-conta" style="margin-top:8px"></p>
       <p class="neg" id="f-erro" hidden style="margin-top:8px"></p>
       <div class="box" style="margin-top:14px">
         <h2>Lançamentos</h2>
@@ -261,7 +293,7 @@ input.pm{width:110px;padding:4px 6px;text-align:right}
       </div>
       <div class="box" style="margin-top:20px"><h2>O que está acontecendo</h2><ul id="g-texto"></ul><p class="note" id="g-quando"></p></div>
       <div class="duas" style="margin-top:20px">
-        <div class="box"><h2>Próximos eventos dos EUA (3 estrelas)</h2><div class="scroll"><table><thead><tr><th>Quando</th><th>Evento</th></tr></thead><tbody id="g-eventos"></tbody></table></div></div>
+        <div class="box"><h2>Próximos eventos importantes dos EUA</h2><div class="scroll"><table><thead><tr><th>Quando</th><th>Importância</th><th>Evento</th></tr></thead><tbody id="g-eventos"></tbody></table></div></div>
         <div class="box"><h2>Últimas notícias</h2><ul class="nots" id="g-nots"></ul></div>
       </div>
     </section>
@@ -270,16 +302,17 @@ input.pm{width:110px;padding:4px 6px;text-align:right}
       <h2>Notícias de cripto</h2>
       <div class="controles" style="margin:10px 0"><label>Fonte<select id="n-fonte"><option value="">Todas</option></select></label></div>
       <ul class="nots" id="n-lista"></ul>
-      <p class="note">Títulos e links dos sites de origem, atualizados de hora em hora. Clique para ler a matéria no site que a publicou.</p>
+      <p class="note">Títulos e links dos sites de origem, coletados a cada 10 minutos; a lista se atualiza sozinha. Clique para ler a matéria no site que a publicou.</p>
     </section>
     <section id="mj-calendario" class="box" hidden>
       <h2>Calendário econômico dos Estados Unidos</h2>
-      <p class="sub">Só os eventos de impacto alto (3 estrelas).</p>
+      <p class="sub">Eventos de 3 estrelas (impacto alto) e de 2 estrelas (impacto médio).</p>
       <div class="controles" style="margin:10px 0">
-        <label>Período<select id="cal-per"><option value="futuro" selected>De hoje em diante</option><option value="tudo">Semana inteira</option></select></label>
+        <label>Importância<select id="cal-imp"><option value="2" selected>2 e 3 estrelas</option><option value="3">Só 3 estrelas</option></select></label>
+        <label>Período<select id="cal-per"><option value="tudo" selected>Semana inteira</option><option value="futuro">De hoje em diante</option></select></label>
       </div>
-      <div class="scroll"><table><thead><tr><th>Dia</th><th>Hora</th><th>Evento</th><th>Previsão</th><th>Anterior</th></tr></thead><tbody id="cal-tb"></tbody></table></div>
-      <p class="note">Horários no fuso do seu aparelho. Mostra só eventos dos Estados Unidos classificados como impacto alto. Cobre a semana atual e, quando disponível, a seguinte. Os nomes dos eventos vêm em inglês da fonte (Forex Factory).</p>
+      <div class="scroll"><table><thead><tr><th>Dia</th><th>Hora</th><th>Importância</th><th>Evento</th><th>Previsão</th><th>Anterior</th></tr></thead><tbody id="cal-tb"></tbody></table></div>
+      <p class="note">Horários no fuso do seu aparelho. Mostra só eventos dos Estados Unidos de impacto alto e médio. Cobre a semana atual e, quando disponível, a seguinte. Os nomes dos eventos vêm em inglês da fonte (Forex Factory).</p>
     </section>
   </div>
 
@@ -438,8 +471,16 @@ input.pm{width:110px;padding:4px 6px;text-align:right}
     </div>
   </div>
 </main>
+<div id="grafico" class="sobre" hidden role="dialog" aria-modal="true" aria-labelledby="gr-titulo">
+  <div class="sobre-in">
+    <div class="sobre-topo"><div><h2 id="gr-titulo" style="margin:0"></h2><span id="gr-preco" class="sub"></span></div>
+      <div><a id="gr-link" class="abrir" target="_blank" rel="noopener">Abrir no TradingView</a> <button type="button" id="gr-fechar">Fechar</button></div></div>
+    <div id="gr-caixa" class="sobre-corpo"></div>
+  </div>
+</div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js"></script>
+<script src="https://unpkg.com/lightweight-charts@4.2.0/dist/lightweight-charts.standalone.production.js"></script>
 <script>document.write('<script src="config.js?v='+Math.floor(Date.now()/60000)+'"><\/script>');</script>
 <script>
 var VENUES=[["binance","Binance"],["bybit","Bybit"],["okx","OKX"],["bitget","Bitget"],["gate","Gate"],["hyper","Hyperliquid"],["dydx","dYdX"]];
@@ -731,7 +772,7 @@ function posicoes(){
   lista.sort(function(a,b){return (b.valor||0)-(a.valor||0);});
   return {lista:lista,real:real,total:total};
 }
-function linhaMov(tb,p){ var tr=el("tr"); cel(tr,p.ativo); cel(tr,prc(p.pm)); cel(tr,prc(p.preco)); cel(tr,p.lpp==null?"–":pct(p.lpp),p.lpp==null?"vazio":cls(p.lpp)); tb.appendChild(tr); }
+function linhaMov(tb,p){ var tr=el("tr"); if((p.classe==="cripto"||p.classe==="defi")&&PRECOS[p.ativo]) botaoAtivo(cel(tr,""),p.ativo); else cel(tr,p.ativo); cel(tr,prc(p.pm)); cel(tr,prc(p.preco)); cel(tr,p.lpp==null?"–":pct(p.lpp),p.lpp==null?"vazio":cls(p.lpp)); tb.appendChild(tr); }
 function semLinhas(tb,cols,msg){ var tr=el("tr"); var td=cel(tr,msg,"txt vazio"); td.colSpan=cols; tb.appendChild(tr); }
 function cDesenha(){
   var r=posicoes(), L=r.lista, tem=CART.lanc.length>0;
@@ -760,7 +801,7 @@ function cDesenha(){
   L.forEach(function(p){ if(p.peso==null) return; var d=el("div","barra"); d.appendChild(el("span","bn",p.ativo)); var t=el("span","bt"); var f=el("i"); f.style.width=Math.max(1,p.peso*100)+"%"; t.appendChild(f); d.appendChild(t); d.appendChild(el("span","bv",usd(p.peso*100,1)+"%  ·  "+simb()+usd(p.valor))); al.appendChild(d); });
 
   var tb=$("c-pos"); tb.textContent="";
-  L.forEach(function(p){ var tr=el("tr"); var td=cel(tr,""); var b=el("button","lnk",p.ativo); b.type="button"; b.addEventListener("click",function(){FILTRO=p.ativo; janela("lanc"); cDesenha();}); td.appendChild(b);
+  L.forEach(function(p){ var tr=el("tr"); var td=cel(tr,""); if((p.classe==="cripto"||p.classe==="defi")&&PRECOS[p.ativo]) botaoAtivo(td,p.ativo); else td.appendChild(document.createTextNode(p.ativo)); td.appendChild(document.createTextNode("  ")); var b=el("button","lnk mini","compras"); b.type="button"; b.addEventListener("click",function(){FILTRO=p.ativo; janela("lanc"); cDesenha();}); td.appendChild(b);
     cel(tr,CLASSES[p.classe][0],"txt"); cel(tr,num(p.qtd)); cel(tr,prc(p.pm));
     if(p.manual||p.preco==null){ var tdp=cel(tr,""), inp=document.createElement("input"); inp.type="number"; inp.step="any"; inp.min="0"; inp.className="pm"; inp.setAttribute("aria-label","Preço atual de "+p.ativo+" em "+(VER==="BRL"?"reais":"dólar")); inp.placeholder=p.semPreco||p.preco==null?"digite":""; if(p.preco!=null&&!p.semPreco) inp.value=+p.preco.toFixed(6);
       inp.addEventListener("change",function(){ var v=+inp.value; CART.manual=CART.manual||{}; if(inp.value===""||!(v>=0)) delete CART.manual[p.ativo]; else CART.manual[p.ativo]=v/fat(); cGravar(); if(typeof nuvemPreco==="function") nuvemPreco(p.ativo,CART.manual[p.ativo]); cDesenha(); }); tdp.appendChild(inp); }
@@ -794,7 +835,7 @@ function mTabela(id,linhas){
   linhas.forEach(function(x){ var v=volDe(x.a); x.v7=v==="p"?null:v.v7; x.v30=v==="p"?null:v.v30; x.car=v==="p"; });
   var k=st.c; linhas.sort(function(a,b){ var x=a[k], y=b[k]; if(k==="a") return st.d*(x<y?-1:x>y?1:0); if(x==null&&y==null) return 0; if(x==null) return 1; if(y==null) return -1; return st.d*(x-y); });
   tb.textContent="";
-  linhas.forEach(function(x){ var tr=el("tr"); cel(tr,x.a); cel(tr,prc(x.p)); cel(tr,pct(x.v),cls(x.v)); cel(tr,volTxt2(x.vol)); cel(tr,x.car?"…":x.v7==null?"–":volTxt2(x.v7),x.v7==null?"vazio":""); cel(tr,x.car?"…":x.v30==null?"–":volTxt2(x.v30),x.v30==null?"vazio":""); tb.appendChild(tr); });
+  linhas.forEach(function(x){ var tr=el("tr"); botaoAtivo(cel(tr,""),x.a); cel(tr,prc(x.p)); cel(tr,pct(x.v),cls(x.v)); cel(tr,volTxt2(x.vol)); cel(tr,x.car?"…":x.v7==null?"–":volTxt2(x.v7),x.v7==null?"vazio":""); cel(tr,x.car?"…":x.v30==null?"–":volTxt2(x.v30),x.v30==null?"vazio":""); tb.appendChild(tr); });
   if(!linhas.length) semLinhas(tb,MCOLS.length,"Buscando preços…");
 }
 function mDesenha(){
@@ -808,16 +849,18 @@ function cPrecos(){
     l.forEach(function(x){ if(/USDT$/.test(x.symbol)&&+x.lastPrice>0&&+x.quoteVolume>0) m[x.symbol.slice(0,-4)]={p:+x.lastPrice,v:(+x.priceChangePercent)/100,vol:+x.quoteVolume}; });
     PRECOS=m; l.forEach(function(x){ if(x.symbol==="USDTBRL"&&+x.lastPrice>0) DOLAR=+x.lastPrice; }); if(DOLAR&&!$("f-cambio").value) $("f-cambio").value=DOLAR.toFixed(4); cDesenha(); mDesenha(); mercResumo(); }).catch(function(){ $("cart-status").textContent="Não consegui buscar os preços. Confira a internet e clique em Atualizar."; });
 }
-function janela(j){ document.querySelectorAll("#cabas button").forEach(function(o){ var on=o.dataset.cj===j; o.setAttribute("aria-selected",on?"true":"false"); $("cj-"+o.dataset.cj).hidden=!on; }); }
-function editar(l){ EDIT=l.id; $("f-ativo").value=l.ativo; $("f-tipo").value=l.tipo; $("f-qtd").value=l.qtd; $("f-classe").value=l.classe||"cripto"; $("f-moeda").value=l.moeda||"USD"; $("f-cambio").value=l.cambio||(DOLAR?DOLAR.toFixed(4):""); $("f-preco").value=l.moeda==="BRL"?+(l.preco*(l.cambio||DOLAR||1)).toFixed(8):l.preco; rotPreco(); $("f-data").value=l.data; $("f-salvar").textContent="Salvar alteração"; $("f-cancelar").hidden=false; $("f-ativo").focus(); }
-function rotPreco(){ $("f-preco-rot").textContent="Preço unitário ("+($("f-moeda").value==="BRL"?"R$":"US$")+")"; }
-function limpaForm(){ EDIT=null; var mo=$("f-moeda").value, cl=$("f-classe").value; $("c-form").reset(); $("f-moeda").value=mo; $("f-classe").value=cl; rotPreco(); if(DOLAR) $("f-cambio").value=DOLAR.toFixed(4); $("f-data").value=new Date().toISOString().slice(0,10); $("f-salvar").textContent="Adicionar"; $("f-cancelar").hidden=true; $("f-erro").hidden=true; }
+function janela(j){ document.querySelectorAll("#cabas button").forEach(function(o){ var on=o.dataset.cj===j; o.setAttribute("aria-selected",on?"true":"false"); $("cj-"+o.dataset.cj).hidden=!on; }); if(j==="desempenho"&&typeof perfDesenha==="function") perfDesenha(); }
+function editar(l){ EDIT=l.id; $("f-ativo").value=l.ativo; $("f-tipo").value=l.tipo; $("f-qtd").value=l.qtd; $("f-classe").value=l.classe||"cripto"; $("f-moeda").value=l.moeda||"USD"; $("f-cambio").value=l.cambio||(DOLAR?DOLAR.toFixed(4):""); $("f-modo").value="unit"; $("f-preco").value=l.moeda==="BRL"?+(l.preco*(l.cambio||DOLAR||1)).toFixed(8):l.preco; rotPreco(); $("f-data").value=l.data; $("f-salvar").textContent="Salvar alteração"; $("f-cancelar").hidden=false; $("f-ativo").focus(); }
+function rotPreco(){ var sm=$("f-moeda").value==="BRL"?"R$":"US$", total=$("f-modo").value==="total"; $("f-preco-rot").textContent=(total?"Total pago (":"Preço de 1 unidade (")+sm+")";
+  var q=+$("f-qtd").value, v=+$("f-preco").value, a=$("f-ativo").value.trim().toUpperCase()||"unidade"; $("f-conta").textContent=(q>0&&v>0)?(total?"Preço por "+a+": "+sm+" "+prc(v/q)+".":"Total da operação: "+sm+" "+usd(v*q)+"."):""; }
+function limpaForm(){ EDIT=null; var mo=$("f-moeda").value, cl=$("f-classe").value, md=$("f-modo").value; $("c-form").reset(); $("f-moeda").value=mo; $("f-classe").value=cl; $("f-modo").value=md; rotPreco(); if(DOLAR) $("f-cambio").value=DOLAR.toFixed(4); $("f-data").value=new Date().toISOString().slice(0,10); $("f-salvar").textContent="Adicionar"; $("f-cancelar").hidden=true; $("f-erro").hidden=true; }
 var TITULOS={carteira:"Minha Carteira",mercado:"Mercado",funding:"Radar de Funding",aulas:"Aulas",admin:"Administração"};
+var AUTHURL=/access_token=|refresh_token=|error_description=|type=(signup|magiclink|recovery)/.test(location.hash)||/[?&](code|token_hash)=/.test(location.search);
 function area(a){ if(!TITULOS[a]) a="carteira"; Object.keys(TITULOS).forEach(function(x){ $("area-"+x).hidden=x!==a; }); document.querySelectorAll("#areas button").forEach(function(o){o.setAttribute("aria-current",o.dataset.area===a?"page":"false");});
-  $("titulo").textContent=TITULOS[a]; $("atualizado").hidden=a!=="funding"; $("cart-status").hidden=a==="funding"||a==="aulas"||a==="admin"; if(a==="admin"&&typeof admCarrega==="function") admCarrega(); try{history.replaceState(null,"","#"+a);}catch(e){} }
+  $("titulo").textContent=TITULOS[a]; $("atualizado").hidden=a!=="funding"; $("cart-status").hidden=a==="funding"||a==="aulas"||a==="admin"; if(a==="admin"&&typeof admCarrega==="function") admCarrega(); if(!AUTHURL){ try{history.replaceState(null,"","#"+a);}catch(e){} } }
 $("c-form").addEventListener("submit",function(ev){ ev.preventDefault();
-  var a=$("f-ativo").value.trim().toUpperCase().replace(/[^A-Z0-9 ]/g,"").replace(/ +/g," "), q=+$("f-qtd").value, pd=+$("f-preco").value, mo=$("f-moeda").value, cb=+$("f-cambio").value, p=mo==="BRL"?(cb>0?pd/cb:NaN):pd, d=$("f-data").value, t=$("f-tipo").value, er=$("f-erro");
-  var msg=!a?"Informe o ativo, por exemplo BTC.":!(q>0)?"A quantidade precisa ser maior que zero.":!(cb>0)?"Informe a cotação do dólar no dia da operação, em reais.":!(p>=0)||$("f-preco").value===""?"Informe o preço unitário.":!d?"Informe a data.":"";
+  var a=$("f-ativo").value.trim().toUpperCase().replace(/[^A-Z0-9 ]/g,"").replace(/ +/g," "), q=+$("f-qtd").value, pd=($("f-modo").value==="total"&&+$("f-qtd").value>0)?(+$("f-preco").value)/(+$("f-qtd").value):+$("f-preco").value, mo=$("f-moeda").value, cb=+$("f-cambio").value, p=mo==="BRL"?(cb>0?pd/cb:NaN):pd, d=$("f-data").value, t=$("f-tipo").value, er=$("f-erro");
+  var msg=!a?"Informe o ativo, por exemplo BTC.":!(q>0)?"A quantidade precisa ser maior que zero.":!(cb>0)?"Informe a cotação do dólar no dia da operação, em reais.":!(p>=0)||$("f-preco").value===""?"Informe o valor pago.":!d?"Informe a data.":"";
   if(!msg&&t==="venda"){ var disp=0; CART.lanc.forEach(function(l){ if(l.ativo===a&&l.id!==EDIT) disp+=l.tipo==="compra"?l.qtd:-l.qtd; }); if(q>disp+1e-9) msg="Você só tem "+num(Math.max(0,disp))+" "+a+" cadastrado para vender."; }
   if(msg){ er.textContent=msg; er.hidden=false; return; }
   if(CART.exemplo){ CART={lanc:[],exemplo:false}; }
@@ -828,8 +871,8 @@ $("c-form").addEventListener("submit",function(ev){ ev.preventDefault();
   if(!cGravar()){ er.textContent="Este navegador não deixou guardar os dados. O lançamento vale só até você fechar a página."; er.hidden=false; } 
   var manter=er.hidden; limpaForm(); if(!manter) er.hidden=false; cDesenha(); });
 $("f-cancelar").addEventListener("click",limpaForm);
-$("f-moeda").addEventListener("change",rotPreco);
-document.querySelectorAll("[data-ver]").forEach(function(b){b.addEventListener("click",function(){ VER=b.dataset.ver; try{localStorage.setItem("carteira_ver",VER);}catch(e){} cDesenha(); });});
+["f-moeda","f-modo"].forEach(function(i){$(i).addEventListener("change",rotPreco);}); ["f-qtd","f-preco","f-ativo"].forEach(function(i){$(i).addEventListener("input",rotPreco);});
+document.querySelectorAll("[data-ver]").forEach(function(b){b.addEventListener("click",function(){ VER=b.dataset.ver; try{localStorage.setItem("carteira_ver",VER);}catch(e){} cDesenha(); if(typeof perfDesenha==="function") perfDesenha(); });});
 $("c-ir-lanc").addEventListener("click",function(){janela("lanc"); $("f-ativo").focus();});
 $("c-exemplo").addEventListener("click",function(){ CART={exemplo:true,lanc:[{id:1,ativo:"BTC",tipo:"compra",qtd:0.02,preco:62000,data:"2026-03-10"},{id:2,ativo:"BTC",tipo:"compra",qtd:0.01,preco:91000,data:"2026-07-02"},{id:3,ativo:"ETH",tipo:"compra",qtd:0.5,preco:3100,data:"2026-04-18"},{id:4,ativo:"SOL",tipo:"compra",qtd:6,preco:95,data:"2026-05-05"},{id:5,ativo:"SOL",tipo:"venda",qtd:2,preco:140,data:"2026-08-20"},{id:6,ativo:"AAVE",tipo:"compra",qtd:3,preco:150,data:"2026-06-11",classe:"defi"},{id:7,ativo:"IVVB11",tipo:"compra",qtd:10,preco:60,data:"2026-02-03",classe:"rv",moeda:"BRL",cambio:5.6},{id:8,ativo:"TESOURO SELIC",tipo:"compra",qtd:1,preco:900,data:"2026-01-15",classe:"rf",moeda:"BRL",cambio:5.7}],manual:{"IVVB11":66,"TESOURO SELIC":960}}; cDesenha(); });
 $("c-limpa-ex").addEventListener("click",function(){ CART={lanc:[],exemplo:false}; cGravar(); cDesenha(); });
@@ -863,24 +906,25 @@ function mercDesenha(){
   mercResumo(); if(!MERC) return;
   if(MERC.panorama){ var g=MERC.panorama; $("g-cap").textContent=grande(g.cap); $("g-var").textContent=pct(g.var24/100)+" em 24h"; $("g-var").className="sub "+cls(g.var24); $("g-vol").textContent=grande(g.vol); $("g-dom").textContent=usd(g.dom_btc,1)+"%"; }
   if(MERC.fng){ $("g-fng").textContent=MERC.fng.valor+" / 100"; $("g-fngc").textContent=FNG_PT[MERC.fng.classe]||MERC.fng.classe; }
-  $("g-quando").textContent="Panorama, notícias e calendário atualizados "+haQuanto(MERC.t)+". Preços ao vivo.";
+  $("g-quando").textContent="Panorama, notícias e calendário coletados "+haQuanto(MERC.t)+"; a coleta se repete a cada 10 minutos. Preços ao vivo.";
   var nots=MERC.noticias||[], gn=$("g-nots"); gn.textContent=""; nots.slice(0,6).forEach(function(n){gn.appendChild(notItem(n));}); if(!nots.length) gn.appendChild(el("li","vazio","Ainda sem notícias coletadas."));
   var sf=$("n-fonte"), atual=sf.value; if(sf.options.length<2){ var fs={}; nots.forEach(function(n){fs[n.fonte]=1;}); Object.keys(fs).sort().forEach(function(f){var o=el("option",null,f); o.value=f; sf.appendChild(o);}); sf.value=atual; }
   var nl=$("n-lista"); nl.textContent=""; nots.filter(function(n){return !sf.value||n.fonte===sf.value;}).forEach(function(n){nl.appendChild(notItem(n));}); if(!nl.children.length) nl.appendChild(el("li","vazio","Ainda sem notícias coletadas."));
-  var ev=(MERC.calendario||[]).filter(function(e){return e.impacto==="High"&&e.moeda==="USD";}).sort(function(a,b){return Date.parse(a.data)-Date.parse(b.data);}), agora=Date.now();
-  var ge=$("g-eventos"); ge.textContent=""; ev.filter(function(e){return Date.parse(e.data)>agora;}).slice(0,6).forEach(function(e){ var tr=el("tr"); cel(tr,new Date(e.data).toLocaleString("pt-BR",{weekday:"short",day:"2-digit",month:"2-digit",hour:"2-digit",minute:"2-digit"}),"txt"); cel(tr,e.titulo,"txt quebra"); ge.appendChild(tr); });
-  if(!ge.children.length) semLinhas(ge,2,"Nenhum evento de 3 estrelas dos EUA pela frente nesta semana.");
+  var estr=function(e){return e.impacto==="High"?"★★★":"★★";}; var ev=(MERC.calendario||[]).filter(function(e){return (e.impacto==="High"||e.impacto==="Medium")&&e.moeda==="USD";}).sort(function(a,b){return Date.parse(a.data)-Date.parse(b.data);}), agora=Date.now();
+  var ge=$("g-eventos"); ge.textContent=""; ev.filter(function(e){return Date.parse(e.data)>agora;}).slice(0,6).forEach(function(e){ var tr=el("tr"); cel(tr,new Date(e.data).toLocaleString("pt-BR",{weekday:"short",day:"2-digit",month:"2-digit",hour:"2-digit",minute:"2-digit"}),"txt"); cel(tr,estr(e),e.impacto==="High"?"txt estr3":"txt estr2"); cel(tr,e.titulo,"txt quebra"); ge.appendChild(tr); });
+  if(!ge.children.length) semLinhas(ge,3,"Nenhum evento importante dos EUA pela frente nesta semana.");
   var per=$("cal-per").value, hoje=new Date(); hoje.setHours(0,0,0,0);
   var tb=$("cal-tb"); tb.textContent=""; var diaAnt="";
-  ev.filter(function(e){ return per==="tudo"||Date.parse(e.data)>=hoje.getTime(); })
+  ev.filter(function(e){ if($("cal-imp").value==="3"&&e.impacto!=="High") return false; return per==="tudo"||Date.parse(e.data)>=hoje.getTime(); })
     .forEach(function(e){ var d=new Date(e.data), dia=d.toLocaleDateString("pt-BR",{weekday:"short",day:"2-digit",month:"2-digit"}), tr=el("tr"); if(Date.parse(e.data)<agora) tr.className="passado";
-      cel(tr,dia===diaAnt?"":dia,"txt"); diaAnt=dia; cel(tr,d.toLocaleTimeString("pt-BR",{hour:"2-digit",minute:"2-digit"})); cel(tr,e.titulo,"txt quebra"); cel(tr,e.previsao||"–"); cel(tr,e.anterior||"–"); tb.appendChild(tr); });
-  if(!tb.children.length) semLinhas(tb,5,(MERC.calendario||[]).length?"Nenhum evento de 3 estrelas dos EUA neste período.":"O calendário ainda não foi coletado.");
+      cel(tr,dia===diaAnt?"":dia,"txt"); diaAnt=dia; cel(tr,d.toLocaleTimeString("pt-BR",{hour:"2-digit",minute:"2-digit"})); cel(tr,estr(e),e.impacto==="High"?"txt estr3":"txt estr2"); cel(tr,e.titulo,"txt quebra"); cel(tr,e.previsao||"–"); cel(tr,e.anterior||"–"); tb.appendChild(tr); });
+  if(!tb.children.length) semLinhas(tb,6,(MERC.calendario||[]).length?"Nenhum evento importante dos EUA neste período.":"O calendário ainda não foi coletado.");
 }
-function mercCarrega(){ if(window.SNAP) return; fetch("mercado.json?t="+Date.now()).then(function(r){ if(!r.ok) throw 0; return r.json(); }).then(function(j){ MERC=j; mercDesenha(); }).catch(function(){ $("g-quando").textContent="Notícias e calendário ainda não foram coletados. Eles aparecem depois da primeira rodada do robô."; mercResumo(); }); }
+var DADOS="https://raw.githubusercontent.com/Emersson11/radar-funding/dados/";
+function mercCarrega(){ if(window.SNAP) return; fetch(DADOS+"mercado.json?t="+Math.floor(Date.now()/60000)).then(function(r){ if(!r.ok) throw 0; return r.json(); }).catch(function(){ return fetch("mercado.json?t="+Date.now()).then(function(r){ if(!r.ok) throw 0; return r.json(); }); }).then(function(j){ MERC=j; mercDesenha(); }).catch(function(){ $("g-quando").textContent="Notícias e calendário ainda não foram coletados. Eles aparecem depois da primeira rodada do robô."; mercResumo(); }); }
 function mjanela(j){ document.querySelectorAll("#mabas button").forEach(function(o){ var on=o.dataset.mj===j; o.setAttribute("aria-selected",on?"true":"false"); $("mj-"+o.dataset.mj).hidden=!on; }); }
 document.querySelectorAll("#mabas button").forEach(function(b){b.addEventListener("click",function(){mjanela(b.dataset.mj);});});
-["n-fonte","cal-per"].forEach(function(id){$(id).addEventListener("change",mercDesenha);});
+["n-fonte","cal-per","cal-imp"].forEach(function(id){$(id).addEventListener("change",mercDesenha);});
 $("mj-ativos").appendChild($("cj-mercado")); $("cj-mercado").hidden=false;
 
 /* ---------- Aulas ---------- */
@@ -904,7 +948,93 @@ function auCarrega(){ if(window.SNAP){$("au-status").textContent="As aulas apare
     if(MODS&&MODS.length) return; AULAS=AULAS; if(!AULAS.length){ $("au-status").textContent="Nenhuma aula cadastrada ainda."; return; } $("au-wrap").hidden=false; auDesenha(); }).catch(function(){ $("au-status").textContent="Não consegui carregar as aulas."; }); }
 $("au-feito").addEventListener("click",function(){ var k=auChave(AULAS[AU]); if(VISTAS[k]) delete VISTAS[k]; else VISTAS[k]=1; try{localStorage.setItem("aulas_vistas",JSON.stringify(VISTAS));}catch(e){} auDesenha(); });
 $("au-prox").addEventListener("click",function(){ if(AU<AULAS.length-1){ AU++; auDesenha(); } });
-mercCarrega(); auCarrega(); setInterval(mercCarrega,600000);
+mercCarrega(); auCarrega(); setInterval(mercCarrega,120000);
+/* ---------- Preços ao vivo (WebSocket da Binance) ---------- */
+var WS=null, wsRedes=null, WSOK=false;
+function ocupado(){ var a=document.activeElement; return !!(a&&a.classList&&a.classList.contains("pm"))||!!document.querySelector("#area-carteira button[data-ok]"); }
+function vivoDesenha(){ wsRedes=null; if(!ocupado()) cDesenha(); mDesenha(); mercResumo(); if(typeof perfVivo==="function") perfVivo(); }
+function vivoLiga(){
+  if(window.SNAP||!window.WebSocket) return;
+  try{ WS=new WebSocket("wss://data-stream.binance.vision/ws/!miniTicker@arr"); }catch(e){ return; }
+  WS.onopen=function(){ WSOK=true; };
+  WS.onmessage=function(ev){ var l; try{ l=JSON.parse(ev.data); }catch(e){ return; } if(!Array.isArray(l)) return;
+    l.forEach(function(x){ var c=+x.c, o=+x.o; if(!(c>0)) return; if(x.s==="USDTBRL"){ DOLAR=c; return; } if(!/USDT$/.test(x.s)) return; var k=x.s.slice(0,-4), q=+x.q; if(!(q>0)) return; PRECOS[k]={p:c,v:o>0?c/o-1:0,vol:q}; });
+    if(!wsRedes) wsRedes=setTimeout(vivoDesenha,3000); };
+  WS.onclose=function(){ WSOK=false; setTimeout(vivoLiga,15000); };
+  WS.onerror=function(){ try{WS.close();}catch(e){} };
+}
+
+/* ---------- Gráfico do ativo (TradingView) ---------- */
+var TVPRONTO=null;
+function tvCarrega(){ if(TVPRONTO) return TVPRONTO; TVPRONTO=new Promise(function(ok,erro){ var s=document.createElement("script"); s.src="https://s3.tradingview.com/tv.js"; s.onload=ok; s.onerror=erro; document.head.appendChild(s); }); return TVPRONTO; }
+function escuro(){ var t=document.documentElement.getAttribute("data-theme"); return t?t==="dark":!!(window.matchMedia&&matchMedia("(prefers-color-scheme: dark)").matches); }
+function abrirGrafico(ativo){
+  var sym="BINANCE:"+ativo+"USDT"; $("gr-titulo").textContent=ativo+" / USDT"; var x=PRECOS[ativo];
+  $("gr-preco").textContent=x?"US$ "+prc(x.p)+"  ·  "+pct(x.v)+" em 24h":""; $("gr-preco").className="sub "+(x?cls(x.v):"");
+  $("gr-link").href="https://br.tradingview.com/chart/?symbol="+encodeURIComponent(sym);
+  var box=$("gr-caixa"); box.textContent=""; var alvo=el("div"); alvo.id="tv_"+Date.now(); alvo.style.height="100%"; box.appendChild(alvo);
+  $("grafico").hidden=false; document.body.style.overflow="hidden"; $("gr-fechar").focus();
+  tvCarrega().then(function(){ new TradingView.widget({autosize:true,symbol:sym,interval:"60",timezone:"America/Sao_Paulo",theme:escuro()?"dark":"light",style:"1",locale:"br",allow_symbol_change:true,hide_side_toolbar:false,container_id:alvo.id}); })
+    .catch(function(){ box.textContent=""; box.appendChild(el("p","sub","Não consegui carregar o gráfico aqui. Use o botão \"Abrir no TradingView\".")); });
+}
+function fecharGrafico(){ $("grafico").hidden=true; $("gr-caixa").textContent=""; document.body.style.overflow=""; }
+function botaoAtivo(td,ativo){ var b=el("button","lnk",ativo); b.type="button"; b.title="Ver o gráfico de "+ativo; b.addEventListener("click",function(){abrirGrafico(ativo);}); td.appendChild(b); return b; }
+$("gr-fechar").addEventListener("click",fecharGrafico);
+$("grafico").addEventListener("click",function(ev){ if(ev.target===$("grafico")) fecharGrafico(); });
+document.addEventListener("keydown",function(ev){ if(ev.key==="Escape"&&!$("grafico").hidden) fecharGrafico(); });
+
+/* ---------- Desempenho da carteira contra referências ---------- */
+var HISTP={}, PERF=null, PCHART=null, PSERIES={}, PPER=0, PVIS={carteira:1,cdi:1,btc:1,ibov:1,spx:0,eth:0,usd:0};
+var PDEF=[["carteira","Carteira","--s1",3],["cdi","CDI","--s4",2],["btc","Bitcoin","--s2",2],["eth","Ethereum","--s3",2],["ibov","Ibovespa","--bad",2],["spx","S&P 500","--warn",2],["usd","Dólar","--s5",2]];
+function dia(t){ return new Date(t).toISOString().slice(0,10); }
+function histDe(par){ if(HISTP[par]) return HISTP[par]; HISTP[par]=getJ("https://data-api.binance.vision/api/v3/klines?symbol="+par+"&interval=1d&limit=1000").then(function(k){ var m={}; k.forEach(function(x){ m[dia(x[0])]=+x[4]; }); return m; }).catch(function(){ return {}; }); return HISTP[par]; }
+function ultimo(m,d,dias){ for(var i=0;i<12;i++){ if(m[d]!=null) return m[d]; d=dia(Date.parse(d)-864e5); } return null; }
+function perfCalcula(){
+  var L=CART.lanc.slice().sort(function(a,b){return a.data<b.data?-1:a.data>b.data?1:a.id-b.id;}); if(!L.length) return Promise.resolve(null);
+  var ativos={}; L.forEach(function(l){ if((l.classe||"cripto")==="cripto"||l.classe==="defi") ativos[l.ativo]=1; });
+  var nomes=Object.keys(ativos).filter(function(a){return a!=="USDT"&&a!=="USDC";});
+  return Promise.all([histDe("USDTBRL"),histDe("BTCUSDT"),histDe("ETHUSDT")].concat(nomes.map(function(a){return histDe(a+"USDT");}))).then(function(r){
+    var fx=r[0], hb=r[1], he=r[2], H={}; nomes.forEach(function(a,i){H[a]=r[3+i];});
+    var brl=VER==="BRL", d0=L[0].data, hoje=dia(Date.now()), dias=[]; for(var t=Date.parse(d0); dia(t)<=hoje; t+=864e5) dias.push(dia(t));
+    var qtd={}, custo={}, idx=1, Vant=0, serie=[], i=0;
+    var cambio=function(d){ return brl?(ultimo(fx,d)||DOLAR||1):1; };
+    dias.forEach(function(d){ var fluxo=0;
+      while(i<L.length&&L[i].data<=d){ var l=L[i++], s=l.tipo==="compra"?1:-1, pl=brl?l.preco*(l.cambio||cambio(d)):l.preco; qtd[l.ativo]=(qtd[l.ativo]||0)+s*l.qtd; custo[l.ativo]=pl; fluxo+=s*l.qtd*pl; }
+      var V=0, c=cambio(d); Object.keys(qtd).forEach(function(a){ var q=qtd[a]; if(!(q>1e-12)) return; var p=(a==="USDT"||a==="USDC")?1:(H[a]?ultimo(H[a],d):null);
+        if(d===hoje&&PRECOS[a]&&H[a]) p=PRECOS[a].p; V+=p!=null?q*p*c:q*((CART.manual&&CART.manual[a]!=null)?CART.manual[a]*c:custo[a]); });
+      if(Vant>0) idx*=(V-fluxo)/Vant; else if(fluxo>0) idx=V/fluxo; Vant=V; serie.push([d,idx-1,V]); });
+    var base=function(m,conv){ var b=null, o=[]; dias.forEach(function(d){ var v=ultimo(m,d); if(v==null) return; if(conv) v*=cambio(d); if(b==null) b=v; o.push([d,v/b-1]); }); return o; };
+    var out={dias:dias,carteira:serie.map(function(x){return [x[0],x[1]];}),valor:serie,btc:base(hb,true),eth:base(he,true)};
+    if(brl) out.usd=base(fx,false);
+    var B=(MERC&&MERC.bench)||{};
+    if(B.cdi){ var m={}; B.cdi.forEach(function(x){m[x[0]]=x[1];}); var f=1, o=[]; dias.forEach(function(d,j){ if(j>0&&m[d]!=null) f*=1+m[d]/100; o.push([d,f-1]); }); out.cdi=o; }
+    ["ibov","spx"].forEach(function(k){ if(B[k]&&B[k].length){ var m={}; B[k].forEach(function(x){m[x[0]]=x[1];}); out[k]=base(m,false); } });
+    return out; });
+}
+function cor(v){ return getComputedStyle(document.documentElement).getPropertyValue(v).trim()||"#888"; }
+function perfDesenha(){
+  if($("cj-desempenho").hidden) return;
+  if(!CART.lanc.length){ $("pf-status").textContent="Cadastre suas compras em Lançamentos para ver o desempenho."; $("pf-caixa").hidden=true; return; }
+  if(!window.LightweightCharts){ $("pf-status").textContent="Não consegui carregar a biblioteca de gráficos. Recarregue a página."; return; }
+  $("pf-status").textContent="Calculando o histórico…";
+  perfCalcula().then(function(p){ PERF=p; if(!p) return; $("pf-caixa").hidden=false;
+    var alvo=$("pf-grafico");
+    if(!PCHART){ PCHART=LightweightCharts.createChart(alvo,{autoSize:true,layout:{background:{color:"transparent"},textColor:cor("--muted"),fontFamily:"IBM Plex Mono, monospace"},grid:{vertLines:{color:cor("--line")},horzLines:{color:cor("--line")}},rightPriceScale:{borderColor:cor("--line")},timeScale:{borderColor:cor("--line")},localization:{locale:"pt-BR",priceFormatter:function(v){return (v>=0?"+":"")+v.toFixed(1).replace(".",",")+"%";}},handleScale:{axisPressedMouseMove:false}}); PSERIES={}; }
+    var corte=PPER?dia(Date.now()-PPER*864e5):"0000";
+    var lg=$("pf-leg"), tb=$("pf-tb"); lg.textContent=""; tb.textContent="";
+    PDEF.forEach(function(d){ var k=d[0], s=p[k]; if(PSERIES[k]){ PCHART.removeSeries(PSERIES[k]); delete PSERIES[k]; } if(!s||!s.length) return;
+      var rec=s.filter(function(x){return x[0]>=corte;}); if(!rec.length) return; var b=1+rec[0][1], pts=rec.map(function(x){return {time:x[0],value:((1+x[1])/b-1)*100};}), fim=pts[pts.length-1].value/100;
+      var bt=el("button",PVIS[k]?"on":"",d[1]+"  "+pct(fim)); bt.type="button"; bt.setAttribute("aria-pressed",PVIS[k]?"true":"false"); bt.style.setProperty("--c","var("+d[2]+")"); bt.addEventListener("click",function(){ PVIS[k]=PVIS[k]?0:1; perfDesenha(); }); lg.appendChild(bt);
+      var tr=el("tr"), td=cel(tr,"","txt"), pt=el("span","ponto"); pt.style.background="var("+d[2]+")"; td.appendChild(pt); td.appendChild(document.createTextNode(d[1])); cel(tr,pct(fim,2),cls(fim));
+      var dc=k==="carteira"?null:(p.__fimCart-fim); if(k==="carteira"){ p.__fimCart=fim; cel(tr,"–","vazio"); } else cel(tr,pct(dc,2)+(dc>=0?" a favor":" contra"),cls(dc)); tb.appendChild(tr);
+      if(PVIS[k]){ PSERIES[k]=PCHART.addLineSeries({color:cor(d[2]),lineWidth:d[3],priceLineVisible:false,lastValueVisible:true,title:d[1]}); PSERIES[k].setData(pts); } });
+    PCHART.timeScale().fitContent();
+    var v=p.valor[p.valor.length-1]; $("pf-status").textContent="De "+p.dias[0].split("-").reverse().join("/")+" até agora. Valor atual "+simb()+usd(v[2])+". O último ponto acompanha o preço ao vivo.";
+  }).catch(function(){ $("pf-status").textContent="Não consegui montar o histórico da carteira."; });
+}
+var perfUlt=0;
+function perfVivo(){ if($("cj-desempenho").hidden||!PCHART) return; if(Date.now()-perfUlt<20000) return; perfUlt=Date.now(); perfDesenha(); }
+document.querySelectorAll("#pf-per button").forEach(function(b){ b.addEventListener("click",function(){ PPER=+b.dataset.d; document.querySelectorAll("#pf-per button").forEach(function(o){o.setAttribute("aria-pressed",o===b?"true":"false");}); perfDesenha(); }); });
 /* ---------- Conta (Supabase) ---------- */
 var CFG=window.PAINEL_CONFIG||{}, SB=null, USUARIO=null, PLANO=null;
 function contaMsg(t,erro){ var m=$("conta-msg"); m.textContent=t||""; m.hidden=!t; m.className=erro?"neg":"sub2"; }
@@ -1023,17 +1153,27 @@ $("com-form").addEventListener("submit",function(ev){ ev.preventDefault(); var t
 if(CFG.supabaseUrl&&CFG.supabaseAnonKey&&window.supabase){
   SB=window.supabase.createClient(CFG.supabaseUrl,CFG.supabaseAnonKey);
   SB.auth.getSession().then(function(r){ sessao(r.data.session); });
-  SB.auth.onAuthStateChange(function(ev,s){ if(ev==="SIGNED_IN"||ev==="SIGNED_OUT") sessao(s); });
+  SB.auth.onAuthStateChange(function(ev,s){ if(ev==="SIGNED_IN"||ev==="SIGNED_OUT") sessao(s);
+    if(ev==="SIGNED_IN"&&AUTHURL){ AUTHURL=false; try{history.replaceState(null,"",location.pathname+"#carteira");}catch(e){} contaMsg("Você entrou. Clique em \"Definir senha\" para não depender de e-mail nas próximas vezes."); } });
+  if(AUTHURL) setTimeout(function(){ if(AUTHURL&&!USUARIO){ AUTHURL=false; var m=decodeURIComponent((location.hash.match(/error_description=([^&]*)/)||[])[1]||"").replace(/\+/g," "); contaMsg(m?"O link não funcionou ("+m+"). Peça um novo.":"O link de acesso não funcionou. Peça um novo.",true); } },8000);
   conteudoCarrega();
 }
-$("conta-form").addEventListener("submit",function(ev){ ev.preventDefault(); var e=$("conta-campo").value.trim(); if(!e) return;
+function erroLogin(m){ m=m||""; return /Invalid login/i.test(m)?"E-mail ou senha incorretos. Se você entrou antes por link, use \"Entrar por link no e-mail\" e depois defina uma senha.":/rate limit/i.test(m)?"O limite de e-mails desta hora foi atingido. Entre com senha, ou tente o link de novo mais tarde.":/already registered/i.test(m)?"Esse e-mail já tem conta. Use Entrar.":/at least 6/i.test(m)?"A senha precisa ter 6 caracteres ou mais.":/not confirmed/i.test(m)?"Confirme o e-mail pelo link que enviamos antes de entrar com senha.":"Não consegui: "+m; }
+$("conta-form").addEventListener("submit",function(ev){ ev.preventDefault(); var e=$("conta-campo").value.trim(), p=$("conta-senha").value; if(!e) return; if(!p){ contaMsg("Digite a senha, ou use \"Entrar por link no e-mail\".",true); return; }
+  contaMsg("Entrando…"); SB.auth.signInWithPassword({email:e,password:p}).then(function(r){ if(r.error) contaMsg(erroLogin(r.error.message),true); else { contaMsg(""); $("conta-senha").value=""; } }); });
+$("conta-criar").addEventListener("click",function(){ var e=$("conta-campo").value.trim(), p=$("conta-senha").value; if(!e||p.length<6){ contaMsg("Para criar a conta, digite o e-mail e uma senha de 6 caracteres ou mais.",true); return; }
+  contaMsg("Criando a conta…"); SB.auth.signUp({email:e,password:p,options:{emailRedirectTo:location.origin+location.pathname}}).then(function(r){ if(r.error) contaMsg(erroLogin(r.error.message),true); else if(r.data&&r.data.session){ contaMsg(""); $("conta-senha").value=""; } else contaMsg("Conta criada. Enviei um e-mail de confirmação para "+e+"; abra o link neste aparelho."); }); });
+$("conta-link").addEventListener("click",function(){ var e=$("conta-campo").value.trim(); if(!e){ contaMsg("Digite o seu e-mail primeiro.",true); return; }
   contaMsg("Enviando…"); SB.auth.signInWithOtp({email:e,options:{emailRedirectTo:location.origin+location.pathname}}).then(function(r){
-    if(r.error) contaMsg("Não consegui enviar o link: "+r.error.message,true); else contaMsg("Enviei um link de acesso para "+e+". Abra o e-mail neste aparelho e clique no link."); }); });
+    if(r.error) contaMsg(erroLogin(r.error.message),true); else contaMsg("Enviei um link de acesso para "+e+". Abra o e-mail neste aparelho e clique no link."); }); });
+$("conta-senha-bt").addEventListener("click",function(){ $("conta-senha-form").hidden=!$("conta-senha-form").hidden; if(!$("conta-senha-form").hidden) $("conta-nova").focus(); });
+$("conta-senha-form").addEventListener("submit",function(ev){ ev.preventDefault(); var p=$("conta-nova").value; if(p.length<6) return;
+  SB.auth.updateUser({password:p}).then(function(r){ if(r.error) contaMsg(erroLogin(r.error.message),true); else { $("conta-nova").value=""; $("conta-senha-form").hidden=true; contaMsg("Senha salva. Da próxima vez, entre com e-mail e senha."); } }); });
 $("conta-sair").addEventListener("click",function(){ SB.auth.signOut(); });
 $("c-migrar-ok").addEventListener("click",function(){ var local=[]; try{ local=JSON.parse(localStorage.getItem(CHAVE)).lanc||[]; }catch(e){}
   SB.from("lancamentos").insert(local.map(paraNuvem)).then(function(r){ if(r.error){ nuvemFalhou(); return; } $("c-migrar").hidden=true; nuvemCarrega(); }); });
 contaDesenha();
-cLer(); limpaForm(); area(location.hash.slice(1)); cDesenha(); mDesenha(); cPrecos(); setInterval(cPrecos,60000);
+cLer(); limpaForm(); area(location.hash.slice(1)); cDesenha(); mDesenha(); cPrecos(); setInterval(function(){ if(!WSOK) cPrecos(); },60000); vivoLiga();
 
 iniciar(); carregaSim();
 if(!window.SNAP){ setInterval(carregaSim,300000); setInterval(iniciar,60000); setInterval(function(){HIST={};},3600000); }
