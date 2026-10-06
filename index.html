@@ -160,7 +160,7 @@ button.mini{font-size:12px;color:var(--muted)}
     <nav class="areas" id="areas" aria-label="Áreas do painel">
       <button type="button" data-area="carteira" aria-current="page">Carteira</button>
       <button type="button" data-area="mercado" aria-current="false">Mercado</button>
-      <button type="button" data-area="funding" aria-current="false">Funding</button>
+      <button type="button" data-area="funding" aria-current="false">Estratégias</button>
       <button type="button" data-area="aulas" aria-current="false">Aulas</button>
       <button type="button" data-area="admin" aria-current="false" id="bt-admin" hidden>Administração</button>
     </nav>
@@ -380,6 +380,14 @@ button.mini{font-size:12px;color:var(--muted)}
   <div id="area-funding" class="area" hidden>
     <div class="box" id="funding-bloq" hidden><h2>Área restrita a assinantes</h2><p class="sub" id="funding-bloq-txt"></p></div>
     <div id="funding-conteudo" class="area">
+  <div class="abas" role="tablist" id="eabas">
+    <button type="button" role="tab" data-est="funding" aria-selected="true">Arbitragem de funding</button>
+    <button type="button" role="tab" data-est="pools" aria-selected="false">Pools de liquidez</button>
+    <button type="button" role="tab" data-est="vaults" aria-selected="false">Vaults</button>
+    <button type="button" role="tab" data-est="trades" aria-selected="false">Trades</button>
+    <button type="button" role="tab" data-est="opcoes" aria-selected="false">Opções</button>
+  </div>
+  <div id="est-funding" class="area">
   <section class="box controles" aria-label="Parâmetros">
     <label>Capital (US$)<input id="capital" type="number" min="1" step="1" value="100"></label>
     <label>Alavancagem<select id="alav"><option value="1">1x</option><option value="2">2x</option><option value="3">3x</option></select></label>
@@ -468,6 +476,56 @@ button.mini{font-size:12px;color:var(--muted)}
     </section>
   </div>
   <p class="rodape">Dados públicos de Binance, Bybit, OKX, Bitget, Gate, Hyperliquid e dYdX. Taxas anualizadas a partir do funding de cada período. Esta página não envia ordens nem acessa contas. Não é recomendação de investimento.</p>
+  </div>
+  <div id="est-pools" class="area" hidden>
+    <section class="box">
+      <h2>Pools de liquidez</h2>
+      <p class="sub">Você deposita dois ativos em uma corretora descentralizada e recebe parte das taxas de quem troca. O rendimento muda todo dia e o par pode valer menos do que se você só guardasse os ativos (perda impermanente).</p>
+      <div class="controles" style="margin-top:12px">
+        <label>Tamanho mínimo do pool<select id="pl-tvl"><option value="1e6">US$ 1 milhão</option><option value="1e7" selected>US$ 10 milhões</option><option value="1e8">US$ 100 milhões</option></select></label>
+        <label>Tipo<select id="pl-tipo"><option value="todos">Todos os pares</option><option value="est">Só stablecoins</option><option value="semil">Sem risco de perda impermanente</option></select></label>
+        <label>Ordenar por<select id="pl-ord"><option value="apy">Maior rendimento hoje</option><option value="m30">Maior média de 30 dias</option><option value="tvl">Maior pool</option></select></label>
+        <label>Ativo ou protocolo<input id="pl-busca" type="text" placeholder="ETH, uniswap…"></label>
+      </div>
+      <p class="sub" id="pl-status">Carregando…</p>
+      <div class="scroll"><table><thead><tr><th class="txt">Par</th><th class="txt">Protocolo</th><th class="txt">Rede</th><th>Tamanho</th><th>Rende hoje (a.a.)</th><th>Média 30 dias</th><th class="txt">Perda impermanente</th></tr></thead><tbody id="pl-corpo"></tbody></table></div>
+      <p class="note">Fonte: DeFiLlama. Rendimento anualizado, soma de taxas e recompensas. Acima de 100% ao ano costuma durar pouco.</p>
+    </section>
+  </div>
+  <div id="est-vaults" class="area" hidden>
+    <section class="box">
+      <h2>Vaults</h2>
+      <p class="sub">Você deposita um único ativo e o protocolo aplica por você (empréstimos, staking, estratégias automáticas). Não há perda impermanente, mas há risco do contrato e do protocolo.</p>
+      <div class="controles" style="margin-top:12px">
+        <label>Tamanho mínimo<select id="vt-tvl"><option value="1e6">US$ 1 milhão</option><option value="1e7" selected>US$ 10 milhões</option><option value="1e8">US$ 100 milhões</option></select></label>
+        <label>Ativo<select id="vt-tipo"><option value="est">Stablecoins (dólar)</option><option value="BTC">Bitcoin</option><option value="ETH">Ethereum</option><option value="SOL">Solana</option><option value="todos">Todos</option></select></label>
+        <label>Ordenar por<select id="vt-ord"><option value="apy">Maior rendimento hoje</option><option value="m30">Maior média de 30 dias</option><option value="tvl">Maior vault</option></select></label>
+        <label>Ativo ou protocolo<input id="vt-busca" type="text" placeholder="USDC, aave…"></label>
+      </div>
+      <p class="sub" id="vt-status">Carregando…</p>
+      <div class="scroll"><table><thead><tr><th class="txt">Ativo</th><th class="txt">Protocolo</th><th class="txt">Rede</th><th>Tamanho</th><th>Rende hoje (a.a.)</th><th>Média 30 dias</th></tr></thead><tbody id="vt-corpo"></tbody></table></div>
+      <p class="note">Fonte: DeFiLlama. Compare com o CDI antes de assumir risco de contrato.</p>
+    </section>
+  </div>
+  <div id="est-trades" class="area" hidden>
+    <section class="box">
+      <h2>Trades: leitura do mercado</h2>
+      <p class="sub">Tendência, força e posicionamento dos principais ativos no gráfico de 4 horas. Clique no ativo para abrir o gráfico.</p>
+      <p class="sub" id="tr-status">Carregando…</p>
+      <div class="scroll"><table><thead><tr><th class="txt">Ativo</th><th>Preço</th><th>24h</th><th class="txt">Tendência (4h)</th><th>RSI (4h)</th><th>Funding (a.a.)</th><th>Comprados / vendidos</th></tr></thead><tbody id="tr-corpo"></tbody></table></div>
+      <p class="note">Tendência: médias de 21 e 55 períodos. RSI acima de 70 indica mercado esticado para cima; abaixo de 30, para baixo. Comprados / vendidos: proporção de contas na Binance Futuros. São leituras, não recomendações de compra ou venda.</p>
+    </section>
+  </div>
+  <div id="est-opcoes" class="area" hidden>
+    <section class="box">
+      <h2>Opções</h2>
+      <p class="sub">Contratos de opções na Deribit, por vencimento. Mostra quanto o mercado espera de oscilação e se há mais proteção contra queda (puts) ou aposta em alta (calls).</p>
+      <div class="controles" style="margin-top:12px"><label>Ativo<select id="op-ativo"><option>BTC</option><option>ETH</option></select></label></div>
+      <p class="sub" id="op-status">Carregando…</p>
+      <div class="scroll"><table><thead><tr><th class="txt">Vencimento</th><th>Dias</th><th>Volatilidade esperada (a.a.)</th><th>Oscilação esperada até lá</th><th>Calls em aberto</th><th>Puts em aberto</th><th>Puts / calls</th><th>Preço com mais contratos</th></tr></thead><tbody id="op-corpo"></tbody></table></div>
+      <p class="note">Volatilidade esperada: a implícita das opções mais próximas do preço atual. Puts / calls acima de 1 indica mais procura por proteção. Fonte: Deribit.</p>
+    </section>
+  </div>
     </div>
   </div>
 </main>
@@ -855,7 +913,7 @@ function vnum(i){ var t=String($(i).value).trim().replace(/[^0-9.,]/g,""); if(t.
 function rotPreco(){ var sm=$("f-moeda").value==="BRL"?"R$":"US$", total=$("f-modo").value==="total"; $("f-preco-rot").textContent=(total?"Total pago (":"Preço de 1 unidade (")+sm+")";
   var q=+$("f-qtd").value, v=vnum("f-preco"), a=$("f-ativo").value.trim().toUpperCase()||"unidade"; $("f-conta").textContent=(q>0&&v>0)?(total?"Preço por "+a+": "+sm+" "+prc(v/q)+".":"Total da operação: "+sm+" "+usd(v*q)+"."):""; }
 function limpaForm(){ EDIT=null; var mo=$("f-moeda").value, cl=$("f-classe").value, md=$("f-modo").value; $("c-form").reset(); $("f-moeda").value=mo; $("f-classe").value=cl; $("f-modo").value=md; rotPreco(); if(DOLAR) $("f-cambio").value=DOLAR.toFixed(4); $("f-data").value=new Date().toISOString().slice(0,10); $("f-salvar").textContent="Adicionar"; $("f-cancelar").hidden=true; $("f-erro").hidden=true; }
-var TITULOS={carteira:"Minha Carteira",mercado:"Mercado",funding:"Radar de Funding",aulas:"Aulas",admin:"Administração"};
+var TITULOS={carteira:"Minha Carteira",mercado:"Mercado",funding:"Estratégias",aulas:"Aulas",admin:"Administração"};
 var AUTHURL=/access_token=|refresh_token=|error_description=|type=(signup|magiclink|recovery)/.test(location.hash)||/[?&](code|token_hash)=/.test(location.search);
 function area(a){ if(!TITULOS[a]) a="carteira"; Object.keys(TITULOS).forEach(function(x){ $("area-"+x).hidden=x!==a; }); document.querySelectorAll("#areas button").forEach(function(o){o.setAttribute("aria-current",o.dataset.area===a?"page":"false");});
   $("titulo").textContent=TITULOS[a]; $("atualizado").hidden=a!=="funding"; $("cart-status").hidden=a==="funding"||a==="aulas"||a==="admin"; if(a==="admin"&&typeof admCarrega==="function") admCarrega(); if(!AUTHURL){ try{history.replaceState(null,"","#"+a);}catch(e){} } }
@@ -1180,6 +1238,59 @@ cLer(); limpaForm(); area(location.hash.slice(1)); cDesenha(); mDesenha(); cPrec
 
 iniciar(); carregaSim();
 if(!window.SNAP){ setInterval(carregaSim,300000); setInterval(iniciar,60000); setInterval(function(){HIST={};},3600000); }
+</script>
+<script>
+/* ---------- Estratégias ---------- */
+var EST={pools:null,carregando:false};
+function estJanela(j){ document.querySelectorAll("#eabas button").forEach(function(o){ var on=o.dataset.est===j; o.setAttribute("aria-selected",on?"true":"false"); $("est-"+o.dataset.est).hidden=!on; });
+  $("atualizado").hidden=j!=="funding"; if(j==="pools"||j==="vaults") estPools(); if(j==="trades") estTrades(); if(j==="opcoes") estOpcoes(); }
+document.querySelectorAll("#eabas button").forEach(function(b){ b.addEventListener("click",function(){ estJanela(b.dataset.est); }); });
+function milhoes(v){ return v>=1e9?"US$ "+usd(v/1e9,2)+" bi":"US$ "+usd(v/1e6,1)+" mi"; }
+function aa(v){ return v==null?"–":usd(v,1)+"%"; }
+function estPools(){ if(EST.pools){ estPoolsDes(); return; } if(EST.carregando) return; EST.carregando=true;
+  fetch("https://yields.llama.fi/pools").then(function(r){return r.json();}).then(function(j){ EST.pools=(j.data||[]).filter(function(p){return p.tvlUsd>=1e6&&p.apy>0&&p.apy<1000&&!p.outlier;}); EST.carregando=false; estPoolsDes(); })
+  .catch(function(){ EST.carregando=false; $("pl-status").textContent=$("vt-status").textContent="Não consegui buscar os dados agora. Tente de novo em instantes."; }); }
+function estLista(multi,pre){ var tvl=+$(pre+"-tvl").value, tipo=$(pre+"-tipo").value, ord=$(pre+"-ord").value, b=$(pre+"-busca").value.trim().toUpperCase();
+  var l=EST.pools.filter(function(p){ if((p.exposure==="multi")!==multi) return false; if(p.tvlUsd<tvl) return false;
+    if(tipo==="est"&&!p.stablecoin) return false; if(tipo==="semil"&&p.ilRisk!=="no") return false;
+    if(!multi&&tipo!=="est"&&tipo!=="todos"&&String(p.symbol).toUpperCase().indexOf(tipo)<0) return false;
+    if(b&&(String(p.symbol)+" "+p.project).toUpperCase().indexOf(b)<0) return false; return true; });
+  var k=ord==="tvl"?"tvlUsd":ord==="m30"?"apyMean30d":"apy"; l.sort(function(x,y){return (y[k]||0)-(x[k]||0);}); return l; }
+function estPoolsDes(){ if(!EST.pools) return;
+  [["pl",true],["vt",false]].forEach(function(c){ var pre=c[0], l=estLista(c[1],pre), corpo=$(pre+"-corpo"); corpo.textContent="";
+    $(pre+"-status").textContent=l.length?l.length+" opções encontradas. Mostrando as "+Math.min(60,l.length)+" primeiras.":"Nada encontrado com esses filtros.";
+    l.slice(0,60).forEach(function(p){ var tr=el("tr"); cel(tr,p.symbol,"txt"); cel(tr,p.project,"txt"); cel(tr,p.chain,"txt"); cel(tr,milhoes(p.tvlUsd)); cel(tr,aa(p.apy),"pos"); cel(tr,aa(p.apyMean30d));
+      if(c[1]) cel(tr,p.ilRisk==="no"?"Não":"Sim","txt "+(p.ilRisk==="no"?"":"neg")); corpo.appendChild(tr); }); }); }
+["pl-tvl","pl-tipo","pl-ord","vt-tvl","vt-tipo","vt-ord"].forEach(function(i){ $(i).addEventListener("change",estPoolsDes); }); ["pl-busca","vt-busca"].forEach(function(i){ $(i).addEventListener("input",estPoolsDes); });
+
+function ema(v,n){ var k=2/(n+1), e=v[0]; for(var i=1;i<v.length;i++) e=v[i]*k+e*(1-k); return e; }
+function rsi(v,n){ var g=0,p=0,i; for(i=1;i<=n;i++){ var d=v[i]-v[i-1]; if(d>0) g+=d; else p-=d; } g/=n; p/=n; for(;i<v.length;i++){ var x=v[i]-v[i-1]; g=(g*(n-1)+(x>0?x:0))/n; p=(p*(n-1)+(x<0?-x:0))/n; } return p===0?100:100-100/(1+g/p); }
+var TRA=["BTC","ETH","SOL","BNB","XRP","DOGE","ADA","LINK","AVAX","SUI"], TRU=0;
+function estTrades(){ if(Date.now()-TRU<60000) return; TRU=Date.now(); var jf=function(u){ return fetch(u).then(function(r){return r.ok?r.json():null;}).catch(function(){return null;}); };
+  Promise.all(TRA.map(function(a){ var s=a+"USDT"; return Promise.all([ jf("https://data-api.binance.vision/api/v3/klines?symbol="+s+"&interval=4h&limit=200"), jf("https://fapi.binance.com/fapi/v1/premiumIndex?symbol="+s), jf("https://fapi.binance.com/futures/data/globalLongShortAccountRatio?symbol="+s+"&period=4h&limit=1"), jf("https://data-api.binance.vision/api/v3/ticker/24hr?symbol="+s) ]); }))
+  .then(function(rs){ var corpo=$("tr-corpo"); corpo.textContent=""; var ok=0;
+    rs.forEach(function(r,i){ var k=r[0]; if(!k||!k.length) return; ok++; var c=k.map(function(x){return +x[4];}), p=c[c.length-1], e21=ema(c,21), e55=ema(c,55), rs_=rsi(c,14);
+      var t=p>e21&&e21>e55?["Alta","pos"]:p<e21&&e21<e55?["Baixa","neg"]:["Lateral",""]; var tr=el("tr"), td=cel(tr,"","txt");
+      botaoAtivo(td,TRA[i]);
+      cel(tr,"US$ "+prc(p)); var v=r[3]?+r[3].priceChangePercent/100:null; cel(tr,v==null?"–":pct(v),v==null?"":v>=0?"pos":"neg"); cel(tr,t[0],"txt "+t[1]);
+      cel(tr,usd(rs_,0),rs_>=70?"neg":rs_<=30?"pos":""); var f=r[1]&&r[1].lastFundingRate!=null?+r[1].lastFundingRate*3*365:null; cel(tr,f==null?"–":pct(f),f==null?"":f>=0?"pos":"neg");
+      var ls=r[2]&&r[2][0]?r[2][0]:null; cel(tr,ls?usd(+ls.longAccount*100,0)+"% / "+usd(+ls.shortAccount*100,0)+"%":"–"); corpo.appendChild(tr); });
+    $("tr-status").textContent=ok?"Atualizado às "+new Date().toLocaleTimeString("pt-BR")+". Atualiza a cada minuto.":"Não consegui buscar os dados agora."; if(!ok) TRU=0; }); }
+setInterval(function(){ if(!$("area-funding").hidden&&!$("est-trades").hidden) estTrades(); },61000);
+
+var MESES={JAN:0,FEB:1,MAR:2,APR:3,MAY:4,JUN:5,JUL:6,AUG:7,SEP:8,OCT:9,NOV:10,DEC:11};
+function estOpcoes(){ var a=$("op-ativo").value; $("op-status").textContent="Carregando…";
+  fetch("https://www.deribit.com/api/v2/public/get_book_summary_by_currency?currency="+a+"&kind=option").then(function(r){return r.json();}).then(function(j){ var g={}, spot=null;
+    (j.result||[]).forEach(function(o){ var m=/^[A-Z]+-(\d{1,2})([A-Z]{3})(\d{2})-(\d+)-([CP])$/.exec(o.instrument_name); if(!m) return; var k=m[1]+m[2]+m[3];
+      var x=g[k]||(g[k]={k:k,t:Date.UTC(2000+ +m[3],MESES[m[2]],+m[1],8),c:0,p:0,und:o.underlying_price,st:{},atm:null,iv:null}); var oi=+o.open_interest||0, st=+m[4]; if(m[5]==="C") x.c+=oi; else x.p+=oi; x.st[st]=(x.st[st]||0)+oi;
+      if(o.underlying_price&&o.mark_iv){ var d=Math.abs(st-o.underlying_price); if(x.atm==null||d<x.atm){ x.atm=d; x.iv=+o.mark_iv; } } if(spot==null&&o.estimated_delivery_price) spot=o.estimated_delivery_price; });
+    var l=Object.keys(g).map(function(k){return g[k];}).filter(function(x){return x.t>Date.now()&&(x.c+x.p)>0;}).sort(function(x,y){return x.t-y.t;}), corpo=$("op-corpo"); corpo.textContent="";
+    l.forEach(function(x){ var dias=Math.max((x.t-Date.now())/864e5,0.05), tr=el("tr"), mx=Object.keys(x.st).sort(function(p,q){return x.st[q]-x.st[p];})[0];
+      cel(tr,new Date(x.t).toLocaleDateString("pt-BR",{timeZone:"UTC"}),"txt"); cel(tr,usd(dias,dias<3?1:0)); cel(tr,x.iv?usd(x.iv,1)+"%":"–"); cel(tr,x.iv?"± "+usd(x.iv*Math.sqrt(dias/365),1)+"%":"–");
+      cel(tr,usd(x.c,0)+" "+a); cel(tr,usd(x.p,0)+" "+a); var pc=x.c?x.p/x.c:null; cel(tr,pc==null?"–":usd(pc,2),pc==null?"":pc>1?"neg":"pos"); cel(tr,"US$ "+usd(+mx,0)); corpo.appendChild(tr); });
+    $("op-status").textContent=l.length?a+" agora: US$ "+usd(spot||l[0].und,0)+". "+l.length+" vencimentos.":"Sem dados no momento."; })
+  .catch(function(){ $("op-status").textContent="Não consegui buscar os dados da Deribit agora."; }); }
+$("op-ativo").addEventListener("change",estOpcoes);
 </script>
 </body>
 </html>
