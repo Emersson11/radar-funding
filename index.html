@@ -124,7 +124,19 @@ td a{color:var(--accent);text-decoration:underline;text-underline-offset:3px}
 button.mv{padding:2px 7px;font-size:12px;line-height:1.2;margin-right:3px} button.mv:disabled{opacity:.3}
 .tiles{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:1px;background:var(--line);border:1px solid var(--line);border-radius:3px;overflow:hidden}
 .tiles>div{background:var(--surface);padding:16px 18px;min-width:0} .tiles .rot{display:block;margin-bottom:8px} .tiles strong{font:500 22px/1.2 var(--mono);display:block} .tiles small{font:400 13px var(--mono);color:var(--muted)}
-.graf{height:300px;margin-top:12px} .pers{display:flex;flex-wrap:wrap;gap:6px;margin-top:10px} .pers button{font-size:13px;padding:5px 11px;color:var(--muted);border-color:var(--line)} .pers button[aria-pressed="true"]{background:var(--accent);border-color:var(--accent);color:#fff}
+.graf{height:300px;margin-top:12px}
+.g21{display:grid;grid-template-columns:minmax(0,2fr) minmax(0,1fr);gap:20px;align-items:stretch} @media (max-width:1000px){.g21{grid-template-columns:1fr}}
+.g21>.box,.duas>.box{display:flex;flex-direction:column;min-width:0} .g21>.box>.graf,.duas>.box>.graf{flex:1 1 auto;min-height:300px;height:auto}
+#mj-defi,#mj-onchain,#mj-etfs{display:flex;flex-direction:column;gap:0} #mj-defi[hidden],#mj-onchain[hidden],#mj-etfs[hidden]{display:none}
+.barras{display:flex;flex-direction:column;gap:9px;margin-top:14px;flex:1;justify-content:space-between}
+.barras .bl{display:grid;grid-template-columns:minmax(84px,30%) 1fr auto;gap:10px;align-items:center;font-size:13px} .barras .bl span:first-child{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-weight:500}
+.barras .bl em{display:block;height:10px;border-radius:5px;background:var(--soft);overflow:hidden} .barras .bl em i{display:block;height:100%;border-radius:5px;background:var(--accent)}
+.barras .bl b{font:500 12px var(--mono);white-space:nowrap;text-align:right;min-width:128px} .barras .bl b small{color:var(--muted);font-weight:400;margin-left:6px}
+.tiles strong{font-size:24px} .tiles>div{padding:18px 20px;border-top:3px solid var(--accent)} .tiles small.pos{color:var(--good)} .tiles small.neg{color:var(--bad)}
+table.tprot td,table.tprot th{padding:9px 12px} table.tprot td:first-child{color:var(--muted);width:36px} table.tprot .pn{display:flex;align-items:center;gap:10px;font-weight:500} table.tprot .pn img{width:22px;height:22px;border-radius:50%;background:var(--soft);flex:none}
+table.tprot .peso{display:flex;align-items:center;gap:8px;min-width:150px} table.tprot .peso em{flex:1;height:8px;border-radius:4px;background:var(--soft);overflow:hidden} table.tprot .peso em i{display:block;height:100%;background:var(--accent);border-radius:4px} table.tprot .peso span{font:400 12px var(--mono);color:var(--muted);min-width:42px;text-align:right}
+table.tprot .chip{display:inline-block;font-size:12px;padding:2px 9px;border-radius:10px;background:var(--soft);color:var(--muted)}
+#ef-nots{max-height:330px;overflow-y:auto} .pers{display:flex;flex-wrap:wrap;gap:6px;margin-top:10px} .pers button{font-size:13px;padding:5px 11px;color:var(--muted);border-color:var(--line)} .pers button[aria-pressed="true"]{background:var(--accent);border-color:var(--accent);color:#fff}
 #rel-doc{max-width:980px;padding:36px 40px} #rel-doc h1{font:600 28px/1.2 var(--serif);margin:0} #rel-doc h2{margin:26px 0 8px;padding-bottom:6px;border-bottom:2px solid var(--accent);font-size:19px} #rel-doc h3{font:600 14px var(--sans);margin:14px 0 4px}
 #rel-doc p,#rel-doc li{font-size:14px;line-height:1.5;max-width:none} #rel-doc ul{margin:6px 0;padding-left:20px} #rel-doc table{font-size:13px;margin-top:6px} #rel-doc .cab{display:flex;justify-content:space-between;align-items:flex-end;gap:16px;border-bottom:3px solid var(--fg);padding-bottom:12px} #rel-doc .rk{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-top:10px} #rel-doc .rk div{border:1px solid var(--line);padding:10px 12px;border-radius:3px} #rel-doc .rk b{display:block;font:500 17px var(--mono)} #rel-doc .rk span{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.06em} #rel-doc svg{width:100%;height:auto;margin-top:8px} #rel-doc .leg{display:flex;flex-wrap:wrap;gap:6px 16px;font-size:12px;margin-top:6px} #rel-doc .leg i{display:inline-block;width:14px;height:3px;vertical-align:middle;margin-right:5px}
 @media (max-width:700px){#rel-doc{padding:18px} #rel-doc .rk{grid-template-columns:repeat(2,1fr)}}
@@ -378,14 +390,17 @@ button.mini{font-size:12px;color:var(--muted)}
     <section id="mj-defi" hidden>
       <div class="tiles" id="df-tiles"></div>
       <p class="sub" id="df-status" style="margin:10px 0">Carregando…</p>
-      <div class="box"><h2>Valor total travado em DeFi (TVL)</h2><p class="sub">Soma, em dólares, de tudo que está depositado em protocolos DeFi de todas as redes.</p>
-        <div class="pers" id="df-per"><button type="button" data-d="90">90 dias</button><button type="button" data-d="365" aria-pressed="true">1 ano</button><button type="button" data-d="1095">3 anos</button><button type="button" data-d="0">Tudo</button></div>
-        <div class="graf" id="df-graf"></div></div>
-      <div class="duas" style="margin-top:20px">
-        <div class="box"><h2>Redes</h2><div class="scroll"><table><thead><tr><th class="txt">Rede</th><th>TVL</th><th>Participação</th></tr></thead><tbody id="df-redes"></tbody></table></div></div>
-        <div class="box"><h2>Stablecoins em circulação</h2><p class="sub" id="df-stb-txt"></p><div class="graf" id="df-stb"></div></div>
+      <div class="g21">
+        <div class="box"><h2>Valor total travado em DeFi (TVL)</h2><p class="sub">Soma, em dólares, de tudo que está depositado em protocolos DeFi de todas as redes.</p>
+          <div class="pers" id="df-per"><button type="button" data-d="90">90 dias</button><button type="button" data-d="365" aria-pressed="true">1 ano</button><button type="button" data-d="1095">3 anos</button><button type="button" data-d="0">Tudo</button></div>
+          <div class="graf" id="df-graf"></div></div>
+        <div class="box"><h2>Onde o dinheiro está: redes</h2><p class="sub">Participação de cada rede no total travado.</p><div class="barras" id="df-redes"></div></div>
       </div>
-      <div class="box" style="margin-top:20px"><h2>Maiores protocolos</h2><div class="scroll"><table><thead><tr><th class="txt">Protocolo</th><th class="txt">Categoria</th><th>TVL</th><th>24h</th><th>7 dias</th></tr></thead><tbody id="df-prot"></tbody></table></div>
+      <div class="g21" style="margin-top:20px">
+        <div class="box"><h2>Stablecoins em circulação</h2><p class="sub" id="df-stb-txt"></p><div class="graf" id="df-stb"></div></div>
+        <div class="box"><h2>Em que o dinheiro está: categorias</h2><p class="sub">Valor travado por tipo de protocolo.</p><div class="barras" id="df-cat"></div></div>
+      </div>
+      <div class="box" style="margin-top:20px"><h2>Maiores protocolos</h2><p class="sub">Clique no título de uma coluna para ordenar. O nome abre a página do protocolo.</p><div class="scroll"><table class="tprot"><thead><tr><th class="txt">#</th><th class="txt">Protocolo</th><th class="txt">Categoria</th><th>TVL</th><th class="txt">Peso no total</th><th>24h</th><th>7 dias</th></tr></thead><tbody id="df-prot"></tbody></table></div>
         <p class="note">Fonte: DeFiLlama. Atualiza sozinho a cada 10 minutos. Corretoras centralizadas e pontes ficam fora da lista de protocolos.</p></div>
     </section>
     <section id="mj-onchain" hidden>
@@ -1494,7 +1509,7 @@ function defiCarrega(){ if(M2.defi&&Date.now()-M2.defiT<600000) return Promise.r
   M2.defiP=Promise.all([gj("https://api.llama.fi/v2/historicalChainTvl"),gj("https://api.llama.fi/v2/chains"),gj("https://api.llama.fi/protocols"),gj("https://stablecoins.llama.fi/stablecoincharts/all"),gj("https://api.llama.fi/overview/dexs?excludeTotalDataChart=true&excludeTotalDataChartBreakdown=true")]).then(function(r){ M2.defiP=null; if(!r[0]&&!M2.defi) return null; if(!r[0]) return M2.defi;
     var d={}; d.tvl=r[0].filter(function(x){return x.tvl>0;}).map(function(x){return {time:dsec(x.date),value:x.tvl};});
     d.redes=(r[1]||[]).filter(function(x){return x.tvl>0;}).sort(function(a,b){return b.tvl-a.tvl;});
-    var fora={CEX:1,Chain:1,Bridge:1,"Canonical Bridge":1}; d.prot=(r[2]||[]).filter(function(p){return p.tvl>0&&!fora[p.category];}).sort(function(a,b){return b.tvl-a.tvl;}).slice(0,40);
+    var fora={CEX:1,Chain:1,Bridge:1,"Canonical Bridge":1}; var todos=(r[2]||[]).filter(function(p){return p.tvl>0&&!fora[p.category];}).sort(function(a,b){return b.tvl-a.tvl;}), cats={}; todos.forEach(function(p){ var c=p.category||"Outros"; cats[c]=(cats[c]||0)+p.tvl; }); d.cats=Object.keys(cats).map(function(c){return {name:c,tvl:cats[c]};}).sort(function(a,b){return b.tvl-a.tvl;}); d.prot=todos.slice(0,40);
     d.nprot=(r[2]||[]).length; d.stb=(r[3]||[]).map(function(x){return {time:dsec(+x.date),value:(x.totalCirculatingUSD||{}).peggedUSD||0};}).filter(function(x){return x.value>0;});
     d.dex=r[4]?{v:r[4].total24h,c:r[4].change_1d,v7:r[4].total7d}:null; M2.defi=d; M2.defiT=Date.now(); return d; }); return M2.defiP; }
 function atras(l,n){ return l.length>n?l[l.length-1-n].value:null; }
@@ -1503,13 +1518,16 @@ function defiDes(){ defiCarrega().then(function(d){ if(!d){ $("df-status").textC
     tile(t,"TVL total",dinG(u),v1==null?"":pct(v1)+" em 24h",cls(v1)); tile(t,"TVL em 7 e 30 dias",(v7==null?"–":pct(v7))+" / "+(v30==null?"–":pct(v30)),"recorde: "+dinG(mx));
     if(d.stb.length){ var su=d.stb[d.stb.length-1].value, s7=varP(su,atras(d.stb,7)); tile(t,"Stablecoins",dinG(su),s7==null?"":pct(s7)+" em 7 dias",cls(s7)); $("df-stb-txt").textContent="Total de "+dinG(su)+". Quando cresce, entra dinheiro novo no mercado cripto."; }
     if(d.dex) tile(t,"Volume em DEX (24h)",dinG(d.dex.v),d.dex.c==null?"":pct(d.dex.c/100)+" contra o dia anterior",cls(d.dex.c));
-    if(d.redes.length) tile(t,"Maior rede",d.redes[0].name,usd(d.redes[0].tvl/u*100,1)+"% do TVL");
+    if(d.redes.length){ var sr=0; d.redes.forEach(function(c){sr+=c.tvl;}); tile(t,"Maior rede",d.redes[0].name,usd(d.redes[0].tvl/(sr||u)*100,1)+"% do TVL"); }
     $("df-status").textContent="Atualizado às "+new Date(M2.defiT).toLocaleTimeString("pt-BR")+". "+d.nprot+" protocolos acompanhados em "+d.redes.length+" redes.";
     grafFaz("df-graf",[{tipo:"area",cor:cor("--accent"),dados:corte(d.tvl,M2.dfPer)}],function(v){return dinG(v).replace("US$ ","");});
     grafFaz("df-stb",[{tipo:"area",cor:cor("--good")||"#1a7f4b",dados:corte(d.stb,365)}],function(v){return dinG(v).replace("US$ ","");});
-    var tb=$("df-redes"); tb.textContent=""; d.redes.slice(0,15).forEach(function(c){ var tr=el("tr"); cel(tr,c.name,"txt"); cel(tr,dinG(c.tvl)); cel(tr,usd(c.tvl/u*100,1)+"%"); tr._v=[c.name,c.tvl,c.tvl]; tb.appendChild(tr); }); ordDom("df-redes");
-    var tp=$("df-prot"); tp.textContent=""; d.prot.forEach(function(p){ var tr=el("tr"), td=cel(tr,"","txt"), a=el("a",null,p.name); a.href="https://defillama.com/protocol/"+encodeURIComponent(p.slug||p.name); a.target="_blank"; a.rel="noopener"; td.appendChild(a);
-      cel(tr,p.category||"–","txt"); cel(tr,dinG(p.tvl)); var c1=p.change_1d, c7=p.change_7d; cel(tr,c1==null?"–":pct(c1/100),c1==null?"":cls(c1)); cel(tr,c7==null?"–":pct(c7/100),c7==null?"":cls(c7)); tr._v=[p.name,p.category||"",p.tvl,c1,c7]; tp.appendChild(tr); }); ordDom("df-prot"); }); }
+    var soma=0; d.redes.forEach(function(c){soma+=c.tvl;}); var barras=function(id,l,tot){ var bx=$(id); bx.textContent=""; var mx=l.length?l[0].tvl:1; l.forEach(function(c){ var r=el("div","bl"), em=el("em"), i=el("i"), b=el("b",null,dinG(c.tvl)); r.appendChild(el("span",null,c.name)); r.firstChild.title=c.name; i.style.width=Math.max(1.5,c.tvl/mx*100)+"%"; em.appendChild(i); r.appendChild(em); b.appendChild(el("small",null,usd(c.tvl/tot*100,1)+"%")); r.appendChild(b); bx.appendChild(r); }); };
+    barras("df-redes",d.redes.slice(0,12),soma||u); var sc=0; d.cats.forEach(function(c){sc+=c.tvl;}); barras("df-cat",d.cats.slice(0,12),sc||u);
+    var tp=$("df-prot"); tp.textContent=""; var pm=d.prot.length?d.prot[0].tvl:1; d.prot.forEach(function(p,ix){ var tr=el("tr"); cel(tr,String(ix+1),"txt"); var td=cel(tr,"","txt"), w=el("span","pn"), a=el("a",null,p.name); a.href="https://defillama.com/protocol/"+encodeURIComponent(p.slug||p.name); a.target="_blank"; a.rel="noopener";
+      if(/^https:\/\/icons\.llama\.fi\//.test(p.logo||"")){ var im=document.createElement("img"); im.src=p.logo; im.alt=""; im.loading="lazy"; im.onerror=function(){ this.style.visibility="hidden"; }; w.appendChild(im); } w.appendChild(a); td.appendChild(w);
+      cel(tr,"","txt").appendChild(el("span","chip",p.category||"–")); cel(tr,dinG(p.tvl)); var pz=cel(tr,"","txt"), pw=el("span","peso"), em=el("em"), i=el("i"); i.style.width=Math.max(2,p.tvl/pm*100)+"%"; em.appendChild(i); pw.appendChild(em); pw.appendChild(el("span",null,usd(p.tvl/u*100,1)+"%")); pz.appendChild(pw);
+      var c1=p.change_1d, c7=p.change_7d; cel(tr,c1==null?"–":pct(c1/100),c1==null?"":cls(c1)); cel(tr,c7==null?"–":pct(c7/100),c7==null?"":cls(c7)); tr._v=[ix,p.name,p.category||"",p.tvl,p.tvl,c1,c7]; tp.appendChild(tr); }); ordDom("df-prot"); }); }
 
 /* On-chain */
 function cm(ativos,met,n){ return gj("https://community-api.coinmetrics.io/v4/timeseries/asset-metrics?assets="+ativos+"&metrics="+met+"&frequency=1d&page_size="+n+"&paging_from=end").then(function(j){ return j&&j.data?j.data.slice().sort(function(a,b){return a.time<b.time?-1:1;}):null; }); }
@@ -1607,7 +1625,7 @@ $("rel-pdf").addEventListener("click",function(){ var go=function(){ var th=docu
     var volta=function(){ document.body.classList.remove("so-rel"); if(th) document.documentElement.setAttribute("data-theme",th); else document.documentElement.removeAttribute("data-theme"); window.removeEventListener("afterprint",volta); }; window.addEventListener("afterprint",volta); setTimeout(function(){ window.print(); },150); };
   if($("rel-doc").children.length) go(); else relGera().then(go); });
 
-ORD["df-redes"]={c:null,d:-1}; ORD["df-prot"]={c:null,d:-1};
+ORD["df-prot"]={c:null,d:-1};
 pers("df-per","dfPer","d",defiDes); pers("ef-per","efPer","d",etfDes); pers("ef-un","efUn","u",etfDes);
 function m2Abre(j){ if(j==="defi") defiDes(); else if(j==="onchain") ocDes(); else if(j==="etfs") etfDes(); else if(j==="relatorio") relGera(); }
 setInterval(function(){ if($("area-mercado").hidden) return; if(!$("mj-defi").hidden) defiDes(); if(!$("mj-onchain").hidden) ocDes(); if(!$("mj-etfs").hidden) etfDes(); },120000);
