@@ -126,7 +126,17 @@ tr.passado td{opacity:.55}
 @media (max-width:760px){.aulas{grid-template-columns:1fr}}
 #au-menu{display:flex;flex-direction:column;gap:4px}
 #au-menu .aumod{font:600 18px/1.25 var(--serif,"Source Serif 4",serif);color:var(--fg);letter-spacing:0;text-transform:none;margin:18px 0 6px;padding:0 0 8px;border-bottom:2px solid var(--accent)} #au-menu .aumod:first-child{margin-top:0}
-.aulas{grid-template-columns:minmax(260px,360px) 1fr}
+.aulas{display:flex;flex-direction:column;gap:20px} .aulas #au-palco{order:1} .aulas #au-menu{order:2;gap:0}
+#au-palco .video{max-width:860px}
+.aulas>*{min-width:0;width:100%;box-sizing:border-box} #au-menu>*{min-width:0;max-width:100%} .carr{position:relative;min-width:0} .trilho{display:flex;gap:14px;overflow-x:auto;scroll-snap-type:x proximity;scroll-behavior:smooth;padding:4px 2px 12px;scrollbar-width:thin}
+button.cartao{flex:0 0 clamp(200px,22vw,280px);scroll-snap-align:start;padding:0;border:1px solid var(--line);border-radius:6px;background:var(--surface);color:var(--fg);text-align:left;overflow:hidden;display:flex;flex-direction:column;font-weight:400}
+button.cartao:hover{border-color:var(--accent)} button.cartao.atual{border-color:var(--accent);box-shadow:0 0 0 2px var(--accent)}
+.cartao .capa{position:relative;aspect-ratio:16/9;background:var(--soft) center/cover no-repeat;display:block;width:100%}
+.cartao .capa i{position:absolute;right:6px;bottom:6px;background:rgba(0,0,0,.78);color:#fff;font:500 12px var(--mono);font-style:normal;padding:2px 6px;border-radius:3px}
+.cartao .capa b{position:absolute;left:6px;top:6px;background:var(--good,#1a7f4b);color:#fff;font:600 11px var(--sans);padding:2px 7px;border-radius:3px}
+.cartao .nome{padding:10px 12px 12px;font-size:14px;line-height:1.3;white-space:normal;display:block}
+.carr .seta{position:absolute;top:calc(50% - 34px);z-index:2;width:38px;height:38px;border-radius:50%;padding:0;background:var(--surface);color:var(--fg);border:1px solid var(--line);box-shadow:0 2px 8px rgba(0,0,0,.2);font-size:18px;line-height:1}
+.carr .seta.esq{left:-6px} .carr .seta.dir{right:-6px} .carr .seta[hidden]{display:none}
 .aumod{margin:10px 0 4px}
 button.aula{text-align:left;border:1px solid transparent;color:var(--fg);padding:8px 10px;font-weight:400}
 button.aula.atual{border-color:var(--accent);font-weight:600}
@@ -170,8 +180,8 @@ button.mini{font-size:12px;color:var(--muted)}
   <div>
     <div class="marca" id="marca" hidden></div>
     <nav class="areas" id="areas" aria-label="Áreas do painel">
-      <button type="button" data-area="carteira" aria-current="page">Carteira</button>
       <button type="button" data-area="mercado" aria-current="false">Mercado</button>
+      <button type="button" data-area="carteira" aria-current="page">Carteira</button>
       <button type="button" data-area="funding" aria-current="false">Estratégias</button>
       <button type="button" data-area="aulas" aria-current="false">Aulas</button>
       <button type="button" data-area="admin" aria-current="false" id="bt-admin" hidden>Administração</button>
@@ -934,7 +944,7 @@ function rotPreco(){ var sm=$("f-moeda").value==="BRL"?"R$":"US$", total=$("f-mo
 function limpaForm(){ EDIT=null; var mo=$("f-moeda").value, cl=$("f-classe").value, md=$("f-modo").value; $("c-form").reset(); $("f-moeda").value=mo; $("f-classe").value=cl; $("f-modo").value=md; rotPreco(); if(DOLAR) $("f-cambio").value=DOLAR.toFixed(4); $("f-data").value=new Date().toISOString().slice(0,10); $("f-salvar").textContent="Adicionar"; $("f-cancelar").hidden=true; $("f-erro").hidden=true; }
 var TITULOS={carteira:"Minha Carteira",mercado:"Mercado",funding:"Estratégias",aulas:"Aulas",admin:"Administração"};
 var AUTHURL=/access_token=|refresh_token=|error_description=|type=(signup|magiclink|recovery)/.test(location.hash)||/[?&](code|token_hash)=/.test(location.search);
-function area(a){ if(!TITULOS[a]) a="carteira"; Object.keys(TITULOS).forEach(function(x){ $("area-"+x).hidden=x!==a; }); document.querySelectorAll("#areas button").forEach(function(o){o.setAttribute("aria-current",o.dataset.area===a?"page":"false");});
+function area(a){ if(!TITULOS[a]) a="mercado"; Object.keys(TITULOS).forEach(function(x){ $("area-"+x).hidden=x!==a; }); document.querySelectorAll("#areas button").forEach(function(o){o.setAttribute("aria-current",o.dataset.area===a?"page":"false");});
   $("titulo").textContent=TITULOS[a]; $("atualizado").hidden=a!=="funding"; $("cart-status").hidden=a==="funding"||a==="aulas"||a==="admin"; if(a==="admin"&&typeof admCarrega==="function") admCarrega(); if(!AUTHURL){ try{history.replaceState(null,"","#"+a);}catch(e){} } }
 $("c-form").addEventListener("submit",function(ev){ ev.preventDefault();
   var a=$("f-ativo").value.trim().toUpperCase().replace(/[^A-Z0-9 ]/g,"").replace(/ +/g," "), q=+$("f-qtd").value, pd=($("f-modo").value==="total"&&+$("f-qtd").value>0)?vnum("f-preco")/(+$("f-qtd").value):vnum("f-preco"), mo=$("f-moeda").value, cb=+$("f-cambio").value, p=mo==="BRL"?(cb>0?pd/cb:NaN):pd, d=$("f-data").value, t=$("f-tipo").value, er=$("f-erro");
@@ -1011,8 +1021,15 @@ try{ VISTAS=JSON.parse(localStorage.getItem("aulas_vistas"))||{}; }catch(e){}
 function auChave(a){ return a.modulo+"|"+a.titulo; }
 function auDesenha(){
   var menu=$("au-menu"); menu.textContent=""; var mod="";
-  AULAS.forEach(function(a,i){ if(a.modulo!==mod){ mod=a.modulo; menu.appendChild(el("div","rot aumod",mod)); }
-    var b=el("button","aula"+(i===AU?" atual":""),(VISTAS[auChave(a)]?"✓ ":"")+a.titulo+(a.duracao?"  ·  "+a.duracao:"")); b.type="button"; b.addEventListener("click",function(){AU=i; auDesenha();}); menu.appendChild(b); });
+  var trilho=null, atualEl=null;
+  AULAS.forEach(function(a,i){ if(a.modulo!==mod||!trilho){ mod=a.modulo; var n=AULAS.filter(function(x){return x.modulo===mod;}).length; menu.appendChild(el("div","rot aumod",mod+"  ·  "+n+(n>1?" aulas":" aula")));
+      var c=el("div","carr"), e=el("button","seta esq","‹"), d=el("button","seta dir","›"); trilho=el("div","trilho"); e.type=d.type="button"; e.setAttribute("aria-label","Aulas anteriores de "+mod); d.setAttribute("aria-label","Próximas aulas de "+mod);
+      (function(t,e,d){ var at=function(){ e.hidden=t.scrollLeft<4; d.hidden=t.scrollLeft+t.clientWidth>=t.scrollWidth-4; }; e.addEventListener("click",function(){ t.scrollBy({left:-t.clientWidth*0.8}); }); d.addEventListener("click",function(){ t.scrollBy({left:t.clientWidth*0.8}); }); t.addEventListener("scroll",at); setTimeout(at,60); window.addEventListener("resize",at); })(trilho,e,d);
+      c.appendChild(e); c.appendChild(trilho); c.appendChild(d); menu.appendChild(c); }
+    var b=el("button","cartao"+(i===AU?" atual":"")), capa=el("span","capa"); b.type="button"; if(a.youtube&&/^[\w-]{6,20}$/.test(a.youtube)) capa.style.backgroundImage="url(https://i.ytimg.com/vi/"+a.youtube+"/mqdefault.jpg)";
+    if(a.duracao) capa.appendChild(el("i",null,a.duracao)); if(VISTAS[auChave(a)]) capa.appendChild(el("b",null,"✓ Assistida")); b.appendChild(capa); b.appendChild(el("span","nome",a.titulo));
+    b.addEventListener("click",function(){ AU=i; auDesenha(); $("au-palco").scrollIntoView({behavior:"smooth",block:"start"}); }); trilho.appendChild(b); if(i===AU) atualEl=b; });
+  if(atualEl) setTimeout(function(){ var t=atualEl.parentNode; t.scrollLeft=Math.max(0,atualEl.offsetLeft-t.offsetLeft-20); },30);
   var a=AULAS[AU]; if(!a) return; var v=$("au-video"); v.textContent="";
   if(a.youtube&&/^[\w-]{6,20}$/.test(a.youtube)){ var f=document.createElement("iframe"); f.src="https://www.youtube-nocookie.com/embed/"+a.youtube; f.title=a.titulo; f.allow="accelerometer; encrypted-media; picture-in-picture; fullscreen"; f.allowFullscreen=true; f.loading="lazy"; v.appendChild(f); }
   else v.appendChild(el("div","semvideo","Esta aula ainda não tem vídeo cadastrado."));
@@ -1128,7 +1145,7 @@ function contaDesenha(){
   $("funding-bloq-txt").textContent=USUARIO?"Sua conta ainda não tem acesso a esta área. Fale com o administrador para liberar.":"Entre com a sua conta para ver esta área.";
   $("c-nota-local").hidden=!!USUARIO; $("c-nota-nuvem").hidden=!USUARIO;
   $("ver-como-rot").hidden=PLANOREAL!=="admin"; $("ver-como-rot").style.display=PLANOREAL==="admin"?"flex":"none";
-  if(PLANO!=="admin"&&!$("area-admin").hidden) area("carteira");
+  if(PLANO!=="admin"&&!$("area-admin").hidden) area("mercado");
   $("bt-admin").hidden=PLANO!=="admin"; if(!$("area-admin").hidden) admCarrega();
 }
 var ADM=[];
@@ -1170,7 +1187,8 @@ function nuvem(op,l){
 }
 function nuvemFalhou(){ $("f-erro").textContent="Não consegui salvar na sua conta. Recarreguei os lançamentos; tente de novo."; $("f-erro").hidden=false; nuvemCarrega().catch(function(){}); }
 function sessao(s){
-  USUARIO=s?s.user:null; PLANO=null; PLANOREAL=null;
+  var antes=USUARIO, primeira=!sessao.ja; sessao.ja=true;
+  USUARIO=s?s.user:null; PLANO=null; PLANOREAL=null; if(USUARIO&&!antes&&!primeira) area("mercado");
   if(!USUARIO){ cLer(); contaDesenha(); cDesenha(); comCarrega(); return; }
   contaDesenha();
   SB.from("perfis").select("plano").eq("user_id",USUARIO.id).maybeSingle().then(function(r){ PLANOREAL=r.data?r.data.plano:"gratis"; var vc="admin"; try{ vc=sessionStorage.getItem("ver_como")||"admin"; }catch(e){} PLANO=PLANOREAL==="admin"?vc:PLANOREAL; $("ver-como").value=PLANO; contaDesenha(); comCarrega(); });
