@@ -176,12 +176,13 @@ def registrar(agora=None):
             pass
     ini = c.setdefault("inicio", int(agora))
     try:   # CDI diário (série 12 do Banco Central), acumulado desde o início
-        d0 = datetime.datetime.fromtimestamp(ini, datetime.timezone.utc).strftime("%d/%m/%Y")
-        d1 = datetime.datetime.fromtimestamp(agora, datetime.timezone.utc).strftime("%d/%m/%Y")
-        dias = radar.get(f"https://api.bcb.gov.br/dados/serie/bcdata.sgs.12/dados?formato=json&dataInicial={d0}&dataFinal={d1}")
+        fmt = lambda ts: datetime.datetime.fromtimestamp(ts, datetime.timezone.utc).strftime("%d/%m/%Y")
+        dia_ini = datetime.datetime.fromtimestamp(ini, datetime.timezone.utc).date()
+        dias = radar.get(f"https://api.bcb.gov.br/dados/serie/bcdata.sgs.12/dados?formato=json&dataInicial={fmt(ini - 10 * 86400)}&dataFinal={fmt(agora)}")
         fator = 1.0
-        for d in dias[1:]:               # o primeiro dia é o do início; rende a partir do seguinte
-            fator *= 1 + float(d["valor"]) / 100
+        for d in dias:                   # rende a partir do dia seguinte ao início
+            if datetime.datetime.strptime(d["data"], "%d/%m/%Y").date() > dia_ini:
+                fator *= 1 + float(d["valor"]) / 100
         ponto["cdi"] = round(fator, 8)
     except Exception:
         pass

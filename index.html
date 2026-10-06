@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Radar de Funding</title>
+<title>Painel Cripto</title>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Source+Serif+4:opsz,wght@8..60,500;8..60,600&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
 <style>
 /* Layout: faixa institucional no topo, parâmetros, indicadores, fichas de operação com as duas pernas lado a lado, tabela geral, método e riscos. */
@@ -91,19 +91,104 @@ details{padding:10px 18px} summary{cursor:pointer;font-size:13px;color:var(--mut
 .ordbot button[aria-pressed="true"]{background:var(--accent);border-color:var(--accent);color:var(--surface);font-weight:600}
 .leg{display:flex;flex-wrap:wrap;gap:6px 16px;font-size:13px;color:var(--muted);margin-top:8px}
 .leg i{display:inline-block;width:14px;height:3px;vertical-align:middle;margin-right:6px}
+.area{display:flex;flex-direction:column;gap:20px}
+.areas{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:14px}
+.areas button{border:1px solid transparent;color:var(--band-muted);padding:6px 14px;font-weight:500}
+.areas button[aria-current="page"]{border-color:var(--band-fg);color:var(--band-fg);font-weight:600}
+button.sec,label.arq{color:var(--muted);border:1px solid var(--line);background:transparent}
+label.arq{display:inline-block;font:500 14px var(--sans);padding:8px 14px;border-radius:3px;cursor:pointer;flex-direction:row}
+button.lnk{border:0;padding:0;background:none;color:var(--accent);font:inherit;text-decoration:underline;text-underline-offset:3px}
+button.lnk.neg{color:var(--bad)}
+.aviso{border:1px solid var(--warn);color:var(--warn);padding:10px 14px;border-radius:3px;margin-bottom:14px;font-size:14px}
+.barra{display:grid;grid-template-columns:64px 1fr auto;gap:10px;align-items:center;padding:6px 0;font-size:14px}
+.bn{font:500 14px var(--mono)} .bt{background:var(--soft);height:10px;border-radius:2px;overflow:hidden;min-width:0} .bt i{display:block;height:100%;background:var(--accent)}
+.bv{font:400 13px var(--mono);color:var(--muted);white-space:nowrap}
+.kpi .sub{font:400 13px var(--mono)}
 .rodape{font-size:12px;color:var(--muted);border-top:1px solid var(--line);padding-top:14px}
 </style>
 </head>
 <body>
 <header class="faixa"><div class="in">
   <div>
-    <div class="marca">Arbitragem de funding · Delta neutro</div>
-    <h1>Radar de Funding</h1>
-    <p id="atualizado">Buscando taxas…</p>
+    <nav class="areas" id="areas" aria-label="Áreas do painel">
+      <button type="button" data-area="carteira" aria-current="page">Carteira</button>
+      <button type="button" data-area="funding" aria-current="false">Funding</button>
+    </nav>
+    <h1 id="titulo">Minha Carteira</h1>
+    <p id="cart-status">Buscando preços…</p>
+    <p id="atualizado" hidden>Buscando taxas…</p>
   </div>
-  <button id="recarregar" type="button">Atualizar taxas</button>
+  <button id="recarregar" type="button">Atualizar</button>
 </div></header>
 <main>
+  <div id="area-carteira" class="area">
+    <div class="abas" role="tablist" id="cabas">
+      <button type="button" role="tab" data-cj="resumo" aria-selected="true">Resumo</button>
+      <button type="button" role="tab" data-cj="posicoes" aria-selected="false">Posições</button>
+      <button type="button" role="tab" data-cj="lanc" aria-selected="false">Lançamentos</button>
+      <button type="button" role="tab" data-cj="mercado" aria-selected="false">Mercado</button>
+    </div>
+
+    <section id="cj-resumo">
+      <div class="box" id="c-vazio" hidden>
+        <h2>Sua carteira ainda está vazia</h2>
+        <p class="sub">Cadastre cada compra na janela Lançamentos: ativo, quantidade, preço e data. O preço médio, o valor atual e o lucro ou prejuízo são calculados sozinhos.</p>
+        <p style="margin-top:12px"><button type="button" id="c-ir-lanc">Cadastrar a primeira compra</button> <button type="button" id="c-exemplo" class="sec">Ver com dados de exemplo</button></p>
+      </div>
+      <div id="c-cheio" hidden>
+        <p class="aviso" id="c-aviso-ex" hidden>Você está vendo dados de exemplo. <button type="button" id="c-limpa-ex" class="sec">Apagar o exemplo</button></p>
+        <div class="kpis">
+          <div class="kpi"><span class="rot">Valor atual</span><b id="k-valor">–</b></div>
+          <div class="kpi"><span class="rot">Investido</span><b id="k-inv">–</b></div>
+          <div class="kpi"><span class="rot">Lucro ou prejuízo</span><b id="k-lp">–</b><span class="sub" id="k-lpp"></span></div>
+          <div class="kpi"><span class="rot">Hoje (24h)</span><b id="k-24">–</b></div>
+          <div class="kpi"><span class="rot">Já realizado</span><b id="k-real">–</b></div>
+        </div>
+        <div class="duas" style="margin-top:20px">
+          <div class="box"><h2>Maiores valorizações</h2><div class="scroll"><table><thead><tr><th>Ativo</th><th>Preço médio</th><th>Preço atual</th><th>Resultado</th></tr></thead><tbody id="c-altas"></tbody></table></div></div>
+          <div class="box"><h2>Maiores quedas</h2><div class="scroll"><table><thead><tr><th>Ativo</th><th>Preço médio</th><th>Preço atual</th><th>Resultado</th></tr></thead><tbody id="c-baixas"></tbody></table></div></div>
+        </div>
+        <div class="box" style="margin-top:20px"><h2>Distribuição da carteira</h2><div id="c-aloc"></div></div>
+      </div>
+    </section>
+
+    <section id="cj-posicoes" class="box" hidden>
+      <h2>Posições abertas</h2>
+      <p class="sub">Preço médio ponderado das compras. Clique em um ativo para ver as compras dele.</p>
+      <div class="scroll"><table><thead><tr><th>Ativo</th><th>Quantidade</th><th>Preço médio</th><th>Preço atual</th><th>24h</th><th>Investido</th><th>Valor atual</th><th>Resultado (US$)</th><th>Resultado</th><th>Peso</th></tr></thead><tbody id="c-pos"></tbody></table></div>
+    </section>
+
+    <section id="cj-lanc" hidden>
+      <form class="box controles" id="c-form">
+        <label>Ativo<input id="f-ativo" type="text" placeholder="BTC" required maxlength="12"></label>
+        <label>Operação<select id="f-tipo"><option value="compra">Compra</option><option value="venda">Venda</option></select></label>
+        <label>Quantidade<input id="f-qtd" type="number" step="any" min="0" required placeholder="0,05"></label>
+        <label>Preço unitário (US$)<input id="f-preco" type="number" step="any" min="0" required placeholder="85000"></label>
+        <label>Data<input id="f-data" type="date" required></label>
+        <button type="submit" id="f-salvar">Adicionar</button>
+        <button type="button" id="f-cancelar" class="sec" hidden>Cancelar edição</button>
+      </form>
+      <p class="neg" id="f-erro" hidden style="margin-top:8px"></p>
+      <div class="box" style="margin-top:14px">
+        <h2>Lançamentos</h2>
+        <p class="sub" id="c-filtro" hidden></p>
+        <div class="scroll"><table><thead><tr><th>Data</th><th>Ativo</th><th>Operação</th><th>Quantidade</th><th>Preço (US$)</th><th>Total (US$)</th><th></th></tr></thead><tbody id="c-lanc"></tbody></table></div>
+        <p style="margin-top:14px"><button type="button" id="c-exportar" class="sec">Salvar cópia de segurança</button> <label class="arq sec">Restaurar cópia<input type="file" id="c-importar" accept="application/json,.json" hidden></label></p>
+      </div>
+      <p class="note">Os lançamentos ficam guardados só neste navegador. Eles não aparecem em outro aparelho nem para outras pessoas, e somem se você limpar os dados do navegador. Salve uma cópia de segurança de vez em quando.</p>
+    </section>
+
+    <section id="cj-mercado" hidden>
+      <div class="duas">
+        <div class="box"><h2>Maiores altas em 24h</h2><div class="scroll"><table><thead><tr><th>Ativo</th><th>Preço (US$)</th><th>24h</th></tr></thead><tbody id="m-altas"></tbody></table></div></div>
+        <div class="box"><h2>Maiores quedas em 24h</h2><div class="scroll"><table><thead><tr><th>Ativo</th><th>Preço (US$)</th><th>24h</th></tr></thead><tbody id="m-baixas"></tbody></table></div></div>
+      </div>
+      <div class="box" style="margin-top:20px"><h2>Principais ativos</h2><div class="scroll"><table><thead><tr><th>Ativo</th><th>Preço (US$)</th><th>24h</th><th>Volume 24h</th></tr></thead><tbody id="m-princ"></tbody></table></div></div>
+      <p class="note">Preços do mercado à vista da Binance, em dólar. Altas e quedas consideram só ativos com mais de US$ 20 milhões negociados em 24h.</p>
+    </section>
+  </div>
+
+  <div id="area-funding" class="area" hidden>
   <section class="box controles" aria-label="Parâmetros">
     <label>Capital (US$)<input id="capital" type="number" min="1" step="1" value="100"></label>
     <label>Alavancagem<select id="alav"><option value="1">1x</option><option value="2">2x</option><option value="3">3x</option></select></label>
@@ -192,6 +277,7 @@ details{padding:10px 18px} summary{cursor:pointer;font-size:13px;color:var(--mut
     </section>
   </div>
   <p class="rodape">Dados públicos de Binance, Bybit, OKX, Bitget, Gate, Hyperliquid e dYdX. Taxas anualizadas a partir do funding de cada período. Esta página não envia ordens nem acessa contas. Não é recomendação de investimento.</p>
+  </div>
 </main>
 
 <script>
@@ -446,9 +532,102 @@ function iniciar(){
   });
 }
 ["capital","alav","vol","busca"].forEach(function(id){$(id).addEventListener("input",desenha);});
-document.querySelectorAll(".abas button").forEach(function(b){b.addEventListener("click",function(){
-  document.querySelectorAll(".abas button").forEach(function(o){o.setAttribute("aria-selected",o===b?"true":"false"); $("aba-"+o.dataset.aba).hidden=o!==b;});});});
-$("recarregar").addEventListener("click",iniciar);
+document.querySelectorAll("button[data-aba]").forEach(function(b){b.addEventListener("click",function(){
+  document.querySelectorAll("button[data-aba]").forEach(function(o){o.setAttribute("aria-selected",o===b?"true":"false"); $("aba-"+o.dataset.aba).hidden=o!==b;});});});
+$("recarregar").addEventListener("click",function(){iniciar(); cPrecos();});
+/* ---------- Carteira ---------- */
+var CHAVE="carteira_v1", CART={lanc:[],exemplo:false}, PRECOS={}, EDIT=null, FILTRO=null;
+var PRINCIPAIS=["BTC","ETH","SOL","BNB","XRP","DOGE","ADA","TRX","AVAX","LINK","SUI","LTC","DOT","NEAR","UNI","AAVE","HYPE","TON"];
+function cLer(){ try{ var j=JSON.parse(localStorage.getItem(CHAVE)); if(j&&Array.isArray(j.lanc)) CART=j; }catch(e){} }
+function cGravar(){ try{ localStorage.setItem(CHAVE,JSON.stringify(CART)); return true; }catch(e){ return false; } }
+function num(v,c){ return v.toLocaleString("pt-BR",{maximumFractionDigits:c==null?8:c}); }
+function prc(p){ return p==null?"sem preço":usd(p,p<1?4:2); }
+function precoDe(a){ if(a==="USDT"||a==="USDC") return {p:1,v:0}; return PRECOS[a]||null; }
+function posicoes(){
+  var m={};
+  CART.lanc.slice().sort(function(a,b){return a.data<b.data?-1:a.data>b.data?1:a.id-b.id;}).forEach(function(l){
+    var p=m[l.ativo]||(m[l.ativo]={ativo:l.ativo,qtd:0,custo:0,real:0});
+    if(l.tipo==="compra"){ p.qtd+=l.qtd; p.custo+=l.qtd*l.preco; }
+    else { var q=Math.min(l.qtd,p.qtd), pm=p.qtd>0?p.custo/p.qtd:0; p.real+=(l.preco-pm)*q; p.custo-=pm*q; p.qtd-=q; }
+  });
+  var lista=[], real=0, total=0;
+  Object.keys(m).forEach(function(k){ var p=m[k]; real+=p.real; if(p.qtd>1e-12){ var x=precoDe(k); p.pm=p.custo/p.qtd; p.preco=x?x.p:null; p.var24=x?x.v:null; p.valor=x?p.qtd*x.p:null; p.lp=x?p.valor-p.custo:null; p.lpp=x&&p.custo>0?p.lp/p.custo:null; if(p.valor!=null) total+=p.valor; lista.push(p); } });
+  lista.forEach(function(p){ p.peso=p.valor!=null&&total>0?p.valor/total:null; });
+  lista.sort(function(a,b){return (b.valor||0)-(a.valor||0);});
+  return {lista:lista,real:real,total:total};
+}
+function linhaMov(tb,p){ var tr=el("tr"); cel(tr,p.ativo); cel(tr,prc(p.pm)); cel(tr,prc(p.preco)); cel(tr,p.lpp==null?"–":pct(p.lpp),p.lpp==null?"vazio":cls(p.lpp)); tb.appendChild(tr); }
+function semLinhas(tb,cols,msg){ var tr=el("tr"); var td=cel(tr,msg,"txt vazio"); td.colSpan=cols; tb.appendChild(tr); }
+function cDesenha(){
+  var r=posicoes(), L=r.lista, tem=CART.lanc.length>0;
+  $("c-vazio").hidden=tem; $("c-cheio").hidden=!tem; $("c-aviso-ex").hidden=!CART.exemplo;
+  var inv=0, d24=0, comPreco=0; L.forEach(function(p){ if(p.valor!=null){ inv+=p.custo; comPreco++; if(p.var24!=null) d24+=p.valor-p.valor/(1+p.var24); } });
+  var lp=r.total-inv;
+  $("k-valor").textContent="US$ "+usd(r.total); $("k-inv").textContent="US$ "+usd(inv);
+  $("k-lp").textContent=sinal(lp,2); $("k-lp").className=cls(lp); $("k-lpp").textContent=inv>0?pct(lp/inv):"";
+  $("k-24").textContent=sinal(d24,2); $("k-24").className=cls(d24);
+  $("k-real").textContent=sinal(r.real,2); $("k-real").className=cls(r.real);
+  var ord=L.filter(function(p){return p.lpp!=null;}).sort(function(a,b){return b.lpp-a.lpp;});
+  var ta=$("c-altas"), tq=$("c-baixas"); ta.textContent=""; tq.textContent="";
+  var altas=ord.filter(function(p){return p.lpp>0;}).slice(0,5), baixas=ord.filter(function(p){return p.lpp<0;}).reverse().slice(0,5);
+  altas.forEach(function(p){linhaMov(ta,p);}); baixas.forEach(function(p){linhaMov(tq,p);});
+  if(!altas.length) semLinhas(ta,4,"Nenhuma posição no lucro agora."); if(!baixas.length) semLinhas(tq,4,"Nenhuma posição no prejuízo agora.");
+  var al=$("c-aloc"); al.textContent="";
+  L.forEach(function(p){ if(p.peso==null) return; var d=el("div","barra"); d.appendChild(el("span","bn",p.ativo)); var t=el("span","bt"); var f=el("i"); f.style.width=Math.max(1,p.peso*100)+"%"; t.appendChild(f); d.appendChild(t); d.appendChild(el("span","bv",usd(p.peso*100,1)+"%  ·  US$ "+usd(p.valor))); al.appendChild(d); });
+
+  var tb=$("c-pos"); tb.textContent="";
+  L.forEach(function(p){ var tr=el("tr"); var td=cel(tr,""); var b=el("button","lnk",p.ativo); b.type="button"; b.addEventListener("click",function(){FILTRO=p.ativo; janela("lanc"); cDesenha();}); td.appendChild(b);
+    cel(tr,num(p.qtd)); cel(tr,prc(p.pm)); cel(tr,prc(p.preco)); cel(tr,p.var24==null?"–":pct(p.var24),p.var24==null?"vazio":cls(p.var24)); cel(tr,usd(p.custo));
+    cel(tr,p.valor==null?"–":usd(p.valor)); cel(tr,p.lp==null?"–":sinal(p.lp,2),p.lp==null?"vazio":cls(p.lp)); cel(tr,p.lpp==null?"–":pct(p.lpp),p.lpp==null?"vazio":cls(p.lpp)); cel(tr,p.peso==null?"–":usd(p.peso*100,1)+"%"); tb.appendChild(tr); });
+  if(!L.length) semLinhas(tb,10,"Nenhuma posição aberta. Cadastre uma compra em Lançamentos.");
+
+  var tl=$("c-lanc"); tl.textContent="";
+  var ls=CART.lanc.filter(function(l){return !FILTRO||l.ativo===FILTRO;}).sort(function(a,b){return a.data<b.data?1:a.data>b.data?-1:b.id-a.id;});
+  $("c-filtro").hidden=!FILTRO; $("c-filtro").textContent=""; if(FILTRO){ $("c-filtro").appendChild(document.createTextNode("Mostrando só "+FILTRO+". ")); var bf=el("button","lnk","Mostrar todos"); bf.type="button"; bf.addEventListener("click",function(){FILTRO=null; cDesenha();}); $("c-filtro").appendChild(bf); }
+  ls.forEach(function(l){ var tr=el("tr"); cel(tr,l.data.split("-").reverse().join("/")); cel(tr,l.ativo); cel(tr,l.tipo==="compra"?"Compra":"Venda","txt "+(l.tipo==="compra"?"pos":"neg")); cel(tr,num(l.qtd)); cel(tr,prc(l.preco)); cel(tr,usd(l.qtd*l.preco));
+    var td=cel(tr,"","txt"); var be=el("button","lnk","Editar"); be.type="button"; be.addEventListener("click",function(){editar(l);}); td.appendChild(be); td.appendChild(document.createTextNode("  "));
+    var br=el("button","lnk neg","Remover"); br.type="button"; br.addEventListener("click",function(){ if(br.dataset.ok){ CART.lanc=CART.lanc.filter(function(x){return x.id!==l.id;}); cGravar(); cDesenha(); } else { br.dataset.ok="1"; br.textContent="Confirmar remoção"; } }); td.appendChild(br); tl.appendChild(tr); });
+  if(!ls.length) semLinhas(tl,7,"Nenhum lançamento ainda.");
+  var semPreco=L.filter(function(p){return p.preco==null;}).map(function(p){return p.ativo;});
+  $("cart-status").textContent=(Object.keys(PRECOS).length?"Preços atualizados em "+new Date().toLocaleTimeString("pt-BR")+". ":"Buscando preços… ")+(semPreco.length?"Sem preço na Binance: "+semPreco.join(", ")+".":"");
+}
+function mDesenha(){
+  var todos=Object.keys(PRECOS).map(function(k){return {a:k,p:PRECOS[k].p,v:PRECOS[k].v,vol:PRECOS[k].vol};});
+  var liq=todos.filter(function(x){return x.vol>=2e7;}).sort(function(a,b){return b.v-a.v;});
+  function enche(id,l,vol){ var tb=$(id); tb.textContent=""; l.forEach(function(x){ var tr=el("tr"); cel(tr,x.a); cel(tr,prc(x.p)); cel(tr,pct(x.v),cls(x.v)); if(vol) cel(tr,"US$ "+usd(x.vol/1e6,0)+" mi"); tb.appendChild(tr); }); if(!l.length) semLinhas(tb,vol?4:3,"Buscando preços…"); }
+  enche("m-altas",liq.slice(0,8)); enche("m-baixas",liq.slice(-8).reverse());
+  enche("m-princ",PRINCIPAIS.filter(function(a){return PRECOS[a];}).map(function(a){return {a:a,p:PRECOS[a].p,v:PRECOS[a].v,vol:PRECOS[a].vol};}),true);
+}
+function cPrecos(){
+  getJ("https://data-api.binance.vision/api/v3/ticker/24hr").then(function(l){ var m={};
+    l.forEach(function(x){ if(/USDT$/.test(x.symbol)&&+x.lastPrice>0&&+x.quoteVolume>0) m[x.symbol.slice(0,-4)]={p:+x.lastPrice,v:(+x.priceChangePercent)/100,vol:+x.quoteVolume}; });
+    PRECOS=m; cDesenha(); mDesenha(); }).catch(function(){ $("cart-status").textContent="Não consegui buscar os preços. Confira a internet e clique em Atualizar."; });
+}
+function janela(j){ document.querySelectorAll("#cabas button").forEach(function(o){ var on=o.dataset.cj===j; o.setAttribute("aria-selected",on?"true":"false"); $("cj-"+o.dataset.cj).hidden=!on; }); }
+function editar(l){ EDIT=l.id; $("f-ativo").value=l.ativo; $("f-tipo").value=l.tipo; $("f-qtd").value=l.qtd; $("f-preco").value=l.preco; $("f-data").value=l.data; $("f-salvar").textContent="Salvar alteração"; $("f-cancelar").hidden=false; $("f-ativo").focus(); }
+function limpaForm(){ EDIT=null; $("c-form").reset(); $("f-data").value=new Date().toISOString().slice(0,10); $("f-salvar").textContent="Adicionar"; $("f-cancelar").hidden=true; $("f-erro").hidden=true; }
+function area(a){ ["carteira","funding"].forEach(function(x){ $("area-"+x).hidden=x!==a; }); document.querySelectorAll("#areas button").forEach(function(o){o.setAttribute("aria-current",o.dataset.area===a?"page":"false");});
+  $("titulo").textContent=a==="carteira"?"Minha Carteira":"Radar de Funding"; $("atualizado").hidden=a!=="funding"; $("cart-status").hidden=a!=="carteira"; try{history.replaceState(null,"","#"+a);}catch(e){} }
+$("c-form").addEventListener("submit",function(ev){ ev.preventDefault();
+  var a=$("f-ativo").value.trim().toUpperCase().replace(/[^A-Z0-9]/g,""), q=+$("f-qtd").value, p=+$("f-preco").value, d=$("f-data").value, t=$("f-tipo").value, er=$("f-erro");
+  var msg=!a?"Informe o ativo, por exemplo BTC.":!(q>0)?"A quantidade precisa ser maior que zero.":!(p>=0)||$("f-preco").value===""?"Informe o preço unitário em dólar.":!d?"Informe a data.":"";
+  if(!msg&&t==="venda"){ var disp=0; CART.lanc.forEach(function(l){ if(l.ativo===a&&l.id!==EDIT) disp+=l.tipo==="compra"?l.qtd:-l.qtd; }); if(q>disp+1e-9) msg="Você só tem "+num(Math.max(0,disp))+" "+a+" cadastrado para vender."; }
+  if(msg){ er.textContent=msg; er.hidden=false; return; }
+  if(CART.exemplo){ CART={lanc:[],exemplo:false}; }
+  var novo={id:EDIT||Date.now(),ativo:a,tipo:t,qtd:q,preco:p,data:d};
+  if(EDIT) CART.lanc=CART.lanc.map(function(l){return l.id===EDIT?novo:l;}); else CART.lanc.push(novo);
+  if(!cGravar()){ er.textContent="Este navegador não deixou guardar os dados. O lançamento vale só até você fechar a página."; er.hidden=false; } 
+  var manter=er.hidden; limpaForm(); if(!manter) er.hidden=false; cDesenha(); });
+$("f-cancelar").addEventListener("click",limpaForm);
+$("c-ir-lanc").addEventListener("click",function(){janela("lanc"); $("f-ativo").focus();});
+$("c-exemplo").addEventListener("click",function(){ CART={exemplo:true,lanc:[{id:1,ativo:"BTC",tipo:"compra",qtd:0.02,preco:62000,data:"2026-03-10"},{id:2,ativo:"BTC",tipo:"compra",qtd:0.01,preco:91000,data:"2026-07-02"},{id:3,ativo:"ETH",tipo:"compra",qtd:0.5,preco:3100,data:"2026-04-18"},{id:4,ativo:"SOL",tipo:"compra",qtd:6,preco:95,data:"2026-05-05"},{id:5,ativo:"SOL",tipo:"venda",qtd:2,preco:140,data:"2026-08-20"},{id:6,ativo:"LINK",tipo:"compra",qtd:25,preco:18,data:"2026-06-11"}]}; cDesenha(); });
+$("c-limpa-ex").addEventListener("click",function(){ CART={lanc:[],exemplo:false}; cGravar(); cDesenha(); });
+$("c-exportar").addEventListener("click",function(){ var a=document.createElement("a"); a.href=URL.createObjectURL(new Blob([JSON.stringify(CART,null,1)],{type:"application/json"})); a.download="carteira-"+new Date().toISOString().slice(0,10)+".json"; document.body.appendChild(a); a.click(); a.remove(); });
+$("c-importar").addEventListener("change",function(ev){ var f=ev.target.files[0]; if(!f) return; var rd=new FileReader(); rd.onload=function(){ try{ var j=JSON.parse(rd.result); if(!j||!Array.isArray(j.lanc)) throw 0; CART={exemplo:false,lanc:j.lanc.filter(function(l){return l&&l.ativo&&l.qtd>0&&l.preco>=0&&l.data;}).map(function(l,i){return {id:l.id||Date.now()+i,ativo:String(l.ativo).toUpperCase(),tipo:l.tipo==="venda"?"venda":"compra",qtd:+l.qtd,preco:+l.preco,data:String(l.data)};})}; cGravar(); cDesenha(); $("f-erro").hidden=true; }catch(e){ $("f-erro").textContent="Esse arquivo não é uma cópia de segurança da carteira."; $("f-erro").hidden=false; } ev.target.value=""; }; rd.readAsText(f); });
+document.querySelectorAll("#cabas button").forEach(function(b){b.addEventListener("click",function(){janela(b.dataset.cj);});});
+document.querySelectorAll("#areas button").forEach(function(b){b.addEventListener("click",function(){area(b.dataset.area);});});
+cLer(); limpaForm(); area(location.hash==="#funding"?"funding":"carteira"); cDesenha(); mDesenha(); cPrecos(); setInterval(cPrecos,60000);
+
 iniciar(); carregaSim();
 if(!window.SNAP){ setInterval(carregaSim,300000); setInterval(iniciar,60000); setInterval(function(){HIST={};},3600000); }
 </script>
