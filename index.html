@@ -106,6 +106,7 @@ button.lnk.neg{color:var(--bad)}
 .kpi .sub{font:400 13px var(--mono)}
 td a{color:var(--accent);text-decoration:underline;text-underline-offset:3px}
 #av-estrelas button{border:0;background:none;padding:0 2px;font-size:26px;line-height:1;color:var(--line)} #av-estrelas button.on{color:#d99a00} #av-estrelas button:disabled{cursor:default}
+button.mv{padding:2px 7px;font-size:12px;line-height:1.2;margin-right:3px} button.mv:disabled{opacity:.3}
 button.ord{border:0;padding:0;background:none;color:inherit;font:inherit;letter-spacing:inherit;text-transform:inherit;white-space:nowrap}
 button.ord:hover{color:var(--fg)}
 .direita{display:flex;flex-wrap:wrap;gap:10px;align-items:center;justify-content:flex-end}
@@ -1214,16 +1215,19 @@ function conteudoCarrega(){
     return true; }).catch(function(){ return false; });
 }
 function botaoRemover(txt,fn){ var b=el("button","lnk neg",txt); b.type="button"; b.addEventListener("click",function(){ if(b.dataset.ok) fn(); else { b.dataset.ok="1"; b.textContent="Confirmar remoção"; } }); return b; }
+function admMove(tab,lista,i,dir){ var j=i+dir; if(j<0||j>=lista.length) return; var l=lista.slice(), x=l[i]; l[i]=l[j]; l[j]=x;
+  Promise.all(l.map(function(o,k){ return o.ordem===k+1?null:SB.from(tab).update({ordem:k+1}).eq("id",o.id); })).then(function(rs){ if(rs.some(function(r){return r&&r.error;})) admErro("Não consegui salvar a nova ordem."); conteudoCarrega(); }); }
+function admSetas(alvo,tab,lista,i,nome){ [[-1,"▲","Subir "],[1,"▼","Descer "]].forEach(function(c){ var b=el("button","mv",c[1]); b.type="button"; b.disabled=i+c[0]<0||i+c[0]>=lista.length; b.title=c[2]+nome; b.setAttribute("aria-label",c[2]+nome); b.addEventListener("click",function(){ admMove(tab,lista,i,c[0]); }); alvo.appendChild(b); }); alvo.appendChild(document.createTextNode(" ")); }
 function admConteudo(){
   var box=$("adm-conteudo"); if(!box) return; box.textContent="";
   var sel=$("aa-mod"), atual=sel.value; sel.textContent=""; MODS.forEach(function(m){ var o=el("option",null,m.titulo); o.value=m.id; sel.appendChild(o); }); if(atual) sel.value=atual;
   if(!MODS.length){ box.appendChild(el("p","sub","Nenhum módulo no banco ainda. Enquanto estiver vazio, o site mostra as aulas do arquivo aulas.json.")); return; }
-  MODS.forEach(function(m){
-    var h=el("div","admmod"); h.appendChild(el("strong",null,m.ordem+". "+m.titulo)); h.appendChild(document.createTextNode("  "));
+  MODS.forEach(function(m,mi){
+    var h=el("div","admmod"); admSetas(h,"modulos",MODS,mi,"o módulo "+m.titulo); h.appendChild(el("strong",null,(mi+1)+". "+m.titulo)); h.appendChild(document.createTextNode("  "));
     var be=el("button","lnk","Editar módulo"); be.type="button"; be.addEventListener("click",function(){ EDM=m.id; $("am-titulo").value=m.titulo; $("am-desc").value=m.descricao; $("am-ordem").value=m.ordem; $("am-salvar").textContent="Salvar módulo"; $("am-cancelar").hidden=false; $("am-titulo").focus(); }); h.appendChild(be); h.appendChild(document.createTextNode("  "));
     h.appendChild(botaoRemover("Remover módulo e aulas",function(){ SB.from("modulos").delete().eq("id",m.id).then(function(r){ if(r.error) admErro("Não consegui remover o módulo."); conteudoCarrega(); }); })); box.appendChild(h);
     var sc=el("div","scroll"), tb=el("table"), th=el("tr"); ["Ordem","Aula","YouTube","Duração",""].forEach(function(x){th.appendChild(el("th",null,x));}); tb.appendChild(th);
-    m.aulas.forEach(function(a){ var tr=el("tr"); cel(tr,String(a.ordem)); cel(tr,a.titulo,"txt quebra"); cel(tr,a.youtube||"sem vídeo",a.youtube?"":"vazio"); cel(tr,a.duracao||"–"); var td=cel(tr,"","txt");
+    m.aulas.forEach(function(a,ai){ var tr=el("tr"); admSetas(cel(tr,"","txt"),"aulas",m.aulas,ai,"a aula "+a.titulo); tr.cells[0].appendChild(document.createTextNode(String(ai+1))); cel(tr,a.titulo,"txt quebra"); cel(tr,a.youtube||"sem vídeo",a.youtube?"":"vazio"); cel(tr,a.duracao||"–"); var td=cel(tr,"","txt");
       var b1=el("button","lnk","Editar"); b1.type="button"; b1.addEventListener("click",function(){ EDA=a.id; $("aa-mod").value=m.id; $("aa-titulo").value=a.titulo; $("aa-yt").value=a.youtube; $("aa-dur").value=a.duracao; $("aa-ordem").value=a.ordem; $("aa-desc").value=a.descricao; $("aa-salvar").textContent="Salvar aula"; $("aa-cancelar").hidden=false; $("aa-titulo").focus(); }); td.appendChild(b1); td.appendChild(document.createTextNode("  "));
       td.appendChild(botaoRemover("Remover",function(){ SB.from("aulas").delete().eq("id",a.id).then(function(r){ if(r.error) admErro("Não consegui remover a aula."); conteudoCarrega(); }); })); tb.appendChild(tr); });
     if(!m.aulas.length) semLinhas(tb,5,"Nenhuma aula neste módulo."); sc.appendChild(tb); box.appendChild(sc); });
