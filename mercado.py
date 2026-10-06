@@ -11,10 +11,20 @@ import requests
 ARQ = pathlib.Path(__file__).with_name("mercado.json")
 S = requests.Session()
 S.headers["User-Agent"] = "Mozilla/5.0 (painel-cripto; +https://github.com/Emersson11/radar-funding)"
-FEEDS = [("Portal do Bitcoin", "https://portaldobitcoin.uol.com.br/feed/"),
-         ("Cointelegraph Brasil", "https://br.cointelegraph.com/rss"),
-         ("Livecoins", "https://livecoins.com.br/feed/"),
-         ("CoinDesk", "https://www.coindesk.com/arc/outboundfeeds/rss/")]
+# Cada fonte pode ter mais de um endereço; usa o primeiro que responder.
+FEEDS = [("AllinCrypto", ["https://allincrypto.com/feed/"]),
+         ("Bitcoin Magazine", ["https://bitcoinmagazine.com/feed", "https://bitcoinmagazine.com/.rss/full/"]),
+         ("Coin Bureau", ["https://coinbureau.com/feed/", "https://www.coinbureau.com/feed/"]),
+         ("CoinDesk", ["https://www.coindesk.com/arc/outboundfeeds/rss/"]),
+         ("Cointelegraph", ["https://cointelegraph.com/rss"]),
+         ("CryptoPotato", ["https://cryptopotato.com/feed/"]),
+         ("CryptoSlate", ["https://cryptoslate.com/feed/"]),
+         ("Decrypt", ["https://decrypt.co/feed"]),
+         ("The Block", ["https://www.theblock.co/rss.xml"]),
+         ("U.Today", ["https://u.today/rss"]),
+         ("Portal do Bitcoin", ["https://portaldobitcoin.uol.com.br/feed/"]),
+         ("Livecoins", ["https://livecoins.com.br/feed/"]),
+         ("Cointelegraph Brasil", ["https://br.cointelegraph.com/rss"])]
 CALENDARIOS = ["https://nfs.faireconomy.media/ff_calendar_thisweek.json",
                "https://nfs.faireconomy.media/ff_calendar_nextweek.json"]
 
@@ -31,30 +41,52 @@ def medo_ganancia():
     return {"valor": int(d["value"]), "classe": d["value_classification"]}
 
 
+def _itens(conteudo):
+    """Lê RSS ou Atom e devolve (título, link, data)."""
+    raiz = ET.fromstring(conteudo)
+    for it in raiz.iter("item"):
+        yield (it.findtext("title") or "").strip(), (it.findtext("link") or "").strip(), it.findtext("pubDate")
+    A = "{http://www.w3.org/2005/Atom}"
+    for it in raiz.iter(A + "entry"):
+        link = it.find(A + "link")
+        yield (it.findtext(A + "title") or "").strip(), (link.get("href", "") if link is not None else ""), it.findtext(A + "updated")
+
+
+def _quando(data):
+    try:
+        return int(parsedate_to_datetime(data).timestamp())
+    except Exception:
+        try:
+            from datetime import datetime
+            return int(datetime.fromisoformat(data.replace("Z", "+00:00")).timestamp())
+        except Exception:
+            return int(time.time())
+
+
 def noticias():
     out, falhas = [], []
-    for fonte, url in FEEDS:
-        try:
-            raiz = ET.fromstring(S.get(url, timeout=20).content)
-            n = 0
-            for it in raiz.iter("item"):
-                titulo, link, data = (it.findtext("title") or "").strip(), (it.findtext("link") or "").strip(), it.findtext("pubDate")
-                if not titulo or not link.startswith("http"):
-                    continue
-                try:
-                    t = int(parsedate_to_datetime(data).timestamp())
-                except Exception:
-                    t = int(time.time())
-                out.append({"titulo": titulo[:200], "link": link, "fonte": fonte, "t": t})
-                n += 1
-                if n >= 10:
-                    break
-        except Exception:
+    for fonte, urls in FEEDS:
+        achou = 0
+        for url in urls:
+            try:
+                r = S.get(url, timeout=20)
+                for titulo, link, data in _itens(r.content):
+                    if not titulo or not link.startswith("http"):
+                        continue
+                    out.append({"titulo": titulo[:200], "link": link, "fonte": fonte, "t": min(_quando(data), int(time.time()))})
+                    achou += 1
+                    if achou >= 12:
+                        break
+            except Exception:
+                pass
+            if achou:
+                break
+        if not achou:
             falhas.append(fonte)
     if not out:
         raise RuntimeError("nenhuma fonte de notícias respondeu")
     out.sort(key=lambda x: -x["t"])
-    return out[:40], falhas
+    return out[:150], falhas
 
 
 def calendario():
