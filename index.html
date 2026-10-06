@@ -26,12 +26,12 @@
 body{margin:0;background:var(--bg);color:var(--fg);font:15px/1.5 var(--sans)}
 p{margin:0}
 .faixa{background:var(--band);color:var(--band-fg);padding-block:26px;padding-inline:16px}
-.faixa .in{max-width:1080px;margin:0 auto;display:flex;flex-wrap:wrap;gap:12px 24px;align-items:flex-end;justify-content:space-between}
+.faixa .in{max-width:1720px;padding-inline:clamp(0px,2vw,40px);margin:0 auto;display:flex;flex-wrap:wrap;gap:12px 24px;align-items:flex-end;justify-content:space-between}
 .marca{font:500 12px/1 var(--sans);letter-spacing:.14em;text-transform:uppercase;color:var(--band-muted);margin-bottom:8px}
 h1{font:600 30px/1.15 var(--serif);margin:0;text-wrap:balance}
 .faixa p{color:var(--band-muted);margin-top:6px;max-width:60ch}
 .faixa button{border-color:var(--band-fg);color:var(--band-fg)}
-main{max-width:1080px;margin:0 auto;padding-block:22px 48px;padding-inline:16px;display:flex;flex-direction:column;gap:20px}
+main{max-width:1720px;margin:0 auto;padding-block:22px 48px;padding-inline:clamp(16px,3vw,56px);display:flex;flex-direction:column;gap:20px}
 h2{font:600 20px/1.25 var(--serif);margin:0 0 4px;text-wrap:balance}
 .rot{font:600 11px/1.2 var(--sans);letter-spacing:.1em;text-transform:uppercase;color:var(--muted)}
 .sub{color:var(--muted)}
@@ -125,6 +125,8 @@ tr.passado td{opacity:.55}
 .aulas{display:grid;grid-template-columns:minmax(220px,300px) 1fr;gap:20px;align-items:start}
 @media (max-width:760px){.aulas{grid-template-columns:1fr}}
 #au-menu{display:flex;flex-direction:column;gap:4px}
+#au-menu .aumod{font:600 18px/1.25 var(--serif,"Source Serif 4",serif);color:var(--fg);letter-spacing:0;text-transform:none;margin:18px 0 6px;padding:0 0 8px;border-bottom:2px solid var(--accent)} #au-menu .aumod:first-child{margin-top:0}
+.aulas{grid-template-columns:minmax(260px,360px) 1fr}
 .aumod{margin:10px 0 4px}
 button.aula{text-align:left;border:1px solid transparent;color:var(--fg);padding:8px 10px;font-weight:400}
 button.aula.atual{border-color:var(--accent);font-weight:600}
@@ -163,6 +165,7 @@ button.mini{font-size:12px;color:var(--muted)}
 </style>
 </head>
 <body>
+<script>try{var _t=localStorage.getItem("tema");if(_t==="dark"||_t==="light")document.documentElement.setAttribute("data-theme",_t);}catch(e){}</script>
 <header class="faixa"><div class="in">
   <div>
     <div class="marca" id="marca" hidden></div>
@@ -185,11 +188,12 @@ button.mini{font-size:12px;color:var(--muted)}
         <div id="perfil-menu" hidden>
           <p id="conta-email"></p>
           <label id="ver-como-rot" hidden>Ver o site como<select id="ver-como"><option value="admin">Administrador</option><option value="assinante">Assinante</option><option value="gratis">Usuário gratuito</option></select></label>
-          <div id="perfil-acoes"><button type="button" id="conta-senha-bt">Definir senha</button></div>
+          <div id="perfil-acoes"><button type="button" class="tema-bt"></button><button type="button" class="tema-sis" hidden>Seguir o tema do sistema</button><button type="button" id="conta-senha-bt">Definir senha</button></div>
           <form id="conta-senha-form" hidden><label class="so-leitor" for="conta-nova">Nova senha</label><input id="conta-nova" type="password" placeholder="nova senha (6 ou mais)" autocomplete="new-password" minlength="6" required><button type="submit">Salvar senha</button></form>
           <button type="button" id="conta-sair">Sair</button>
         </div></div>
     </div>
+    <button type="button" class="tema-bt" id="tema-fora"></button>
     <button id="recarregar" type="button">Atualizar</button>
   </div>
 </div>
@@ -1116,6 +1120,7 @@ document.addEventListener("DOMContentLoaded",function(){ $("ver-como").addEventL
 function contaDesenha(){
   if(!SB){ $("conta").hidden=true; return; }
   $("conta").hidden=false; $("conta-fora").hidden=!!USUARIO; $("conta-dentro").hidden=!USUARIO;
+  if(typeof temaDesenha==="function") $("tema-fora").hidden=!!USUARIO;
   var rc=$("recarregar"); if(USUARIO){ if(rc.parentNode.id!=="perfil-acoes") $("perfil-acoes").insertBefore(rc,$("perfil-acoes").firstChild); rc.textContent="Atualizar dados"; $("perfil-bt").textContent=(USUARIO.email||"?").charAt(0); } else if(rc.parentNode.id==="perfil-acoes"){ document.querySelector(".direita").appendChild(rc); rc.textContent="Atualizar"; $("perfil-menu").hidden=true; }
   if(USUARIO){ $("conta-email").textContent=USUARIO.email+(PLANO&&PLANO!=="gratis"?" · "+(PLANO==="admin"?"administrador":"assinante"):""); }
   var bloq=!!(SB&&CFG.exigirAssinatura&&PLANO!=="assinante"&&PLANO!=="admin");
@@ -1255,6 +1260,13 @@ $("conta-link").addEventListener("click",function(){ var e=$("conta-campo").valu
 $("conta-senha-bt").addEventListener("click",function(){ $("conta-senha-form").hidden=!$("conta-senha-form").hidden; if(!$("conta-senha-form").hidden) $("conta-nova").focus(); });
 $("conta-senha-form").addEventListener("submit",function(ev){ ev.preventDefault(); var p=$("conta-nova").value; if(p.length<6) return;
   SB.auth.updateUser({password:p}).then(function(r){ if(r.error) contaMsg(erroLogin(r.error.message),true); else { $("conta-nova").value=""; $("conta-senha-form").hidden=true; contaMsg("Senha salva. Da próxima vez, entre com e-mail e senha."); } }); });
+function temaDesenha(){ var e=escuro(), fixo=document.documentElement.getAttribute("data-theme"); [].forEach.call(document.querySelectorAll(".tema-bt"),function(b){ b.textContent=e?"☀ Tema claro":"☾ Tema escuro"; }); [].forEach.call(document.querySelectorAll(".tema-sis"),function(b){ b.hidden=!fixo; }); $("tema-fora").hidden=!!USUARIO;
+  if(typeof PCHART!=="undefined"&&PCHART){ try{ PCHART.remove(); }catch(x){} PCHART=null; if(typeof perfDesenha==="function"&&!$("cj-desempenho").hidden) perfDesenha(); } }
+function temaPoe(t){ try{ if(t) localStorage.setItem("tema",t); else localStorage.removeItem("tema"); }catch(x){} if(t) document.documentElement.setAttribute("data-theme",t); else document.documentElement.removeAttribute("data-theme"); temaDesenha(); }
+[].forEach.call(document.querySelectorAll(".tema-bt"),function(b){ b.addEventListener("click",function(){ temaPoe(escuro()?"light":"dark"); }); });
+[].forEach.call(document.querySelectorAll(".tema-sis"),function(b){ b.addEventListener("click",function(){ temaPoe(null); }); });
+if(window.matchMedia) try{ matchMedia("(prefers-color-scheme: dark)").addEventListener("change",temaDesenha); }catch(x){}
+temaDesenha();
 function perfilMenu(ab){ $("perfil-menu").hidden=!ab; $("perfil-bt").setAttribute("aria-expanded",ab?"true":"false"); }
 $("perfil-bt").addEventListener("click",function(ev){ ev.stopPropagation(); perfilMenu($("perfil-menu").hidden); });
 document.addEventListener("click",function(ev){ if(!$("perfil-menu").hidden&&!$("perfil-menu").contains(ev.target)) perfilMenu(false); });
