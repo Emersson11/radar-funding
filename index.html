@@ -104,6 +104,8 @@ button.lnk.neg{color:var(--bad)}
 .bn{font:500 14px var(--mono)} .bt{background:var(--soft);height:10px;border-radius:2px;overflow:hidden;min-width:0} .bt i{display:block;height:100%;background:var(--accent)}
 .bv{font:400 13px var(--mono);color:var(--muted);white-space:nowrap}
 .kpi .sub{font:400 13px var(--mono)}
+button.ord{border:0;padding:0;background:none;color:inherit;font:inherit;letter-spacing:inherit;text-transform:inherit;white-space:nowrap}
+button.ord:hover{color:var(--fg)}
 .rodape{font-size:12px;color:var(--muted);border-top:1px solid var(--line);padding-top:14px}
 </style>
 </head>
@@ -184,7 +186,7 @@ button.lnk.neg{color:var(--bad)}
         <div class="box"><h2>Maiores quedas em 24h</h2><div class="scroll"><table><thead><tr><th>Ativo</th><th>Preço (US$)</th><th>24h</th></tr></thead><tbody id="m-baixas"></tbody></table></div></div>
       </div>
       <div class="box" style="margin-top:20px"><h2>Principais ativos</h2><div class="scroll"><table><thead><tr><th>Ativo</th><th>Preço (US$)</th><th>24h</th><th>Volume 24h</th></tr></thead><tbody id="m-princ"></tbody></table></div></div>
-      <p class="note">Preços do mercado à vista da Binance, em dólar. Altas e quedas consideram só ativos com mais de US$ 20 milhões negociados em 24h.</p>
+      <p class="note">Clique no título de uma coluna para ordenar do maior para o menor; clique de novo para inverter. Preços e volumes do mercado à vista da Binance, em dólar. Altas e quedas consideram só ativos com mais de US$ 20 milhões negociados em 24h. Os volumes de 7 e 30 dias incluem o dia de hoje até agora.</p>
     </section>
   </div>
 
@@ -541,7 +543,7 @@ var PRINCIPAIS=["BTC","ETH","SOL","BNB","XRP","DOGE","ADA","TRX","AVAX","LINK","
 function cLer(){ try{ var j=JSON.parse(localStorage.getItem(CHAVE)); if(j&&Array.isArray(j.lanc)) CART=j; }catch(e){} }
 function cGravar(){ try{ localStorage.setItem(CHAVE,JSON.stringify(CART)); return true; }catch(e){ return false; } }
 function num(v,c){ return v.toLocaleString("pt-BR",{maximumFractionDigits:c==null?8:c}); }
-function prc(p){ return p==null?"sem preço":usd(p,p<1?4:2); }
+function prc(p){ return p==null?"sem preço":p>0&&p<0.01?p.toLocaleString("pt-BR",{maximumSignificantDigits:4}):usd(p,p<1?4:2); }
 function precoDe(a){ if(a==="USDT"||a==="USDC") return {p:1,v:0}; return PRECOS[a]||null; }
 function posicoes(){
   var m={};
@@ -591,12 +593,29 @@ function cDesenha(){
   var semPreco=L.filter(function(p){return p.preco==null;}).map(function(p){return p.ativo;});
   $("cart-status").textContent=(Object.keys(PRECOS).length?"Preços atualizados em "+new Date().toLocaleTimeString("pt-BR")+". ":"Buscando preços… ")+(semPreco.length?"Sem preço na Binance: "+semPreco.join(", ")+".":"");
 }
+var VOLS={}, VFILA=[], VATIVOS=0, vredes=null;
+var MORDEM={"m-altas":{c:"v",d:-1},"m-baixas":{c:"v",d:1},"m-princ":{c:"vol",d:-1}};
+var MCOLS=[["a","Ativo"],["p","Preço (US$)"],["v","24h"],["vol","Volume 24h"],["v7","Volume 7 dias"],["v30","Volume 30 dias"]];
+function volTxt2(v){ return v==null?"…":v>=1e9?"US$ "+usd(v/1e9,2)+" bi":"US$ "+usd(v/1e6,v<1e7?1:0)+" mi"; }
+function vProx(){ while(VATIVOS<4&&VFILA.length){ (function(a){ VATIVOS++;
+  getJ("https://data-api.binance.vision/api/v3/klines?symbol="+a+"USDT&interval=1d&limit=30").then(function(k){ var v7=0,v30=0; k.forEach(function(x,i){ var q=+x[7]; v30+=q; if(i>=k.length-7) v7+=q; }); VOLS[a]={v7:v7,v30:v30,t:Date.now()}; })
+    .catch(function(){ VOLS[a]={v7:null,v30:null,t:Date.now(),erro:true}; }).then(function(){ VATIVOS--; clearTimeout(vredes); vredes=setTimeout(mDesenha,300); vProx(); }); })(VFILA.shift()); } }
+function volDe(a){ var v=VOLS[a]; if(v&&(v==="p"||Date.now()-v.t<3600000)) return v; VOLS[a]="p"; VFILA.push(a); vProx(); return "p"; }
+function mTabela(id,linhas){
+  var tb=$(id), st=MORDEM[id], th=tb.parentNode.tHead; th.textContent=""; var trh=el("tr");
+  MCOLS.forEach(function(c){ var h=el("th"); var b=el("button","ord",c[1]+(st.c===c[0]?(st.d<0?" ▼":" ▲"):" ↕")); b.type="button"; b.setAttribute("aria-label","Ordenar por "+c[1]+(st.c===c[0]?(st.d<0?", do maior para o menor":", do menor para o maior"):""));
+    b.addEventListener("click",function(){ if(st.c===c[0]) st.d=-st.d; else { st.c=c[0]; st.d=c[0]==="a"?1:-1; } mDesenha(); }); h.appendChild(b); trh.appendChild(h); }); th.appendChild(trh);
+  linhas.forEach(function(x){ var v=volDe(x.a); x.v7=v==="p"?null:v.v7; x.v30=v==="p"?null:v.v30; x.car=v==="p"; });
+  var k=st.c; linhas.sort(function(a,b){ var x=a[k], y=b[k]; if(k==="a") return st.d*(x<y?-1:x>y?1:0); if(x==null&&y==null) return 0; if(x==null) return 1; if(y==null) return -1; return st.d*(x-y); });
+  tb.textContent="";
+  linhas.forEach(function(x){ var tr=el("tr"); cel(tr,x.a); cel(tr,prc(x.p)); cel(tr,pct(x.v),cls(x.v)); cel(tr,volTxt2(x.vol)); cel(tr,x.car?"…":x.v7==null?"–":volTxt2(x.v7),x.v7==null?"vazio":""); cel(tr,x.car?"…":x.v30==null?"–":volTxt2(x.v30),x.v30==null?"vazio":""); tb.appendChild(tr); });
+  if(!linhas.length) semLinhas(tb,MCOLS.length,"Buscando preços…");
+}
 function mDesenha(){
   var todos=Object.keys(PRECOS).map(function(k){return {a:k,p:PRECOS[k].p,v:PRECOS[k].v,vol:PRECOS[k].vol};});
   var liq=todos.filter(function(x){return x.vol>=2e7;}).sort(function(a,b){return b.v-a.v;});
-  function enche(id,l,vol){ var tb=$(id); tb.textContent=""; l.forEach(function(x){ var tr=el("tr"); cel(tr,x.a); cel(tr,prc(x.p)); cel(tr,pct(x.v),cls(x.v)); if(vol) cel(tr,"US$ "+usd(x.vol/1e6,0)+" mi"); tb.appendChild(tr); }); if(!l.length) semLinhas(tb,vol?4:3,"Buscando preços…"); }
-  enche("m-altas",liq.slice(0,8)); enche("m-baixas",liq.slice(-8).reverse());
-  enche("m-princ",PRINCIPAIS.filter(function(a){return PRECOS[a];}).map(function(a){return {a:a,p:PRECOS[a].p,v:PRECOS[a].v,vol:PRECOS[a].vol};}),true);
+  mTabela("m-altas",liq.slice(0,8)); mTabela("m-baixas",liq.slice(-8));
+  mTabela("m-princ",PRINCIPAIS.filter(function(a){return PRECOS[a];}).map(function(a){return {a:a,p:PRECOS[a].p,v:PRECOS[a].v,vol:PRECOS[a].vol};}));
 }
 function cPrecos(){
   getJ("https://data-api.binance.vision/api/v3/ticker/24hr").then(function(l){ var m={};
