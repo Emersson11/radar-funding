@@ -188,8 +188,15 @@ def pct(v):
 def telegram(texto):
     import os
     tok, chat = os.environ.get("TELEGRAM_TOKEN"), os.environ.get("TELEGRAM_CHAT_ID")
-    if not tok or not chat:
+    if not tok:
         print("[sem Telegram configurado]\n" + texto)
         return False
+    if not chat:   # sem chat definido: usa a conversa mais recente que escreveu para o bot
+        try:
+            ups = requests.get(f"https://api.telegram.org/bot{tok}/getUpdates", timeout=20).json().get("result", [])
+            chat = [u["message"]["chat"]["id"] for u in ups if "message" in u][-1]
+        except Exception:
+            print("[bot sem conversa: envie uma mensagem para ele]\n" + texto)
+            return False
     r = requests.post(f"https://api.telegram.org/bot{tok}/sendMessage", json={"chat_id": chat, "text": texto}, timeout=20)
     return r.ok
