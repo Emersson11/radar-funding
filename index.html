@@ -172,7 +172,7 @@ button.mini{font-size:12px;color:var(--muted)}
   <div class="direita">
     <div id="conta" hidden>
       <div id="conta-fora"><form id="conta-form" class="contaf"><label class="so-leitor" for="conta-campo">Seu e-mail</label><input id="conta-campo" type="email" placeholder="seu@email.com" required autocomplete="email"><label class="so-leitor" for="conta-senha">Sua senha</label><input id="conta-senha" type="password" placeholder="senha" autocomplete="current-password" minlength="6"><button type="submit">Entrar</button><button type="button" id="conta-criar">Criar conta</button><button type="button" id="conta-link" class="lnkb">Entrar por link no e-mail</button></form></div>
-      <div id="conta-dentro" hidden><span id="conta-email"></span> <button type="button" id="conta-senha-bt">Definir senha</button> <button type="button" id="conta-sair">Sair</button>
+      <div id="conta-dentro" hidden><span id="conta-email"></span> <label id="ver-como-rot" hidden style="display:inline-flex;gap:6px;align-items:center;color:inherit">Ver como <select id="ver-como"><option value="admin">Administrador</option><option value="assinante">Assinante</option><option value="gratis">Usuário gratuito</option></select></label> <button type="button" id="conta-senha-bt">Definir senha</button> <button type="button" id="conta-sair">Sair</button>
         <form id="conta-senha-form" class="contaf" hidden style="margin-top:8px"><label class="so-leitor" for="conta-nova">Nova senha</label><input id="conta-nova" type="password" placeholder="nova senha (6 ou mais)" autocomplete="new-password" minlength="6" required><button type="submit">Salvar senha</button></form></div>
     </div>
     <button id="recarregar" type="button">Atualizar</button>
@@ -1094,8 +1094,9 @@ var perfUlt=0;
 function perfVivo(){ if($("cj-desempenho").hidden||!PCHART) return; if(Date.now()-perfUlt<20000) return; perfUlt=Date.now(); perfDesenha(); }
 document.querySelectorAll("#pf-per button").forEach(function(b){ b.addEventListener("click",function(){ PPER=+b.dataset.d; document.querySelectorAll("#pf-per button").forEach(function(o){o.setAttribute("aria-pressed",o===b?"true":"false");}); perfDesenha(); }); });
 /* ---------- Conta (Supabase) ---------- */
-var CFG=window.PAINEL_CONFIG||{}, SB=null, USUARIO=null, PLANO=null;
+var CFG=window.PAINEL_CONFIG||{}, SB=null, USUARIO=null, PLANO=null, PLANOREAL=null;
 function contaMsg(t,erro){ var m=$("conta-msg"); m.textContent=t||""; m.hidden=!t; m.className=erro?"neg":"sub2"; }
+document.addEventListener("DOMContentLoaded",function(){ $("ver-como").addEventListener("change",function(){ if(PLANOREAL!=="admin") return; PLANO=this.value; try{ sessionStorage.setItem("ver_como",PLANO); }catch(e){} contaDesenha(); if(typeof comCarrega==="function") comCarrega(); }); });
 function contaDesenha(){
   if(!SB){ $("conta").hidden=true; return; }
   $("conta").hidden=false; $("conta-fora").hidden=!!USUARIO; $("conta-dentro").hidden=!USUARIO;
@@ -1104,6 +1105,8 @@ function contaDesenha(){
   $("funding-bloq").hidden=!bloq; $("funding-conteudo").hidden=bloq;
   $("funding-bloq-txt").textContent=USUARIO?"Sua conta ainda não tem acesso a esta área. Fale com o administrador para liberar.":"Entre com a sua conta para ver esta área.";
   $("c-nota-local").hidden=!!USUARIO; $("c-nota-nuvem").hidden=!USUARIO;
+  $("ver-como-rot").hidden=PLANOREAL!=="admin"; $("ver-como-rot").style.display=PLANOREAL==="admin"?"inline-flex":"none";
+  if(PLANO!=="admin"&&!$("area-admin").hidden) area("carteira");
   $("bt-admin").hidden=PLANO!=="admin"; if(!$("area-admin").hidden) admCarrega();
 }
 var ADM=[];
@@ -1145,10 +1148,10 @@ function nuvem(op,l){
 }
 function nuvemFalhou(){ $("f-erro").textContent="Não consegui salvar na sua conta. Recarreguei os lançamentos; tente de novo."; $("f-erro").hidden=false; nuvemCarrega().catch(function(){}); }
 function sessao(s){
-  USUARIO=s?s.user:null; PLANO=null;
+  USUARIO=s?s.user:null; PLANO=null; PLANOREAL=null;
   if(!USUARIO){ cLer(); contaDesenha(); cDesenha(); comCarrega(); return; }
   contaDesenha();
-  SB.from("perfis").select("plano").eq("user_id",USUARIO.id).maybeSingle().then(function(r){ PLANO=r.data?r.data.plano:"gratis"; contaDesenha(); comCarrega(); });
+  SB.from("perfis").select("plano").eq("user_id",USUARIO.id).maybeSingle().then(function(r){ PLANOREAL=r.data?r.data.plano:"gratis"; var vc="admin"; try{ vc=sessionStorage.getItem("ver_como")||"admin"; }catch(e){} PLANO=PLANOREAL==="admin"?vc:PLANOREAL; $("ver-como").value=PLANO; contaDesenha(); comCarrega(); });
   nuvemCarrega().catch(function(){ $("cart-status").textContent="Não consegui ler os lançamentos da sua conta."; });
 }
 /* ---------- Conteúdo: módulos, aulas, comentários, nome do site ---------- */
