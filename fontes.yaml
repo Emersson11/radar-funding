@@ -1,0 +1,1669 @@
+# =====================================================================
+#  FONTES — importadas do site Altside Macro Research
+#  (https://altside-macro-research.vercel.app — aba "Fontes e casas",
+#   feed de notícias e fontes adicionadas manualmente)
+# =====================================================================
+#  tipo rss   = feed de notícias (pega os links novos automaticamente)
+#  tipo auto  = o programa procura o feed RSS do site sozinho; se não
+#               houver, monitora a própria página e detecta mudanças
+#  tipo telegram = canal público do Telegram (t.me/s/nome) — é onde
+#               vários perfis do X republicam seus posts e gráficos
+#  tipo page  = uma página específica
+#  tipo json  = endereço de API que devolve JSON
+#  ativo: sim / nao    intervalo_min: minutos entre coletas
+#  max_itens: quantos textos novos pegar de cada feed por coleta
+#
+#  Os espaços no começo das linhas importam (2 e 4 espaços).
+#  O sistema respeita o robots.txt de cada site.
+# =====================================================================
+
+fontes:
+
+  # ---------------------------------------------------------------
+  # NOTÍCIAS CRIPTO E MACRO (as mesmas do feed automático do site)
+  # ---------------------------------------------------------------
+  - nome: "CoinDesk"
+    url: "https://www.coindesk.com/arc/outboundfeeds/rss/"
+    tipo: rss
+    ativo: sim
+    intervalo_min: 60
+    max_itens: 8
+    tags: "noticias"
+  - nome: "Cointelegraph"
+    url: "https://cointelegraph.com/rss"
+    tipo: rss
+    ativo: sim
+    intervalo_min: 60
+    max_itens: 8
+    tags: "noticias"
+  - nome: "The Block"
+    url: "https://www.theblock.co/rss.xml"
+    tipo: rss
+    ativo: sim
+    intervalo_min: 60
+    max_itens: 8
+    tags: "noticias"
+  - nome: "Decrypt"
+    url: "https://decrypt.co/feed"
+    tipo: rss
+    ativo: sim
+    intervalo_min: 60
+    max_itens: 8
+    tags: "noticias"
+  - nome: "CryptoSlate"
+    url: "https://cryptoslate.com/feed/"
+    tipo: rss
+    ativo: sim
+    intervalo_min: 60
+    max_itens: 8
+    tags: "noticias"
+  - nome: "CryptoPotato"
+    url: "https://cryptopotato.com/feed/"
+    tipo: rss
+    ativo: sim
+    intervalo_min: 60
+    max_itens: 8
+    tags: "noticias"
+  - nome: "U.Today"
+    url: "https://u.today/rss"
+    tipo: rss
+    ativo: sim
+    intervalo_min: 60
+    max_itens: 8
+    tags: "noticias"
+  - nome: "Bitcoinist"
+    url: "https://bitcoinist.com/feed/"
+    tipo: rss
+    ativo: sim
+    intervalo_min: 60
+    max_itens: 8
+    tags: "noticias"
+  - nome: "NewsBTC"
+    url: "https://www.newsbtc.com/feed/"
+    tipo: rss
+    ativo: sim
+    intervalo_min: 60
+    max_itens: 8
+    tags: "noticias"
+  - nome: "Econbrowser (macro)"
+    url: "https://econbrowser.com/feed"
+    tipo: rss
+    ativo: sim
+    intervalo_min: 60
+    max_itens: 8
+    tags: "noticias"
+
+  # ---------------------------------------------------------------
+  # TWITTER/X VIA TELEGRAM — os mesmos posts (e gráficos) publicados no
+  # canal público do Telegram de cada perfil. Atualiza de 30 em 30 min.
+  # ---------------------------------------------------------------
+  - nome: "The Kobeissi Letter (Telegram)"
+    url: "https://t.me/s/thekobeissiletter"
+    tipo: telegram
+    ativo: sim
+    intervalo_min: 30
+    tags: "twitter"
+  - nome: "Watcher.Guru (Telegram)"
+    url: "https://t.me/s/WatcherGuru"
+    tipo: telegram
+    ativo: sim
+    intervalo_min: 30
+    tags: "twitter"
+  # Canal de retransmissão (não oficial) das manchetes do @DeItaone
+  - nome: "Walter Bloomberg (Telegram)"
+    url: "https://t.me/s/WalterBloomberg"
+    tipo: telegram
+    ativo: sim
+    intervalo_min: 30
+    tags: "twitter"
+  # Canal oficial (linkado no próprio coinbureau.com) do @coinbureau
+  - nome: "Coin Bureau (Telegram)"
+    url: "https://t.me/s/CoinBureau"
+    tipo: telegram
+    ativo: sim
+    intervalo_min: 30
+    tags: "twitter"
+  # ATENÇÃO: o canal t.me/bravosresearch parece ser GOLPE (se passa pela
+  # Bravos e oferece "plano de recuperação de trading"). NÃO usar.
+  # Para adicionar outro perfil: procure "t.me/s/NOME" no navegador; se
+  # mostrar os posts recentes do perfil, copie um bloco acima e troque a url.
+
+  # ---------------------------------------------------------------
+  # OFICIAL E REGULAÇÃO
+  # ---------------------------------------------------------------
+  - nome: "Federal Reserve"
+    url: "https://www.federalreserve.gov/"
+    tipo: auto
+    ativo: sim
+    intervalo_min: 720
+    max_itens: 5
+    tags: "oficial"
+  - nome: "BLS"
+    url: "https://www.bls.gov/"
+    tipo: auto
+    ativo: sim
+    intervalo_min: 720
+    max_itens: 5
+    tags: "oficial"
+  - nome: "U.S. Census Bureau"
+    url: "https://www.census.gov/"
+    tipo: auto
+    ativo: sim
+    intervalo_min: 720
+    max_itens: 5
+    tags: "oficial"
+  - nome: "SEC"
+    url: "https://www.sec.gov/"
+    tipo: auto
+    ativo: sim
+    intervalo_min: 720
+    max_itens: 5
+    tags: "regulação"
+  - nome: "CFTC"
+    url: "https://www.cftc.gov/"
+    tipo: auto
+    ativo: sim
+    intervalo_min: 720
+    max_itens: 5
+    tags: "regulação"
+
+  # ---------------------------------------------------------------
+  # PESQUISA, ANÁLISE E NEWSLETTERS
+  # ---------------------------------------------------------------
+  - nome: "Indexology (S&P DJI)"
+    url: "https://www.indexologyblog.com/"
+    tipo: auto
+    ativo: sim
+    intervalo_min: 720
+    max_itens: 3
+    tags: "notícias e mercado"
+  - nome: "Robin Brooks"
+    url: "https://robinjbrooks.substack.com/"
+    tipo: auto
+    ativo: sim
+    intervalo_min: 720
+    max_itens: 3
+    tags: "analista (substack)"
+  - nome: "The Leah Files"
+    url: "https://theleahfiles.substack.com/"
+    tipo: auto
+    ativo: sim
+    intervalo_min: 720
+    max_itens: 3
+    tags: "analista (substack)"
+  - nome: "Goldman Sachs Insights"
+    url: "https://www.goldmansachs.com/insights/macroeconomics"
+    tipo: auto
+    ativo: sim
+    intervalo_min: 720
+    max_itens: 3
+    tags: "casa de análise"
+  - nome: "CoinMetrics"
+    url: "https://coinmetrics.io/"
+    tipo: auto
+    ativo: sim
+    intervalo_min: 720
+    max_itens: 3
+    tags: "on-chain"
+  - nome: "Blockworks"
+    url: "https://blockworks.com/"
+    tipo: auto
+    ativo: sim
+    intervalo_min: 720
+    max_itens: 3
+    tags: "notícias defi"
+  - nome: "Panoptic"
+    url: "https://panoptic.xyz/research"
+    tipo: auto
+    ativo: sim
+    intervalo_min: 720
+    max_itens: 3
+    tags: "pesquisa cripto"
+  - nome: "Milk Road"
+    url: "https://themilkroad.beehiiv.com/"
+    tipo: auto
+    ativo: sim
+    intervalo_min: 720
+    max_itens: 3
+    tags: "newsletter"
+  - nome: "The Edge"
+    url: "https://www.the-edge.xyz/t/Yields-Of-The-Week"
+    tipo: auto
+    ativo: sim
+    intervalo_min: 720
+    max_itens: 3
+    tags: "pesquisa cripto"
+  - nome: "Bitwise"
+    url: "https://bitwiseinvestments.com/crypto-market-insights"
+    tipo: auto
+    ativo: sim
+    intervalo_min: 720
+    max_itens: 3
+    tags: "pesquisa cripto"
+  - nome: "Castle Labs"
+    url: "https://research.castlelabs.io/"
+    tipo: auto
+    ativo: sim
+    intervalo_min: 720
+    max_itens: 3
+    tags: "pesquisa cripto"
+  - nome: "Glassnode"
+    url: "https://insights.glassnode.com/tag/product/"
+    tipo: auto
+    ativo: sim
+    intervalo_min: 720
+    max_itens: 3
+    tags: "pesquisa cripto"
+  - nome: "Mirador Finance"
+    url: "https://www.mirador.finance/archive?sort=new"
+    tipo: auto
+    ativo: sim
+    intervalo_min: 720
+    max_itens: 3
+    tags: "pesquisa cripto"
+  - nome: "Sentora"
+    url: "https://sentora.com/research/articles"
+    tipo: auto
+    ativo: sim
+    intervalo_min: 720
+    max_itens: 3
+    tags: "pesquisa cripto"
+  - nome: "GFI Research"
+    url: "https://gfiresearch.net/"
+    tipo: auto
+    ativo: sim
+    intervalo_min: 720
+    max_itens: 3
+    tags: "pesquisa cripto"
+  - nome: "Cryptonary"
+    url: "https://cryptonary.com/all-research/?route=header"
+    tipo: auto
+    ativo: sim
+    intervalo_min: 720
+    max_itens: 3
+    tags: "pesquisa cripto"
+  - nome: "Sea Launch"
+    url: "https://sealaunch.substack.com/archive"
+    tipo: auto
+    ativo: sim
+    intervalo_min: 720
+    max_itens: 3
+    tags: "analista (substack)"
+  - nome: "PANews"
+    url: "https://www.panewslab.com/zh/profundity/index.html"
+    tipo: auto
+    ativo: sim
+    intervalo_min: 720
+    max_itens: 3
+    tags: "pesquisa cripto"
+  - nome: "Alea Research"
+    url: "https://alearesearch.io/research/"
+    tipo: auto
+    ativo: sim
+    intervalo_min: 720
+    max_itens: 3
+    tags: "pesquisa cripto"
+  - nome: "K33 Research"
+    url: "https://k33.com/research"
+    tipo: auto
+    ativo: sim
+    intervalo_min: 720
+    max_itens: 3
+    tags: "pesquisa cripto"
+  - nome: "Kaiko Research"
+    url: "https://research.kaiko.com/"
+    tipo: auto
+    ativo: sim
+    intervalo_min: 720
+    max_itens: 3
+    tags: "pesquisa cripto"
+  - nome: "Glassnode 2"
+    url: "https://insights.glassnode.com/tag/newsletter/"
+    tipo: auto
+    ativo: sim
+    intervalo_min: 720
+    max_itens: 3
+    tags: "pesquisa cripto"
+  - nome: "Galaxy Digital"
+    url: "https://www.galaxy.com/insights/research/"
+    tipo: auto
+    ativo: sim
+    intervalo_min: 720
+    max_itens: 3
+    tags: "pesquisa cripto"
+  - nome: "21Shares"
+    url: "https://www.21shares.com/en-eu/insights/research-reports"
+    tipo: auto
+    ativo: sim
+    intervalo_min: 720
+    max_itens: 3
+    tags: "pesquisa cripto"
+  - nome: "21Shares 2"
+    url: "https://www.21shares.com/en-eu/insights/market-updates"
+    tipo: auto
+    ativo: sim
+    intervalo_min: 720
+    max_itens: 3
+    tags: "pesquisa cripto"
+  - nome: "21Shares 3"
+    url: "https://www.21shares.com/en-eu/insights/data-insights"
+    tipo: auto
+    ativo: sim
+    intervalo_min: 720
+    max_itens: 3
+    tags: "pesquisa cripto"
+  - nome: "21Shares 4"
+    url: "https://www.21shares.com/en-eu/blog"
+    tipo: auto
+    ativo: sim
+    intervalo_min: 720
+    max_itens: 3
+    tags: "pesquisa cripto"
+  - nome: "CoinMetrics Insights"
+    url: "https://coinmetrics.io/insights/"
+    tipo: auto
+    ativo: sim
+    intervalo_min: 720
+    max_itens: 3
+    tags: "pesquisa cripto"
+  - nome: "CoinShares"
+    url: "https://coinshares.com/corp/insights/"
+    tipo: auto
+    ativo: sim
+    intervalo_min: 720
+    max_itens: 3
+    tags: "pesquisa cripto"
+  - nome: "CoinShares 2"
+    url: "https://coinshares.com/corp/insights/research-data/"
+    tipo: auto
+    ativo: sim
+    intervalo_min: 720
+    max_itens: 3
+    tags: "pesquisa cripto"
+  - nome: "WuBlockchain"
+    url: "https://wublock.substack.com/archive"
+    tipo: auto
+    ativo: sim
+    intervalo_min: 720
+    max_itens: 3
+    tags: "analista (substack)"
+  - nome: "SevenC"
+    url: "https://sevenc.substack.com/"
+    tipo: auto
+    ativo: sim
+    intervalo_min: 720
+    max_itens: 3
+    tags: "analista (substack)"
+  - nome: "DappRadar"
+    url: "https://dappradar.com/reports"
+    tipo: auto
+    ativo: sim
+    intervalo_min: 720
+    max_itens: 3
+    tags: "pesquisa cripto"
+  - nome: "Pantera Capital"
+    url: "https://panteracapital.com/blockchain-letter/"
+    tipo: auto
+    ativo: sim
+    intervalo_min: 720
+    max_itens: 3
+    tags: "pesquisa cripto"
+  - nome: "Hashrate Index"
+    url: "https://hashrateindex.com/blog/"
+    tipo: auto
+    ativo: sim
+    intervalo_min: 720
+    max_itens: 3
+    tags: "pesquisa cripto"
+  - nome: "The Block Research"
+    url: "https://www.theblock.co/reports"
+    tipo: auto
+    ativo: sim
+    intervalo_min: 720
+    max_itens: 3
+    tags: "pesquisa cripto"
+  - nome: "Messari"
+    url: "https://messari.io/research"
+    tipo: auto
+    ativo: sim
+    intervalo_min: 720
+    max_itens: 3
+    tags: "pesquisa cripto"
+  - nome: "Variant Fund"
+    url: "https://variant.fund/writing/"
+    tipo: auto
+    ativo: sim
+    intervalo_min: 720
+    max_itens: 3
+    tags: "pesquisa cripto"
+  - nome: "Multicoin Capital"
+    url: "https://multicoin.capital/thesis/"
+    tipo: auto
+    ativo: sim
+    intervalo_min: 720
+    max_itens: 3
+    tags: "pesquisa cripto"
+  - nome: "Multicoin Capital 2"
+    url: "https://multicoin.capital/writing/"
+    tipo: auto
+    ativo: sim
+    intervalo_min: 720
+    max_itens: 3
+    tags: "pesquisa cripto"
+  - nome: "a16z crypto"
+    url: "https://a16zcrypto.com/posts/"
+    tipo: auto
+    ativo: sim
+    intervalo_min: 720
+    max_itens: 3
+    tags: "pesquisa cripto"
+  - nome: "Chorus One"
+    url: "https://chorus.one/crypto-research"
+    tipo: auto
+    ativo: sim
+    intervalo_min: 720
+    max_itens: 3
+    tags: "pesquisa cripto"
+  - nome: "Nickel Digital"
+    url: "https://nickel.digital/investorlibrary"
+    tipo: auto
+    ativo: sim
+    intervalo_min: 720
+    max_itens: 3
+    tags: "pesquisa cripto"
+  - nome: "Fidelity Digital Assets"
+    url: "https://www.fidelitydigitalassets.com/research-and-insights"
+    tipo: auto
+    ativo: sim
+    intervalo_min: 720
+    max_itens: 3
+    tags: "pesquisa cripto"
+  - nome: "Binance Research"
+    url: "https://www.binance.com/en/research"
+    tipo: auto
+    ativo: sim
+    intervalo_min: 720
+    max_itens: 3
+    tags: "pesquisa cripto"
+  - nome: "DBA"
+    url: "https://dba.xyz/"
+    tipo: auto
+    ativo: sim
+    intervalo_min: 720
+    max_itens: 3
+    tags: "pesquisa cripto"
+  - nome: "Xangle"
+    url: "https://xangle.io/en/research/all?content_type=original&sub_category=all&nowPeriod=insight_page.filter.all_time&order=related"
+    tipo: auto
+    ativo: sim
+    intervalo_min: 720
+    max_itens: 3
+    tags: "pesquisa cripto"
+  - nome: "Cointelegraph Research"
+    url: "https://cointelegraph.com/research"
+    tipo: auto
+    ativo: sim
+    intervalo_min: 720
+    max_itens: 3
+    tags: "pesquisa cripto"
+  - nome: "CoinGecko Research"
+    url: "https://www.coingecko.com/research/category/reports"
+    tipo: auto
+    ativo: sim
+    intervalo_min: 720
+    max_itens: 3
+    tags: "pesquisa cripto"
+  - nome: "Blocmates"
+    url: "https://www.blocmates.com/articles"
+    tipo: auto
+    ativo: sim
+    intervalo_min: 720
+    max_itens: 3
+    tags: "pesquisa cripto"
+  - nome: "Coin98"
+    url: "https://coin98.net/home/moi-nhat"
+    tipo: auto
+    ativo: sim
+    intervalo_min: 720
+    max_itens: 3
+    tags: "pesquisa cripto"
+  - nome: "4Pillars"
+    url: "https://4pillars.io/en/reports"
+    tipo: auto
+    ativo: sim
+    intervalo_min: 720
+    max_itens: 3
+    tags: "pesquisa cripto"
+  - nome: "IOSG Ventures"
+    url: "https://iosg.vc/#research"
+    tipo: auto
+    ativo: sim
+    intervalo_min: 720
+    max_itens: 3
+    tags: "pesquisa cripto"
+  - nome: "Castle Capital"
+    url: "https://chronicle.castlecapital.vc/"
+    tipo: auto
+    ativo: sim
+    intervalo_min: 720
+    max_itens: 3
+    tags: "pesquisa cripto"
+  - nome: "Castle Labs 2"
+    url: "https://castlelabs.substack.com/t/chronicle"
+    tipo: auto
+    ativo: sim
+    intervalo_min: 720
+    max_itens: 3
+    tags: "analista (substack)"
+  - nome: "The DeFi Report"
+    url: "https://thedefireport.io/"
+    tipo: auto
+    ativo: sim
+    intervalo_min: 720
+    max_itens: 3
+    tags: "pesquisa cripto"
+  - nome: "CryptoRank"
+    url: "https://cryptorank.io/insights"
+    tipo: auto
+    ativo: sim
+    intervalo_min: 720
+    max_itens: 3
+    tags: "pesquisa cripto"
+  - nome: "HackerNoon"
+    url: "https://hackernoon.com/tagged/hackernoon-top-story"
+    tipo: auto
+    ativo: sim
+    intervalo_min: 720
+    max_itens: 3
+    tags: "pesquisa cripto"
+  - nome: "YBB Capital"
+    url: "https://ybbcapital.medium.com/"
+    tipo: auto
+    ativo: sim
+    intervalo_min: 720
+    max_itens: 3
+    tags: "pesquisa cripto"
+  - nome: "DeSpread Research"
+    url: "https://research.despread.io/insight/"
+    tipo: auto
+    ativo: sim
+    intervalo_min: 720
+    max_itens: 3
+    tags: "pesquisa cripto"
+  - nome: "DeSpread Research 2"
+    url: "https://research.despread.io/report/"
+    tipo: auto
+    ativo: sim
+    intervalo_min: 720
+    max_itens: 3
+    tags: "pesquisa cripto"
+  - nome: "DeSpread Research 3"
+    url: "https://research.despread.io/blog/"
+    tipo: auto
+    ativo: sim
+    intervalo_min: 720
+    max_itens: 3
+    tags: "pesquisa cripto"
+  - nome: "Decentralised.co"
+    url: "https://www.decentralised.co/archive?sort=new"
+    tipo: auto
+    ativo: sim
+    intervalo_min: 720
+    max_itens: 3
+    tags: "pesquisa cripto"
+  - nome: "Tiger-research"
+    url: "https://reports.tiger-research.com/s/latest"
+    tipo: auto
+    ativo: sim
+    intervalo_min: 720
+    max_itens: 3
+    tags: "pesquisa cripto"
+  - nome: "Shoal Research"
+    url: "https://www.shoal.gg/archive"
+    tipo: auto
+    ativo: sim
+    intervalo_min: 720
+    max_itens: 3
+    tags: "pesquisa cripto"
+  - nome: "Blockworks Research"
+    url: "https://blockworks-research.beehiiv.com/"
+    tipo: auto
+    ativo: sim
+    intervalo_min: 720
+    max_itens: 3
+    tags: "newsletter"
+  - nome: "Fireblocks"
+    url: "https://www.fireblocks.com/blog/"
+    tipo: auto
+    ativo: sim
+    intervalo_min: 720
+    max_itens: 3
+    tags: "pesquisa cripto"
+  - nome: "Nic Carter"
+    url: "https://medium.com/@nic__carter"
+    tipo: auto
+    ativo: sim
+    intervalo_min: 720
+    max_itens: 3
+    tags: "pesquisa cripto"
+  - nome: "Coinbase Institutional"
+    url: "https://www.coinbase.com/pt-br/institutional/research-insights"
+    tipo: auto
+    ativo: sim
+    intervalo_min: 720
+    max_itens: 3
+    tags: "pesquisa cripto"
+  - nome: "Layer2 Roundup"
+    url: "https://www.layer2roundup.io/archive"
+    tipo: auto
+    ativo: sim
+    intervalo_min: 720
+    max_itens: 3
+    tags: "pesquisa cripto"
+  - nome: "Security Token"
+    url: "https://securitytoken.medium.com/"
+    tipo: auto
+    ativo: sim
+    intervalo_min: 720
+    max_itens: 3
+    tags: "pesquisa cripto"
+  - nome: "Chaos Labs"
+    url: "https://chaoslabs.xyz/research"
+    tipo: auto
+    ativo: sim
+    intervalo_min: 720
+    max_itens: 3
+    tags: "pesquisa cripto"
+  - nome: "Gate Learn"
+    url: "https://www.gate.io/pt-br/learn/topics?page=1&sort=updated_at"
+    tipo: auto
+    ativo: sim
+    intervalo_min: 720
+    max_itens: 3
+    tags: "pesquisa cripto"
+  - nome: "Gate Learn 2"
+    url: "https://www.gate.com/pt-br/learn/category/In-Depth%20Research"
+    tipo: auto
+    ativo: sim
+    intervalo_min: 720
+    max_itens: 3
+    tags: "pesquisa cripto"
+  - nome: "Helius"
+    url: "https://www.helius.dev/blog"
+    tipo: auto
+    ativo: sim
+    intervalo_min: 720
+    max_itens: 3
+    tags: "pesquisa cripto"
+  - nome: "Parsec"
+    url: "https://parsec.substack.com/archive"
+    tipo: auto
+    ativo: sim
+    intervalo_min: 720
+    max_itens: 3
+    tags: "analista (substack)"
+  - nome: "TokenInsight"
+    url: "https://tokeninsight.com/en/research"
+    tipo: auto
+    ativo: sim
+    intervalo_min: 720
+    max_itens: 3
+    tags: "pesquisa cripto"
+  - nome: "Artemis"
+    url: "https://research.artemis.xyz/archive"
+    tipo: auto
+    ativo: sim
+    intervalo_min: 720
+    max_itens: 3
+    tags: "pesquisa cripto"
+  - nome: "0xKyle"
+    url: "https://0xkyle.substack.com/"
+    tipo: auto
+    ativo: sim
+    intervalo_min: 720
+    max_itens: 3
+    tags: "analista (substack)"
+  - nome: "Syncracy Capital"
+    url: "https://www.syncracy.io/writing"
+    tipo: auto
+    ativo: sim
+    intervalo_min: 720
+    max_itens: 3
+    tags: "pesquisa cripto"
+  - nome: "Grayscale Research"
+    url: "https://research.grayscale.com/#reports"
+    tipo: auto
+    ativo: sim
+    intervalo_min: 720
+    max_itens: 3
+    tags: "pesquisa cripto"
+  - nome: "Fortunafi"
+    url: "https://fortunafi.beehiiv.com/"
+    tipo: auto
+    ativo: sim
+    intervalo_min: 720
+    max_itens: 3
+    tags: "newsletter"
+  - nome: "Kaishinaw"
+    url: "https://medium.com/@kaishinaw"
+    tipo: auto
+    ativo: sim
+    intervalo_min: 720
+    max_itens: 3
+    tags: "pesquisa cripto"
+  - nome: "ChainFeeds"
+    url: "https://substack.chainfeeds.xyz/"
+    tipo: auto
+    ativo: sim
+    intervalo_min: 720
+    max_itens: 3
+    tags: "pesquisa cripto"
+  - nome: "BlockBeats"
+    url: "https://www.theblockbeats.info/article"
+    tipo: auto
+    ativo: sim
+    intervalo_min: 720
+    max_itens: 3
+    tags: "pesquisa cripto"
+  - nome: "Stanford Blockchain Review"
+    url: "https://review.stanfordblockchain.xyz/archive"
+    tipo: auto
+    ativo: sim
+    intervalo_min: 720
+    max_itens: 3
+    tags: "pesquisa cripto"
+  - nome: "Chainalysis"
+    url: "https://www.chainalysis.com/reports/"
+    tipo: auto
+    ativo: sim
+    intervalo_min: 720
+    max_itens: 3
+    tags: "pesquisa cripto"
+  - nome: "CoinDesk Data"
+    url: "https://data.coindesk.com/reports"
+    tipo: auto
+    ativo: sim
+    intervalo_min: 720
+    max_itens: 3
+    tags: "pesquisa cripto"
+  - nome: "LlamaRisk"
+    url: "https://www.llamarisk.com/research"
+    tipo: auto
+    ativo: sim
+    intervalo_min: 720
+    max_itens: 3
+    tags: "pesquisa cripto"
+  - nome: "TechFlow"
+    url: "https://www.techflowpost.com/research/index.html"
+    tipo: auto
+    ativo: sim
+    intervalo_min: 720
+    max_itens: 3
+    tags: "pesquisa cripto"
+  - nome: "2077 Research"
+    url: "https://research.2077.xyz/"
+    tipo: auto
+    ativo: sim
+    intervalo_min: 720
+    max_itens: 3
+    tags: "pesquisa cripto"
+  - nome: "Fraxcesco"
+    url: "https://fraxcesco.substack.com/"
+    tipo: auto
+    ativo: sim
+    intervalo_min: 720
+    max_itens: 3
+    tags: "analista (substack)"
+  - nome: "Castle Island Ventures"
+    url: "https://castleisland.vc/writing/"
+    tipo: auto
+    ativo: sim
+    intervalo_min: 720
+    max_itens: 3
+    tags: "pesquisa cripto"
+  - nome: "Alea Research 2"
+    url: "https://alearesearch.substack.com/archive"
+    tipo: auto
+    ativo: sim
+    intervalo_min: 720
+    max_itens: 3
+    tags: "analista (substack)"
+  - nome: "Our Network"
+    url: "https://www.ournetwork.xyz/"
+    tipo: auto
+    ativo: sim
+    intervalo_min: 720
+    max_itens: 3
+    tags: "pesquisa cripto"
+  - nome: "HashKey Capital Insights"
+    url: "https://medium.com/hashkey-capital-insights"
+    tipo: auto
+    ativo: sim
+    intervalo_min: 720
+    max_itens: 3
+    tags: "pesquisa cripto"
+  - nome: "Insights4VC"
+    url: "https://insights4vc.substack.com/archive"
+    tipo: auto
+    ativo: sim
+    intervalo_min: 720
+    max_itens: 3
+    tags: "analista (substack)"
+  - nome: "BitMEX Blog (Arthur Hayes)"
+    url: "https://blog.bitmex.com/author/arthur/?lang=en_us"
+    tipo: auto
+    ativo: sim
+    intervalo_min: 720
+    max_itens: 3
+    tags: "pesquisa cripto"
+  - nome: "Three Sigma"
+    url: "https://threesigma.xyz/blog"
+    tipo: auto
+    ativo: sim
+    intervalo_min: 720
+    max_itens: 3
+    tags: "pesquisa cripto"
+  - nome: "Lucky Trader"
+    url: "https://luckytrader.substack.com/"
+    tipo: auto
+    ativo: sim
+    intervalo_min: 720
+    max_itens: 3
+    tags: "analista (substack)"
+  - nome: "On-Chain Times"
+    url: "https://www.onchaintimes.com/"
+    tipo: auto
+    ativo: sim
+    intervalo_min: 720
+    max_itens: 3
+    tags: "pesquisa cripto"
+  - nome: "Kimmy Crypto"
+    url: "https://kimmycrypto.substack.com/archive"
+    tipo: auto
+    ativo: sim
+    intervalo_min: 720
+    max_itens: 3
+    tags: "analista (substack)"
+  - nome: "Cherry Ventures"
+    url: "https://www.cherry.xyz/writing"
+    tipo: auto
+    ativo: sim
+    intervalo_min: 720
+    max_itens: 3
+    tags: "pesquisa cripto"
+  - nome: "River Research"
+    url: "https://blog.river.com/tag/river-research/"
+    tipo: auto
+    ativo: sim
+    intervalo_min: 720
+    max_itens: 3
+    tags: "pesquisa cripto"
+  - nome: "Outlier Ventures"
+    url: "https://outlierventures.io/news/"
+    tipo: auto
+    ativo: sim
+    intervalo_min: 720
+    max_itens: 3
+    tags: "pesquisa cripto"
+  - nome: "L1D"
+    url: "https://medium.com/@L1D"
+    tipo: auto
+    ativo: sim
+    intervalo_min: 720
+    max_itens: 3
+    tags: "pesquisa cripto"
+  - nome: "Ondo Finance Insights"
+    url: "https://ondo.finance/insights"
+    tipo: auto
+    ativo: sim
+    intervalo_min: 720
+    max_itens: 3
+    tags: "pesquisa cripto"
+  - nome: "Crucible Capital"
+    url: "https://cruciblecapital.substack.com/archive"
+    tipo: auto
+    ativo: sim
+    intervalo_min: 720
+    max_itens: 3
+    tags: "analista (substack)"
+  - nome: "CoinMetrics 2"
+    url: "https://coinmetrics.substack.com/archive"
+    tipo: auto
+    ativo: sim
+    intervalo_min: 720
+    max_itens: 3
+    tags: "analista (substack)"
+  - nome: "CMT Digital"
+    url: "https://cmt.digital/insights"
+    tipo: auto
+    ativo: sim
+    intervalo_min: 720
+    max_itens: 3
+    tags: "pesquisa cripto"
+  - nome: "BlockAnalitica"
+    url: "https://blockanalitica.substack.com/archive"
+    tipo: auto
+    ativo: sim
+    intervalo_min: 720
+    max_itens: 3
+    tags: "analista (substack)"
+  - nome: "MixBytes"
+    url: "https://mixbytes.io/reports"
+    tipo: auto
+    ativo: sim
+    intervalo_min: 720
+    max_itens: 3
+    tags: "pesquisa cripto"
+  - nome: "Killer Apps"
+    url: "https://killerapps.substack.com/"
+    tipo: auto
+    ativo: sim
+    intervalo_min: 720
+    max_itens: 3
+    tags: "analista (substack)"
+  - nome: "SH Brennan"
+    url: "https://shbrennan.substack.com/archive"
+    tipo: auto
+    ativo: sim
+    intervalo_min: 720
+    max_itens: 3
+    tags: "analista (substack)"
+  - nome: "The Defiant"
+    url: "https://thedefiant.io/news/research-and-opinion"
+    tipo: auto
+    ativo: sim
+    intervalo_min: 720
+    max_itens: 3
+    tags: "pesquisa cripto"
+  - nome: "RE7 Capital"
+    url: "https://re7.capital/blog/"
+    tipo: auto
+    ativo: sim
+    intervalo_min: 720
+    max_itens: 3
+    tags: "pesquisa cripto"
+  - nome: "K3 Capital"
+    url: "https://k3capital.substack.com/archive"
+    tipo: auto
+    ativo: sim
+    intervalo_min: 720
+    max_itens: 3
+    tags: "analista (substack)"
+  - nome: "Syndica"
+    url: "https://blog.syndica.io/tag/research/"
+    tipo: auto
+    ativo: sim
+    intervalo_min: 720
+    max_itens: 3
+    tags: "pesquisa cripto"
+  - nome: "Memento Research"
+    url: "https://mementoresearch.com/publications/"
+    tipo: auto
+    ativo: sim
+    intervalo_min: 720
+    max_itens: 3
+    tags: "pesquisa cripto"
+  - nome: "Bid Club"
+    url: "https://www.bidclub.io/"
+    tipo: auto
+    ativo: sim
+    intervalo_min: 720
+    max_itens: 3
+    tags: "pesquisa cripto"
+  - nome: "Bravos Research"
+    url: "https://bravosresearch.com/the-macro-report/"
+    tipo: auto
+    ativo: sim
+    intervalo_min: 720
+    max_itens: 3
+    tags: "pesquisa cripto"
+  - nome: "Developer Report"
+    url: "https://www.developerreport.com/developer-report"
+    tipo: auto
+    ativo: sim
+    intervalo_min: 720
+    max_itens: 3
+    tags: "pesquisa cripto"
+  - nome: "OKG Research"
+    url: "https://medium.com/@OKGResearch"
+    tipo: auto
+    ativo: sim
+    intervalo_min: 720
+    max_itens: 3
+    tags: "pesquisa cripto"
+  - nome: "ARK Invest"
+    url: "https://www.ark-invest.com/articles"
+    tipo: auto
+    ativo: sim
+    intervalo_min: 720
+    max_itens: 3
+    tags: "pesquisa cripto"
+  - nome: "ARK Invest 2"
+    url: "https://www.ark-invest.com/big-ideas-2025"
+    tipo: auto
+    ativo: sim
+    intervalo_min: 720
+    max_itens: 3
+    tags: "pesquisa cripto"
+  - nome: "ARK Invest 3"
+    url: "https://www.ark-invest.com/newsletters"
+    tipo: auto
+    ativo: sim
+    intervalo_min: 720
+    max_itens: 3
+    tags: "pesquisa cripto"
+  - nome: "ARK Invest 4"
+    url: "https://www.ark-invest.com/white-papers"
+    tipo: auto
+    ativo: sim
+    intervalo_min: 720
+    max_itens: 3
+    tags: "pesquisa cripto"
+  - nome: "0xgreythorn"
+    url: "https://0xgreythorn.medium.com/"
+    tipo: auto
+    ativo: sim
+    intervalo_min: 720
+    max_itens: 3
+    tags: "pesquisa cripto"
+  - nome: "Greythorn Capital"
+    url: "https://greythorn.com/research/?_tag=core-research"
+    tipo: auto
+    ativo: sim
+    intervalo_min: 720
+    max_itens: 3
+    tags: "pesquisa cripto"
+  - nome: "Blockchain Gamer"
+    url: "https://www.blockchaingamer.biz/news/"
+    tipo: auto
+    ativo: sim
+    intervalo_min: 720
+    max_itens: 3
+    tags: "pesquisa cripto"
+  - nome: "Helika"
+    url: "https://helika.substack.com/"
+    tipo: auto
+    ativo: sim
+    intervalo_min: 720
+    max_itens: 3
+    tags: "analista (substack)"
+  - nome: "Chain of Thought"
+    url: "https://chainofthought.xyz/"
+    tipo: auto
+    ativo: sim
+    intervalo_min: 720
+    max_itens: 3
+    tags: "pesquisa cripto"
+  - nome: "Artemis 2"
+    url: "https://www.artemis.xyz/research"
+    tipo: auto
+    ativo: sim
+    intervalo_min: 720
+    max_itens: 3
+    tags: "pesquisa cripto"
+  - nome: "7X Ventures"
+    url: "https://www.7xvc.com/"
+    tipo: auto
+    ativo: sim
+    intervalo_min: 720
+    max_itens: 3
+    tags: "pesquisa cripto"
+  - nome: "Hashed Emergent"
+    url: "https://hashedem.substack.com/archive"
+    tipo: auto
+    ativo: sim
+    intervalo_min: 720
+    max_itens: 3
+    tags: "analista (substack)"
+  - nome: "Swastik Research"
+    url: "https://iamswastik.substack.com/archive?sort=new"
+    tipo: auto
+    ativo: sim
+    intervalo_min: 720
+    max_itens: 3
+    tags: "analista (substack)"
+  - nome: "TRHX Research"
+    url: "https://trhx.com/research"
+    tipo: auto
+    ativo: sim
+    intervalo_min: 720
+    max_itens: 3
+    tags: "pesquisa cripto"
+  - nome: "Oak Research"
+    url: "https://oakresearch.io/en/analyses"
+    tipo: auto
+    ativo: sim
+    intervalo_min: 720
+    max_itens: 3
+    tags: "pesquisa cripto"
+  - nome: "Oak Research 2"
+    url: "https://oakresearch.io/en/reports"
+    tipo: auto
+    ativo: sim
+    intervalo_min: 720
+    max_itens: 3
+    tags: "pesquisa cripto"
+  - nome: "ASXN Newsletter"
+    url: "https://newsletter.asxn.xyz/archive"
+    tipo: auto
+    ativo: sim
+    intervalo_min: 720
+    max_itens: 3
+    tags: "pesquisa cripto"
+  - nome: "Frontier Lab"
+    url: "https://frontierlab.xyz/insight"
+    tipo: auto
+    ativo: sim
+    intervalo_min: 720
+    max_itens: 3
+    tags: "pesquisa cripto"
+  - nome: "Footprint Analytics"
+    url: "https://www.footprint.network/news/reports"
+    tipo: auto
+    ativo: sim
+    intervalo_min: 720
+    max_itens: 3
+    tags: "pesquisa cripto"
+  - nome: "S4mmy.eth"
+    url: "https://s4mmyeth.substack.com/"
+    tipo: auto
+    ativo: sim
+    intervalo_min: 720
+    max_itens: 3
+    tags: "analista (substack)"
+  - nome: "Stoic's Musing"
+    url: "https://stoicsmusing.substack.com/"
+    tipo: auto
+    ativo: sim
+    intervalo_min: 720
+    max_itens: 3
+    tags: "analista (substack)"
+  - nome: "BCG Publications"
+    url: "https://www.bcg.com/publications"
+    tipo: auto
+    ativo: sim
+    intervalo_min: 720
+    max_itens: 3
+    tags: "pesquisa cripto"
+  - nome: "Grayscale Research 2"
+    url: "https://research.grayscale.com/reports"
+    tipo: auto
+    ativo: sim
+    intervalo_min: 720
+    max_itens: 3
+    tags: "pesquisa cripto"
+  - nome: "Ecoinometrics"
+    url: "https://www.ecoinometrics.com/"
+    tipo: auto
+    ativo: sim
+    intervalo_min: 720
+    max_itens: 3
+    tags: "pesquisa cripto"
+  - nome: "Mason Nystrom"
+    url: "https://www.masonnystrom.com/archive"
+    tipo: auto
+    ativo: sim
+    intervalo_min: 720
+    max_itens: 3
+    tags: "pesquisa cripto"
+  - nome: "Modular Capital"
+    url: "https://www.modularcapital.xyz/writing"
+    tipo: auto
+    ativo: sim
+    intervalo_min: 720
+    max_itens: 3
+    tags: "pesquisa cripto"
+  - nome: "WeSearch"
+    url: "https://wesearch.substack.com/"
+    tipo: auto
+    ativo: sim
+    intervalo_min: 720
+    max_itens: 3
+    tags: "analista (substack)"
+  - nome: "One True Kirk"
+    url: "https://onetruekirk.github.io/"
+    tipo: auto
+    ativo: sim
+    intervalo_min: 720
+    max_itens: 3
+    tags: "pesquisa cripto"
+  - nome: "Google Cloud Web3"
+    url: "https://cloud.google.com/application/web3/learn"
+    tipo: auto
+    ativo: sim
+    intervalo_min: 720
+    max_itens: 3
+    tags: "pesquisa cripto"
+  - nome: "GLC Research"
+    url: "https://glcresearch.beehiiv.com/"
+    tipo: auto
+    ativo: sim
+    intervalo_min: 720
+    max_itens: 3
+    tags: "newsletter"
+  - nome: "Sumcap Research"
+    url: "https://www.sumcap.xyz/research"
+    tipo: auto
+    ativo: sim
+    intervalo_min: 720
+    max_itens: 3
+    tags: "pesquisa cripto"
+  - nome: "Auditless Research"
+    url: "https://research.auditless.com/archive?sort=new"
+    tipo: auto
+    ativo: sim
+    intervalo_min: 720
+    max_itens: 3
+    tags: "pesquisa cripto"
+  - nome: "Barterswap"
+    url: "https://barterswap.xyz/blog"
+    tipo: auto
+    ativo: sim
+    intervalo_min: 720
+    max_itens: 3
+    tags: "pesquisa cripto"
+  - nome: "Arcana Research"
+    url: "https://arcanaresearch.substack.com/"
+    tipo: auto
+    ativo: sim
+    intervalo_min: 720
+    max_itens: 3
+    tags: "analista (substack)"
+  - nome: "MixBytes 2"
+    url: "https://mixbytes.io/blog"
+    tipo: auto
+    ativo: sim
+    intervalo_min: 720
+    max_itens: 3
+    tags: "pesquisa cripto"
+  - nome: "Cyber Fund"
+    url: "https://cyber.fund/content"
+    tipo: auto
+    ativo: sim
+    intervalo_min: 720
+    max_itens: 3
+    tags: "pesquisa cripto"
+  - nome: "Token Brice"
+    url: "https://tokenbrice.xyz/"
+    tipo: auto
+    ativo: sim
+    intervalo_min: 720
+    max_itens: 3
+    tags: "pesquisa cripto"
+  - nome: "Spartan Group"
+    url: "http://spartangroup.io/insights/all"
+    tipo: auto
+    ativo: sim
+    intervalo_min: 720
+    max_itens: 3
+    tags: "pesquisa cripto"
+  - nome: "Visser Labs"
+    url: "https://visserlabs.substack.com/"
+    tipo: auto
+    ativo: sim
+    intervalo_min: 720
+    max_itens: 3
+    tags: "analista (substack)"
+  - nome: "AR.CA"
+    url: "https://www.ar.ca/blog"
+    tipo: auto
+    ativo: sim
+    intervalo_min: 720
+    max_itens: 3
+    tags: "pesquisa cripto"
+  - nome: "Rekt News"
+    url: "https://rekt.news/"
+    tipo: auto
+    ativo: sim
+    intervalo_min: 720
+    max_itens: 3
+    tags: "pesquisa cripto"
+  - nome: "A1 Research"
+    url: "https://a1research.io/blog"
+    tipo: auto
+    ativo: sim
+    intervalo_min: 720
+    max_itens: 3
+    tags: "pesquisa cripto"
+  - nome: "Hyperliquid Research (Hyperliquidr)"
+    url: "https://www.hyperliquidr.xyz/posts"
+    tipo: auto
+    ativo: sim
+    intervalo_min: 720
+    max_itens: 3
+    tags: "pesquisa cripto"
+  - nome: "Hyperliquid News"
+    url: "https://hyperliquid.xyz/news"
+    tipo: auto
+    ativo: sim
+    intervalo_min: 720
+    max_itens: 3
+    tags: "adicionada manualmente"
+  - nome: "Pendle (Medium)"
+    url: "https://medium.com/pendle"
+    tipo: auto
+    ativo: sim
+    intervalo_min: 720
+    max_itens: 3
+    tags: "adicionada manualmente"
+  - nome: "Solana Reports"
+    url: "https://solana.com/pt/reports"
+    tipo: auto
+    ativo: sim
+    intervalo_min: 720
+    max_itens: 3
+    tags: "adicionada manualmente"
+  - nome: "Solana News"
+    url: "https://solana.com/news"
+    tipo: auto
+    ativo: sim
+    intervalo_min: 720
+    max_itens: 3
+    tags: "adicionada manualmente"
+  - nome: "Sentora Case Studies"
+    url: "https://sentora.com/case-studies"
+    tipo: auto
+    ativo: sim
+    intervalo_min: 720
+    max_itens: 3
+    tags: "adicionada manualmente"
+  - nome: "Morpho Blog"
+    url: "https://morpho.org/blog"
+    tipo: auto
+    ativo: sim
+    intervalo_min: 720
+    max_itens: 3
+    tags: "adicionada manualmente"
+  - nome: "Blockworks 0xResearch"
+    url: "https://blockworks.com/newsletter/0xresearch"
+    tipo: auto
+    ativo: sim
+    intervalo_min: 720
+    max_itens: 3
+    tags: "adicionada manualmente"
+
+  # ---------------------------------------------------------------
+  # DADOS DE MERCADO (API pública)
+  # ---------------------------------------------------------------
+  - nome: "Preços BTC/ETH/SOL/HYPE (CoinGecko)"
+    url: "https://api.coingecko.com/api/v3/simple/price?ids=bitcoin,ethereum,solana,hyperliquid&vs_currencies=usd,brl&include_24hr_change=true"
+    tipo: json
+    ativo: sim
+    intervalo_min: 60
+    tags: "preco"
+
+  # ---------------------------------------------------------------
+  # DESATIVADAS (assinatura, login, app interativo ou bloqueio a robôs)
+  # ---------------------------------------------------------------
+  # Desativada: bloqueia robôs
+  - nome: "Reuters"
+    url: "https://www.reuters.com/"
+    tipo: auto
+    ativo: nao
+    intervalo_min: 1440
+    tags: "notícias e mercado"
+  # Desativada: página de cotações (use a fonte JSON de preços)
+  - nome: "CoinGecko"
+    url: "https://www.coingecko.com/"
+    tipo: auto
+    ativo: nao
+    intervalo_min: 1440
+    tags: "mercado cripto"
+  # Desativada: bloqueia robôs
+  - nome: "ForexFactory"
+    url: "https://www.forexfactory.com/calendar"
+    tipo: auto
+    ativo: nao
+    intervalo_min: 1440
+    tags: "calendário econômico"
+  # Desativada: exige assinatura e bloqueia robôs
+  - nome: "Bloomberg"
+    url: "https://www.bloomberg.com/"
+    tipo: auto
+    ativo: nao
+    intervalo_min: 1440
+    tags: "notícias e mercado"
+  # Desativada: exige assinatura
+  - nome: "Financial Times"
+    url: "https://www.ft.com/"
+    tipo: auto
+    ativo: nao
+    intervalo_min: 1440
+    tags: "notícias e mercado"
+  # Desativada: bloqueia robôs
+  - nome: "Seeking Alpha"
+    url: "https://seekingalpha.com/"
+    tipo: auto
+    ativo: nao
+    intervalo_min: 1440
+    tags: "notícias e mercado"
+  # Desativada: ferramenta interativa
+  - nome: "CME FedWatch"
+    url: "https://www.cmegroup.com/markets/interest-rates/cme-fedwatch-tool.html"
+    tipo: auto
+    ativo: nao
+    intervalo_min: 1440
+    tags: "ferramenta"
+  # Desativada: painel interativo
+  - nome: "Koyfin — Weekly Economic Index"
+    url: "https://app.koyfin.com/wei"
+    tipo: auto
+    ativo: nao
+    intervalo_min: 1440
+    tags: "ferramenta"
+  # Desativada: painel interativo (API paga)
+  - nome: "Dune Analytics"
+    url: "https://dune.com/"
+    tipo: auto
+    ativo: nao
+    intervalo_min: 1440
+    tags: "on-chain"
+  # Desativada: painel (dados via API)
+  - nome: "DefiLlama"
+    url: "https://defillama.com/"
+    tipo: auto
+    ativo: nao
+    intervalo_min: 1440
+    tags: "on-chain"
+  # Desativada: página Notion (só funciona com navegador)
+  - nome: "Pantera (Notion)"
+    url: "https://panterafi.notion.site/"
+    tipo: auto
+    ativo: nao
+    intervalo_min: 1440
+    tags: "pesquisa cripto"
+  # Desativada: aplicativo (sem texto)
+  - nome: "DEXU"
+    url: "https://dexu.ai/overview"
+    tipo: auto
+    ativo: nao
+    intervalo_min: 1440
+    tags: "pesquisa cripto"
+  # Desativada: área de membros (login)
+  - nome: "Delphi Digital"
+    url: "https://members.delphidigital.io/reads"
+    tipo: auto
+    ativo: nao
+    intervalo_min: 1440
+    tags: "pesquisa cripto"
+  # Desativada: área de membros (login)
+  - nome: "Delphi Digital 2"
+    url: "https://members.delphidigital.io/search?sort=created_at_desc&contentType=7"
+    tipo: auto
+    ativo: nao
+    intervalo_min: 1440
+    tags: "pesquisa cripto"
+  # Desativada: página Notion (só funciona com navegador)
+  - nome: "Muur Research Hub"
+    url: "https://muur.notion.site/Research-Hub-706b6adfbd494edf912e165db7247869"
+    tipo: auto
+    ativo: nao
+    intervalo_min: 1440
+    tags: "pesquisa cripto"
+  # Desativada: página Notion (só funciona com navegador)
+  - nome: "Moomsxx"
+    url: "https://moomsxx.notion.site/11309e5d7b938068b959f6fe721a036d?v=11309e5d7b938117ad77000c07c515f9"
+    tipo: auto
+    ativo: nao
+    intervalo_min: 1440
+    tags: "pesquisa cripto"
+  # Desativada: aplicativo (login)
+  - nome: "IntoTheBlock"
+    url: "https://app.intotheblock.com/perspectives"
+    tipo: auto
+    ativo: nao
+    intervalo_min: 1440
+    tags: "pesquisa cripto"
+
+  # ---------------------------------------------------------------
+  # PERFIS DO X PEDIDOS EM 29/09/2026 — coletados pelo site/feed oficial
+  # de cada um (o X em si bloqueia robôs). @CoinDesk, @Blockworks e
+  # @a16zcrypto já estavam acima (CoinDesk, Blockworks, a16z crypto).
+  # ---------------------------------------------------------------
+  # @deerpointmacro
+  - nome: "Deer Point Macro"
+    url: "https://deerpointmacro.substack.com/feed"
+    tipo: rss
+    ativo: sim
+    intervalo_min: 360
+    max_itens: 3
+    tags: "analista (substack)"
+  # @_checkonchain (James Check): newsletter on-chain de Bitcoin, com gráficos
+  - nome: "Checkonchain"
+    url: "https://newsletter.checkonchain.com/feed"
+    tipo: rss
+    ativo: sim
+    intervalo_min: 360
+    max_itens: 3
+    tags: "on-chain"
+  # @BitcoinMagazine
+  - nome: "Bitcoin Magazine"
+    url: "https://bitcoinmagazine.com/feed"
+    tipo: rss
+    ativo: sim
+    intervalo_min: 60
+    max_itens: 8
+    tags: "noticias"
+  # @RealAllinCrypto
+  - nome: "AllinCrypto"
+    url: "https://allincrypto.com/feed/"
+    tipo: rss
+    ativo: sim
+    intervalo_min: 60
+    max_itens: 6
+    tags: "noticias"
+  # @coinbureau: o site não tem feed; o programa monitora a página de análises
+  - nome: "Coin Bureau (análises)"
+    url: "https://coinbureau.com/analysis"
+    tipo: auto
+    ativo: sim
+    intervalo_min: 720
+    max_itens: 3
+    tags: "pesquisa cripto"
+  # @coinglass_com: notícias do próprio coinglass.com (o Telegram deles é um
+  # grupo de conversa, sem posts públicos)
+  - nome: "CoinGlass (notícias)"
+    url: "https://www.coinglass.com/news"
+    tipo: auto
+    ativo: sim
+    intervalo_min: 360
+    max_itens: 5
+    tags: "mercado cripto"
+
+  # ---------------------------------------------------------------
+  # TWITTER/X — sem coleta direta: o X bloqueia robôs e os "espelhos"
+  # (nitter/xcancel) estão suspensos ou bloqueados. Os que têm canal no
+  # Telegram estão na seção "TWITTER/X VIA TELEGRAM" lá em cima.
+  # ---------------------------------------------------------------
+  # X/Twitter bloqueia robôs: sem coleta automática gratuita
+  - nome: "The Kobeissi Letter"
+    url: "https://x.com/kobeissiletter"
+    tipo: page
+    ativo: nao
+    intervalo_min: 1440
+    tags: "twitter"
+  # X/Twitter bloqueia robôs: sem coleta automática gratuita
+  - nome: "Watcher.Guru"
+    url: "https://x.com/WatcherGuru"
+    tipo: page
+    ativo: nao
+    intervalo_min: 1440
+    tags: "twitter"
+  # X/Twitter bloqueia robôs: sem coleta automática gratuita
+  - nome: "Jurrien Timmer (Fidelity)"
+    url: "https://x.com/TimmerFidelity"
+    tipo: page
+    ativo: nao
+    intervalo_min: 1440
+    tags: "twitter"
+  # X/Twitter bloqueia robôs: sem coleta automática gratuita
+  - nome: "Walter Bloomberg (DeItaone)"
+    url: "https://x.com/DeItaone"
+    tipo: page
+    ativo: nao
+    intervalo_min: 1440
+    tags: "twitter"
+  # X/Twitter bloqueia robôs: sem coleta automática gratuita
+  - nome: "Bravos Research (X)"
+    url: "https://x.com/bravosresearch"
+    tipo: page
+    ativo: nao
+    intervalo_min: 1440
+    tags: "twitter"
+  # X/Twitter bloqueia robôs: sem coleta automática gratuita
+  - nome: "@defi0xjeff"
+    url: "https://x.com/Defi0xJeff"
+    tipo: page
+    ativo: nao
+    intervalo_min: 1440
+    tags: "twitter"
+  # X/Twitter bloqueia robôs: sem coleta automática gratuita
+  - nome: "@levelusd"
+    url: "https://x.com/levelusd/articles"
+    tipo: page
+    ativo: nao
+    intervalo_min: 1440
+    tags: "twitter"
+  # X/Twitter bloqueia robôs: sem coleta automática gratuita
+  - nome: "0xcarlosg"
+    url: "https://x.com/0xcarlosg"
+    tipo: page
+    ativo: nao
+    intervalo_min: 1440
+    tags: "twitter"
+  # X/Twitter bloqueia robôs: sem coleta automática gratuita
+  - nome: "Ondo (X)"
+    url: "https://x.com/Ondo"
+    tipo: page
+    ativo: nao
+    intervalo_min: 1440
+    tags: "twitter"
+  # X/Twitter bloqueia robôs: sem coleta automática gratuita
+  - nome: "Coinbase (X)"
+    url: "https://x.com/coinbase"
+    tipo: page
+    ativo: nao
+    intervalo_min: 1440
+    tags: "twitter"
+  # X/Twitter bloqueia robôs: sem coleta automática gratuita
+  - nome: "Investidor em Mercados Globais"
+    url: "https://x.com/GlobalMktObserv"
+    tipo: page
+    ativo: nao
+    intervalo_min: 1440
+    tags: "twitter"
+  # X/Twitter bloqueia robôs: sem coleta automática gratuita. Perfil anônimo,
+  # sem site, feed ou Telegram oficial.
+  - nome: "Bitcoin (X)"
+    url: "https://x.com/Bitcoin"
+    tipo: page
+    ativo: nao
+    intervalo_min: 1440
+    tags: "twitter"
+  # X/Twitter bloqueia robôs: coletado pelo coinglass.com/news (acima)
+  - nome: "CoinGlass (X)"
+    url: "https://x.com/coinglass_com"
+    tipo: page
+    ativo: nao
+    intervalo_min: 1440
+    tags: "twitter"

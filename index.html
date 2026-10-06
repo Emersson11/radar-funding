@@ -125,6 +125,7 @@ button.mv{padding:2px 7px;font-size:12px;line-height:1.2;margin-right:3px} butto
 .tiles{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:1px;background:var(--line);border:1px solid var(--line);border-radius:3px;overflow:hidden}
 .tiles>div{background:var(--surface);padding:16px 18px;min-width:0} .tiles .rot{display:block;margin-bottom:8px} .tiles strong{font:500 22px/1.2 var(--mono);display:block} .tiles small{font:400 13px var(--mono);color:var(--muted)}
 .graf{height:300px;margin-top:12px}
+.g3{display:grid;grid-template-columns:repeat(auto-fit,minmax(340px,1fr));gap:20px} .g3>.box{display:flex;flex-direction:column;min-width:0} .g3>.box[hidden]{display:none} .g3 .graf{height:260px}
 .g21{display:grid;grid-template-columns:minmax(0,2fr) minmax(0,1fr);gap:20px;align-items:stretch} @media (max-width:1000px){.g21{grid-template-columns:1fr}}
 .g21>.box,.duas>.box{display:flex;flex-direction:column;min-width:0} .g21>.box>.graf,.duas>.box>.graf{flex:1 1 auto;min-height:300px;height:auto}
 #mj-defi,#mj-onchain,#mj-etfs{display:flex;flex-direction:column;gap:0} #mj-defi[hidden],#mj-onchain[hidden],#mj-etfs[hidden]{display:none}
@@ -228,6 +229,7 @@ button.mini{font-size:12px;color:var(--muted)}
       <button type="button" data-area="carteira" aria-current="page">Carteira</button>
       <button type="button" data-area="funding" aria-current="false">Estratégias</button>
       <button type="button" data-area="aulas" aria-current="false">Aulas</button>
+      <button type="button" data-area="analises" aria-current="false">Análises</button>
       <button type="button" data-area="relatorio" aria-current="false">Relatório</button>
       <button type="button" data-area="admin" aria-current="false" id="bt-admin" hidden>Administração</button>
     </nav>
@@ -381,7 +383,7 @@ button.mini{font-size:12px;color:var(--muted)}
     <section id="mj-ativos" hidden></section>
     <section id="mj-noticias" class="box" hidden>
       <h2>Notícias de cripto</h2>
-      <div class="controles" style="margin:10px 0"><label>Fonte<select id="n-fonte"><option value="">Todas</option></select></label></div>
+      <div class="controles" style="margin:10px 0"><label>Tipo de fonte<select id="n-tipo"><option value="">Todos</option><option value="noticias">Notícias</option><option value="research">Casas de research</option><option value="analistas">Analistas</option><option value="redes">X e Telegram</option><option value="oficial">Órgãos oficiais</option></select></label><label>Fonte<select id="n-fonte"><option value="">Todas</option></select></label><label>Buscar no título<input id="n-busca" type="text" placeholder="ETF, Solana, Fed…" style="width:220px"></label></div><p class="sub" id="n-conta"></p>
       <ul class="nots" id="n-lista"></ul>
       <p class="note">Títulos e links dos sites de origem, coletados a cada 10 minutos; a lista se atualiza sozinha. Clique para ler a matéria no site que a publicou.</p>
     </section>
@@ -444,6 +446,27 @@ button.mini{font-size:12px;color:var(--muted)}
     <div class="relbar no-print"><div><strong>Relatório de mercado</strong><span class="sub" id="rel-status"></span></div><div><button type="button" class="sec" id="rel-gerar">Atualizar dados</button><button type="button" id="rel-pdf">⤓ Baixar PDF</button></div></div>
     <article id="rel-doc"></article>
     <p class="note no-print">Ao clicar em "Baixar PDF", escolha "Salvar como PDF" no destino da impressão e deixe marcada a opção de gráficos de plano de fundo para manter as cores.</p>
+  </div>
+  <div id="area-analises" class="area" hidden>
+    <section class="box">
+      <h2>Análise de ativo</h2>
+      <p class="sub">Digite o nome do ativo ou protocolo e os apelidos, separados por vírgula. O painel reúne o que as fontes acompanhadas publicaram nos últimos 30 dias e os números de mercado atuais.</p>
+      <form id="an-form" class="controles" style="margin-top:12px"><label>Ativo e apelidos<input id="an-nomes" type="text" placeholder="Ethena, USDe, ENA" required style="width:320px"></label><button type="submit">Analisar</button></form>
+      <div class="pers" id="an-ex"><button type="button" data-n="Bitcoin, BTC">Bitcoin</button><button type="button" data-n="Ethereum, ETH">Ethereum</button><button type="button" data-n="Solana, SOL">Solana</button><button type="button" data-n="Hyperliquid, HYPE">Hyperliquid</button><button type="button" data-n="Ethena, USDe, ENA">Ethena</button><button type="button" data-n="Pendle">Pendle</button><button type="button" data-n="Aave">Aave</button></div>
+    </section>
+    <div id="an-res" hidden>
+      <section class="box"><h2 id="an-titulo"></h2><p class="sub" id="an-status"></p><div class="tiles" id="an-ficha" style="margin-top:14px"></div></section>
+      <div class="g3" style="margin-top:20px">
+        <div class="box" hidden><h2>Preço no último ano</h2><div class="graf" id="an-g-preco"></div></div>
+        <div class="box" hidden><h2>Valor depositado (TVL)</h2><div class="graf" id="an-g-tvl"></div></div>
+        <div class="box" hidden><h2>Taxas em soma de 30 dias</h2><div class="graf" id="an-g-taxas"></div></div>
+      </div>
+      <section class="box" style="margin-top:20px"><h2>O que as fontes publicaram</h2><p class="sub" id="an-docs-txt"></p><ul class="nots" id="an-docs" style="max-height:640px;overflow-y:auto"></ul></section>
+      <section class="box" style="margin-top:20px"><h2>Análise escrita</h2><p class="sub">A análise completa em texto (introdução, o que é, como funciona, quem está por trás, produtos, token, números, riscos e conclusão) é escrita por um modelo de inteligência artificial a partir do texto integral das publicações. Essa etapa ainda não está ligada: depende de uma chave de IA e de um lugar privado para guardar os textos das casas.</p></section>
+    </div>
+    <section class="box"><h2>Fontes acompanhadas</h2><p class="sub" id="an-fontes">Carregando o acervo…</p>
+      <details style="margin-top:10px"><summary>Ver a situação de cada fonte</summary><div class="scroll" style="max-height:420px;overflow-y:auto"><table><thead><tr><th class="txt">Fonte</th><th class="txt">Tipo</th><th class="txt">Última leitura</th><th class="txt">Quando</th></tr></thead><tbody id="an-ftb"></tbody></table></div></details>
+      <p class="note">A coleta respeita o robots.txt de cada site, não usa login e espera o intervalo de cada fonte. Fica guardado o título, o endereço, a data e um trecho curto de cada publicação; o link leva ao texto original.</p></section>
   </div>
   <div id="area-aulas" class="area" hidden>
     <p class="sub" id="au-status">Carregando as aulas…</p>
@@ -1043,7 +1066,7 @@ function vnum(i){ var t=String($(i).value).trim().replace(/[^0-9.,]/g,""); if(t.
 function rotPreco(){ var sm=$("f-moeda").value==="BRL"?"R$":"US$", total=$("f-modo").value==="total"; $("f-preco-rot").textContent=(total?"Total pago (":"Preço de 1 unidade (")+sm+")";
   var q=+$("f-qtd").value, v=vnum("f-preco"), a=$("f-ativo").value.trim().toUpperCase()||"unidade"; $("f-conta").textContent=(q>0&&v>0)?(total?"Preço por "+a+": "+sm+" "+prc(v/q)+".":"Total da operação: "+sm+" "+usd(v*q)+"."):""; }
 function limpaForm(){ EDIT=null; var mo=$("f-moeda").value, cl=$("f-classe").value, md=$("f-modo").value; $("c-form").reset(); $("f-moeda").value=mo; $("f-classe").value=cl; $("f-modo").value=md; rotPreco(); if(DOLAR) $("f-cambio").value=DOLAR.toFixed(4); $("f-data").value=new Date().toISOString().slice(0,10); $("f-salvar").textContent="Adicionar"; $("f-cancelar").hidden=true; $("f-erro").hidden=true; }
-var TITULOS={carteira:"Minha Carteira",mercado:"Mercado",funding:"Estratégias",aulas:"Aulas",relatorio:"Relatório",admin:"Administração"};
+var TITULOS={carteira:"Minha Carteira",mercado:"Mercado",funding:"Estratégias",aulas:"Aulas",analises:"Análises",relatorio:"Relatório",admin:"Administração"};
 var AUTHURL=/access_token=|refresh_token=|error_description=|type=(signup|magiclink|recovery)/.test(location.hash)||/[?&](code|token_hash)=/.test(location.search);
 function area(a){ if(!TITULOS[a]) a=(typeof ABAINI!=="undefined"&&ABAINI)||"mercado"; Object.keys(TITULOS).forEach(function(x){ $("area-"+x).hidden=x!==a; }); document.querySelectorAll("#areas button").forEach(function(o){o.setAttribute("aria-current",o.dataset.area===a?"page":"false");});
   $("titulo").textContent=TITULOS[a]; $("atualizado").hidden=a!=="funding"; $("cart-status").hidden=a==="funding"||a==="aulas"||a==="admin"; if(a==="admin"&&typeof admCarrega==="function") admCarrega(); if(!AUTHURL){ try{history.replaceState(null,"","#"+a);}catch(e){} } }
@@ -1097,8 +1120,8 @@ function mercDesenha(){
   if(MERC.fng){ $("g-fng").textContent=MERC.fng.valor+" / 100"; $("g-fngc").textContent=FNG_PT[MERC.fng.classe]||MERC.fng.classe; }
   $("g-quando").textContent="Panorama, notícias e calendário coletados "+haQuanto(MERC.t)+"; a coleta se repete a cada 10 minutos. Preços ao vivo.";
   var nots=MERC.noticias||[], gn=$("g-nots"); gn.textContent=""; nots.slice(0,6).forEach(function(n){gn.appendChild(notItem(n));}); if(!nots.length) gn.appendChild(el("li","vazio","Ainda sem notícias coletadas."));
-  var sf=$("n-fonte"), atual=sf.value; if(sf.options.length<2){ var fs={}; nots.forEach(function(n){fs[n.fonte]=1;}); Object.keys(fs).sort().forEach(function(f){var o=el("option",null,f); o.value=f; sf.appendChild(o);}); sf.value=atual; }
-  var nl=$("n-lista"); nl.textContent=""; nots.filter(function(n){return !sf.value||n.fonte===sf.value;}).forEach(function(n){nl.appendChild(notItem(n));}); if(!nl.children.length) nl.appendChild(el("li","vazio","Ainda sem notícias coletadas."));
+  var sf=$("n-fonte"), atual=sf.value; var fs={}, tp=$("n-tipo").value; nots.forEach(function(n){ if(!tp||(n.tipo||"noticias")===tp) fs[n.fonte]=1; }); var nfs=Object.keys(fs).sort(); if(sf.dataset.k!==nfs.join("|")){ sf.dataset.k=nfs.join("|"); sf.textContent=""; var o0=el("option",null,"Todas ("+nfs.length+")"); o0.value=""; sf.appendChild(o0); nfs.forEach(function(f){var o=el("option",null,f); o.value=f; sf.appendChild(o);}); sf.value=fs[atual]?atual:""; }
+  var nl=$("n-lista"); nl.textContent=""; var nb=semAcento($("n-busca").value.trim()), nfil=nots.filter(function(n){return (!sf.value||n.fonte===sf.value)&&(!tp||(n.tipo||"noticias")===tp)&&(!nb||semAcento(n.titulo+" "+(n.titulo_original||"")).indexOf(nb)>=0);}); $("n-conta").textContent=nfil.length+" publicações"+(nfil.length>250?"; mostrando as 250 mais recentes.":"."); nfil.slice(0,250).forEach(function(n){nl.appendChild(notItem(n));}); if(!nl.children.length) nl.appendChild(el("li","vazio","Ainda sem notícias coletadas."));
   var estr=function(e){return e.impacto==="High"?"★★★":"★★";}; var ev=(MERC.calendario||[]).filter(function(e){return (e.impacto==="High"||e.impacto==="Medium")&&e.moeda==="USD";}).sort(function(a,b){return Date.parse(a.data)-Date.parse(b.data);}), agora=Date.now();
   var ge=$("g-eventos"); ge.textContent=""; ev.filter(function(e){return Date.parse(e.data)>agora;}).slice(0,6).forEach(function(e){ var tr=el("tr"); cel(tr,new Date(e.data).toLocaleString("pt-BR",{weekday:"short",day:"2-digit",month:"2-digit",hour:"2-digit",minute:"2-digit"}),"txt"); cel(tr,estr(e),e.impacto==="High"?"txt estr3":"txt estr2"); cel(tr,e.titulo,"txt quebra"); ge.appendChild(tr); });
   if(!ge.children.length) semLinhas(ge,3,"Nenhum evento importante dos EUA pela frente nesta semana.");
@@ -1114,12 +1137,12 @@ var DADOS="https://raw.githubusercontent.com/Emersson11/radar-funding/dados/";
 var TRAD={}, TRADF={"Portal do Bitcoin":1,"Livecoins":1,"Cointelegraph Brasil":1}, tradOcupado=false; try{ TRAD=JSON.parse(localStorage.getItem("trad_pt_v1"))||{}; }catch(e){}
 function tradItens(){ if(!MERC) return []; return (MERC.noticias||[]).filter(function(n){return !TRADF[n.fonte];}).concat((MERC.calendario||[]).filter(function(e){return e.moeda==="USD"&&(e.impacto==="High"||e.impacto==="Medium");})); }
 function tradAplica(){ var falta=[]; tradItens().forEach(function(x){ if(!x.titulo_original) x.titulo_original=x.titulo; var o=x.titulo_original; if(TRAD[o]) x.titulo=TRAD[o]; else if(x.titulo===o&&falta.indexOf(o)<0) falta.push(o); });
-  if(!falta.length||tradOcupado) return; tradOcupado=true; var lotes=[]; falta=falta.slice(0,160); for(var i=0;i<falta.length;i+=12) lotes.push(falta.slice(i,i+12));
+  if(!falta.length||tradOcupado) return; tradOcupado=true; var lotes=[]; falta=falta.slice(0,240); for(var i=0;i<falta.length;i+=12) lotes.push(falta.slice(i,i+12));
   var prox=function(){ var l=lotes.shift(); if(!l){ tradOcupado=false; var usados={}; tradItens().forEach(function(x){usados[x.titulo_original]=1;}); Object.keys(TRAD).forEach(function(k){ if(!usados[k]) delete TRAD[k]; }); try{ localStorage.setItem("trad_pt_v1",JSON.stringify(TRAD)); }catch(e){} return; }
-    fetch("https://translate.googleapis.com/translate_a/single?client=gtx&sl=en&tl=pt&dt=t&q="+encodeURIComponent(l.map(function(t){return t.replace(/\n/g," ");}).join("\n"))).then(function(r){ if(!r.ok) throw 0; return r.json(); }).then(function(j){ var pt=j[0].map(function(sg){return sg[0]||"";}).join("").split("\n").map(function(t){return t.trim();});
+    fetch("https://translate.googleapis.com/translate_a/single?client=gtx&sl=auto&tl=pt&dt=t&q="+encodeURIComponent(l.map(function(t){return t.replace(/\n/g," ");}).join("\n"))).then(function(r){ if(!r.ok) throw 0; return r.json(); }).then(function(j){ var pt=j[0].map(function(sg){return sg[0]||"";}).join("").split("\n").map(function(t){return t.trim();});
       if(pt.length===l.length) l.forEach(function(o,i){ if(pt[i]) TRAD[o]=pt[i]; }); tradItens().forEach(function(x){ if(TRAD[x.titulo_original]) x.titulo=TRAD[x.titulo_original]; }); mercDesenha(); if(typeof etfDes==="function"&&!$("mj-etfs").hidden) etfDes(); setTimeout(prox,350); }).catch(function(){ tradOcupado=false; }); };
   prox(); }
-function mercCarrega(){ if(window.SNAP) return; fetch(DADOS+"mercado.json?t="+Math.floor(Date.now()/60000)).then(function(r){ if(!r.ok) throw 0; return r.json(); }).catch(function(){ return fetch("mercado.json?t="+Date.now()).then(function(r){ if(!r.ok) throw 0; return r.json(); }); }).then(function(j){ if(j&&j.panorama&&!(j.panorama.vol<j.panorama.cap)) j.panorama.vol=null; MERC=j; tradAplica(); mercDesenha(); }).catch(function(){ $("g-quando").textContent="Notícias e calendário ainda não foram coletados. Eles aparecem depois da primeira rodada do robô."; mercResumo(); }); }
+function mercCarrega(){ if(window.SNAP) return; fetch(DADOS+"mercado.json?t="+Math.floor(Date.now()/60000)).then(function(r){ if(!r.ok) throw 0; return r.json(); }).catch(function(){ return fetch("mercado.json?t="+Date.now()).then(function(r){ if(!r.ok) throw 0; return r.json(); }); }).then(function(j){ if(j&&j.panorama&&!(j.panorama.vol<j.panorama.cap)) j.panorama.vol=null; MERC=j; if(typeof ACERVO!=="undefined"&&ACERVO) acervoJunta(); else { tradAplica(); mercDesenha(); } }).catch(function(){ $("g-quando").textContent="Notícias e calendário ainda não foram coletados. Eles aparecem depois da primeira rodada do robô."; mercResumo(); }); }
 function mjanela(j){ document.querySelectorAll("#mabas button").forEach(function(o){ var on=o.dataset.mj===j; o.setAttribute("aria-selected",on?"true":"false"); $("mj-"+o.dataset.mj).hidden=!on; }); if(typeof m2Abre==="function") m2Abre(j); }
 document.querySelectorAll("#mabas button").forEach(function(b){b.addEventListener("click",function(){mjanela(b.dataset.mj);});});
 ["n-fonte","cal-per","cal-imp"].forEach(function(id){$(id).addEventListener("change",mercDesenha);});
@@ -1318,7 +1341,7 @@ function sessao(s){
 var MODS=[], EDM=null, EDA=null;
 function ytId(v){ v=(v||"").trim(); var m=v.match(/(?:v=|youtu\.be\/|embed\/|shorts\/)([\w-]{6,20})/); return m?m[1]:(/^[\w-]{6,20}$/.test(v)?v:""); }
 function admErro(t){ $("adm-c-erro").textContent=t||""; $("adm-c-erro").hidden=!t; }
-var ABASP=[["mercado","Mercado"],["carteira","Carteira"],["funding","Estratégias"],["aulas","Aulas"],["relatorio","Relatório"]], ABAS=ABASP.map(function(x){return {id:x[0],nome:x[1]};});
+var ABASP=[["mercado","Mercado"],["carteira","Carteira"],["funding","Estratégias"],["aulas","Aulas"],["analises","Análises"],["relatorio","Relatório"]], ABAS=ABASP.map(function(x){return {id:x[0],nome:x[1]};});
 function abasAplica(l){ var ok=[], nav=$("areas"); (Array.isArray(l)?l:[]).forEach(function(x){ if(x&&ABASP.some(function(p){return p[0]===x.id;})&&!ok.some(function(o){return o.id===x.id;})) ok.push({id:x.id,nome:String(x.nome||"").trim().slice(0,24)||ABASP.filter(function(p){return p[0]===x.id;})[0][1]}); });
   ABASP.forEach(function(p){ if(!ok.some(function(o){return o.id===p[0];})) ok.push({id:p[0],nome:p[1]}); }); ABAS=ok;
   ABAS.forEach(function(a){ var b=nav.querySelector('button[data-area="'+a.id+'"]'); if(!b) return; b.textContent=a.nome; nav.insertBefore(b,$("bt-admin")); TITULOS[a.id]=a.id==="carteira"&&a.nome==="Carteira"?"Minha Carteira":a.nome; if(!$("area-"+a.id).hidden) $("titulo").textContent=TITULOS[a.id]; });
@@ -1677,7 +1700,7 @@ function relGera(){ var doc=$("rel-doc"); $("rel-status").textContent="Montando 
     H3("2.6 O que as notícias dizem");
     if(nt.length){ var fontes={}, TEMAS=[["ETFs e investidores institucionais",/\bETFs?\b|BlackRock|institucion|institution|Grayscale|tesouraria|treasury/i],["Regulação e governos",/\bSEC\b|regula|lei\b|law|congress|senado|senate|governo|government|tribunal|court|CVM|banco central|Fed\b/i],["Bitcoin",/bitcoin|\bBTC\b/i],["Ethereum",/ethereum|\bETH\b/i],["Altcoins",/solana|\bXRP\b|ripple|cardano|dogecoin|\bBNB\b|altcoin/i],["DeFi e stablecoins",/defi|stablecoin|tether|USDC|\bUSDT\b|staking/i],["Ataques e segurança",/hack|exploit|ataque|golpe|scam|roub|stolen|invas/i],["Empresas e corretoras",/binance|coinbase|\bOKX\b|kraken|bybit|corretora|exchange|IPO/i]];
       nt.forEach(function(n){ (fontes[n.fonte]=fontes[n.fonte]||[]).push(n); }); var nf=Object.keys(fontes).sort(), cont=TEMAS.map(function(T){ var l=nt.filter(function(n){return T[1].test(n.titulo);}); return {n:T[0],l:l}; }).filter(function(x){return x.l.length;}).sort(function(a,b){return b.l.length-a.l.length;});
-      P("Nas últimas 24 horas foram coletadas "+nt.length+" notícias em "+nf.length+" fontes ("+nf.join(", ")+"). "+(cont.length?"Os assuntos mais presentes foram "+cont.slice(0,3).map(function(x){return x.n.toLowerCase()+" ("+x.l.length+" manchetes)";}).join(", ")+". A seguir, as manchetes mais recentes de cada assunto.":""));
+      P("Nas últimas 24 horas foram coletadas "+nt.length+" publicações em "+nf.length+" fontes"+(nf.length<=14?" ("+nf.join(", ")+")":", entre portais de notícias, casas de research, analistas, canais oficiais e perfis acompanhados pelo Telegram")+". "+(cont.length?"Os assuntos mais presentes foram "+cont.slice(0,3).map(function(x){return x.n.toLowerCase()+" ("+x.l.length+" manchetes)";}).join(", ")+". A seguir, as manchetes mais recentes de cada assunto.":""));
       var usadas={}; cont.slice(0,5).forEach(function(c){ var l=c.l.filter(function(n){return !usadas[n.link];}).slice(0,3); if(!l.length) return; doc.appendChild(el("p","rtema",c.n)); UL(l.map(function(n){ usadas[n.link]=1; return n.titulo+" ("+n.fonte+")"; })); });
       var resto=nt.filter(function(n){return !usadas[n.link];}).slice(0,4); if(resto.length){ doc.appendChild(el("p","rtema","Outros destaques")); UL(resto.map(function(n){return n.titulo+" ("+n.fonte+")";})); } }
     else P("Nenhuma notícia foi coletada nas últimas 24 horas.");
@@ -1709,6 +1732,53 @@ pers("df-per","dfPer","d",defiDes); pers("ef-per","efPer","d",etfDes); pers("ef-
 function m2Abre(j){ if(j==="defi") defiDes(); else if(j==="onchain") ocDes(); else if(j==="etfs") etfDes(); }
 [].forEach.call(document.querySelectorAll('#areas button[data-area="relatorio"]'),function(b){ b.addEventListener("click",function(){ setTimeout(relGera,50); }); }); if(location.hash==="#relatorio") setTimeout(relGera,2500);
 setInterval(function(){ if($("area-mercado").hidden) return; if(!$("mj-defi").hidden) defiDes(); if(!$("mj-onchain").hidden) ocDes(); if(!$("mj-etfs").hidden) etfDes(); },120000);
+</script>
+<script>
+/* ---------- Acervo de fontes e Análises de ativos ---------- */
+var ACERVO=null, AN={cg:null,prot:null,nomes:[]};
+var TIPOS_PT={noticias:"Notícias",research:"Casas de research",analistas:"Analistas",redes:"X e Telegram",oficial:"Órgãos oficiais"};
+function acervoJunta(){ if(!ACERVO||!MERC) return; var tem={}; (MERC.noticias=MERC.noticias||[]).forEach(function(n){ tem[n.link]=1; if(!n.tipo) n.tipo="noticias"; });
+  ACERVO.itens.forEach(function(i){ if(!tem[i.link]){ tem[i.link]=1; MERC.noticias.push({titulo:i.titulo,link:i.link,fonte:i.fonte,t:i.t,tipo:i.tipo,trecho:i.trecho||""}); } });
+  MERC.noticias.sort(function(a,b){return b.t-a.t;}); tradAplica(); mercDesenha(); fontesDes(); }
+function acervoCarrega(){ fetch("https://raw.githubusercontent.com/Emersson11/radar-funding/acervo/acervo.json?t="+Math.floor(Date.now()/300000)).then(function(r){ if(!r.ok) throw 0; return r.json(); }).then(function(j){ ACERVO=j; acervoJunta(); }).catch(function(){ fontesDes(); }); }
+function fontesDes(){ var b=$("an-fontes"); if(!b) return; if(!ACERVO){ b.textContent="O acervo ainda não foi coletado. Ele aparece depois da primeira rodada do coletor."; return; }
+  var f=ACERVO.fontes||[], ok=f.filter(function(x){return /^ok/.test(x.situacao);}).length, por={}; ACERVO.itens.forEach(function(i){por[i.tipo]=(por[i.tipo]||0)+1;});
+  b.textContent="Acervo com "+ACERVO.itens.length+" publicações dos últimos 30 dias, de "+f.length+" fontes acompanhadas ("+ok+" respondendo na última leitura). Coletado "+haQuanto(ACERVO.t)+". "+Object.keys(por).map(function(k){return (TIPOS_PT[k]||k)+": "+por[k];}).join(" · ")+".";
+  var tb=$("an-ftb"); if(!tb) return; tb.textContent=""; f.slice().sort(function(a,b){return a.nome<b.nome?-1:1;}).forEach(function(x){ var tr=el("tr"), td=cel(tr,"","txt"), a=el("a",null,x.nome); a.href=x.url; a.target="_blank"; a.rel="noopener noreferrer"; td.appendChild(a); cel(tr,TIPOS_PT[x.tipo]||x.tipo,"txt"); cel(tr,x.situacao,"txt "+(/^ok/.test(x.situacao)?"pos":/aguard/.test(x.situacao)?"":"neg")); cel(tr,x.ultimo?haQuanto(x.ultimo):"–","txt"); tb.appendChild(tr); }); }
+function semAcento(t){ return String(t||"").normalize("NFD").replace(/[̀-ͯ]/g,"").toLowerCase(); }
+function anBusca(){ var bruto=$("an-nomes").value.split(",").map(function(x){return x.trim();}).filter(Boolean); if(!bruto.length) return; AN.nomes=bruto; try{ localStorage.setItem("an_ult",bruto.join(", ")); }catch(e){}
+  $("an-res").hidden=false; $("an-titulo").textContent=bruto[0]; $("an-status").textContent="Buscando documentos e números de "+bruto[0]+"…";
+  var res=bruto.map(function(n){ return new RegExp("(^|[^a-z0-9])"+semAcento(n).replace(/[.*+?^${}()|[\]\\]/g,"\\$&")+"($|[^a-z0-9])"); }), docs=[];
+  ((MERC&&MERC.noticias)||[]).forEach(function(n){ var tt=semAcento((n.titulo_original||"")+" "+n.titulo), tr=semAcento(n.trecho); var noT=res.some(function(r){return r.test(tt);}), noC=res.some(function(r){return r.test(tr);}); if(noT||noC) docs.push({n:n,ded:noT}); });
+  docs.sort(function(a,b){ return (b.ded-a.ded)||(b.n.t-a.n.t); }); var ded=docs.filter(function(d){return d.ded;}).length;
+  var ul=$("an-docs"); ul.textContent=""; docs.slice(0,80).forEach(function(d){ var li=notItem(d.n); var m=li.querySelector(".meta"); if(m) m.textContent=(d.ded?"Dedicado · ":"Só cita · ")+(TIPOS_PT[d.n.tipo]||"Notícias")+" · "+m.textContent; if(d.n.trecho){ var p=el("span","sub",d.n.trecho); p.style.display="block"; p.style.marginTop="4px"; li.appendChild(p); } ul.appendChild(li); });
+  if(!docs.length) ul.appendChild(el("li","vazio","Nenhuma publicação do acervo cita esse nome nos últimos 30 dias. Tente o nome do protocolo e o código do token, separados por vírgula."));
+  $("an-docs-txt").textContent=docs.length?docs.length+" publicações citam o ativo: "+ded+" com o nome no título (dedicadas) e "+(docs.length-ded)+" que só citam no trecho.":"";
+  anNumeros(bruto).then(function(){ $("an-status").textContent="Atualizado às "+new Date().toLocaleTimeString("pt-BR")+"."; }); }
+function anNumeros(nomes){ var q=nomes[0], ficha=$("an-ficha"); ficha.textContent=""; ["an-g-preco","an-g-tvl","an-g-taxas"].forEach(function(i){ $(i).textContent=""; $(i).parentNode.hidden=true; });
+  var pCg=gj("https://api.coingecko.com/api/v3/search?query="+encodeURIComponent(q)).then(function(j){ var cs=(j&&j.coins)||[]; if(!cs.length) return null; var alvo=semAcento(q), sims=nomes.map(function(n){return n.toUpperCase();});
+      var c=cs.filter(function(x){return semAcento(x.name)===alvo;})[0]||cs.filter(function(x){return sims.indexOf(String(x.symbol).toUpperCase())>=0&&semAcento(x.name).indexOf(alvo)>=0;})[0]||cs[0]; return c; })
+    .then(function(c){ if(!c) return null; return Promise.all([gj("https://api.coingecko.com/api/v3/coins/"+c.id+"?localization=false&tickers=false&community_data=false&developer_data=false"),gj("https://api.coingecko.com/api/v3/coins/"+c.id+"/market_chart?vs_currency=usd&days=365&interval=daily")]); });
+  var pLl=(AN.prot?Promise.resolve(AN.prot):gj("https://api.llama.fi/protocols").then(function(l){ AN.prot=l||[]; return AN.prot; })).then(function(l){ var al=nomes.map(semAcento), sims=nomes.map(function(n){return n.toUpperCase();});
+      var c=l.filter(function(p){ var nm=semAcento(p.name); return al.some(function(a){return nm===a||nm.indexOf(a+" ")===0;})||(p.symbol&&p.symbol!=="-"&&sims.indexOf(String(p.symbol).toUpperCase())>=0&&al.some(function(a){return nm.indexOf(a)>=0;})); }).sort(function(a,b){return (b.tvl||0)-(a.tvl||0);});
+      if(!c.length) return null; var pai=c[0].parentProtocol, grupo=pai?l.filter(function(p){return p.parentProtocol===pai;}):[c[0]], slug=pai?pai.replace("parent#",""):c[0].slug;
+      return Promise.all([Promise.resolve({nome:pai?c[0].name.replace(/ V\d+$| [A-Z][a-z]+$/,""):c[0].name,cat:c[0].category,tvl:grupo.reduce(function(s,p){return s+(p.tvl||0);},0),slug:slug,n:grupo.length}),gj("https://api.llama.fi/protocol/"+slug),gj("https://api.llama.fi/summary/fees/"+slug+"?dataType=dailyFees")]); });
+  return Promise.all([pCg.catch(function(){return null;}),pLl.catch(function(){return null;})]).then(function(r){ var cg=r[0], ll=r[1], K=function(a,b,c,d){ tile(ficha,a,b,c,d); };
+    if(cg&&cg[0]&&cg[0].market_data){ var c=cg[0], m=c.market_data, P=m.current_price.usd, v=function(x){return x==null?null:x/100;}; $("an-titulo").textContent=c.name+" ("+String(c.symbol).toUpperCase()+")";
+      K("Preço","US$ "+prc(P),m.price_change_percentage_24h==null?"":pct(v(m.price_change_percentage_24h))+" em 24h",cls(m.price_change_percentage_24h)); K("7 dias / 30 dias",(m.price_change_percentage_7d==null?"–":pct(v(m.price_change_percentage_7d)))+" / "+(m.price_change_percentage_30d==null?"–":pct(v(m.price_change_percentage_30d))),m.price_change_percentage_1y==null?"":pct(v(m.price_change_percentage_1y))+" em 1 ano");
+      K("Valor de mercado",dinG(m.market_cap.usd),c.market_cap_rank?"posição "+c.market_cap_rank+" no ranking":""); K("Volume em 24h",dinG(m.total_volume.usd),m.market_cap.usd?usd(m.total_volume.usd/m.market_cap.usd*100,1)+"% do valor de mercado":"");
+      if(m.ath&&m.ath.usd) K("Máxima histórica","US$ "+prc(m.ath.usd),pct(P/m.ath.usd-1)+" desde "+new Date(m.ath_date.usd).toLocaleDateString("pt-BR"),"neg");
+      if(m.circulating_supply) K("Oferta em circulação",usd(m.circulating_supply,0),m.max_supply?usd(m.circulating_supply/m.max_supply*100,0)+"% do máximo":m.total_supply?usd(m.circulating_supply/m.total_supply*100,0)+"% do total emitido":"");
+      if(m.fully_diluted_valuation&&m.fully_diluted_valuation.usd) K("Valor totalmente diluído",dinG(m.fully_diluted_valuation.usd),"se toda a oferta estivesse em circulação");
+      if(cg[1]&&cg[1].prices){ var pts=[], vd={}; cg[1].prices.forEach(function(x){ var d=dia(x[0]); if(!vd[d]){ vd[d]=1; pts.push({time:d,value:x[1]}); } }); $("an-g-preco").parentNode.hidden=false; grafFaz("an-g-preco",[{tipo:"area",cor:cor("--accent"),dados:pts}],function(x){return prc(x);}); } }
+    if(ll&&ll[0]){ var L=ll[0]; K("Valor depositado (TVL)",dinG(L.tvl),(L.cat||"")+(L.n>1?" · "+L.n+" versões somadas":"")); var mcap=cg&&cg[0]&&cg[0].market_data?cg[0].market_data.market_cap.usd:null; if(mcap&&L.tvl) K("Valor de mercado / TVL",usd(mcap/L.tvl,2),"quanto o mercado paga por dólar depositado");
+      var fz=ll[2]; if(fz&&fz.total24h!=null){ K("Taxas geradas em 24h",dinG(fz.total24h),fz.total30d!=null?dinG(fz.total30d)+" em 30 dias":""); if(fz.total30d&&mcap) K("Valor de mercado / taxas anualizadas",usd(mcap/(fz.total30d*12.17),1)+"x","com base nos últimos 30 dias"); }
+      var th=ll[1]&&ll[1].tvl; if(th&&th.length){ var c1=dia(Date.now()-365*864e5), tp=[], v2={}; th.forEach(function(x){ var d=dsec(x.date); if(d>=c1&&!v2[d]){ v2[d]=1; tp.push({time:d,value:x.totalLiquidityUSD}); } }); if(tp.length>5){ $("an-g-tvl").parentNode.hidden=false; grafFaz("an-g-tvl",[{tipo:"area",cor:cor("--good")||"#1a7f4b",dados:tp}],function(x){return dinG(x).replace("US$ ","");}); } }
+      var fc=fz&&fz.totalDataChart; if(fc&&fc.length>40){ var c2=dia(Date.now()-365*864e5), fp=[], soma=0, fila=[]; fc.forEach(function(x){ fila.push(x[1]||0); soma+=x[1]||0; if(fila.length>30) soma-=fila.shift(); var d=dsec(x[0]); if(d>=c2) fp.push({time:d,value:soma}); }); if(fp.length>5){ $("an-g-taxas").parentNode.hidden=false; grafFaz("an-g-taxas",[{tipo:"area",cor:cor("--s2"),dados:fp}],function(x){return dinG(x).replace("US$ ","");}); } } }
+    if(!ficha.children.length) ficha.appendChild(el("p","sub","Não encontrei esse ativo na CoinGecko nem na DefiLlama. Confira o nome ou tente o código do token.")); }); }
+document.addEventListener("DOMContentLoaded",function(){ $("an-form").addEventListener("submit",function(ev){ ev.preventDefault(); anBusca(); }); try{ var u=localStorage.getItem("an_ult"); if(u) $("an-nomes").value=u; }catch(e){}
+  [].forEach.call(document.querySelectorAll("#an-ex button"),function(b){ b.addEventListener("click",function(){ $("an-nomes").value=b.dataset.n; anBusca(); }); });
+  ["n-tipo"].forEach(function(i){ $(i).addEventListener("change",mercDesenha); }); $("n-busca").addEventListener("input",mercDesenha); acervoCarrega(); setInterval(acervoCarrega,600000); });
 </script>
 </body>
 </html>
