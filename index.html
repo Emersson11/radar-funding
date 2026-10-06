@@ -10,17 +10,17 @@
 :root{
   --bg:#f4f5f7; --surface:#ffffff; --fg:#0e1a2b; --muted:#5a6678; --line:#d9dee6; --soft:#eef1f5;
   --band:#0b2545; --band-fg:#f2f5f9; --band-muted:#a9b8cc; --accent:#1f4e8c;
-  --good:#1a7a4c; --bad:#b23a30; --warn:#8f6408;
+  --good:#1a7a4c; --bad:#b23a30; --warn:#8f6408; --s1:#1f4e8c; --s2:#b8690a; --s3:#6a4fb3; --s4:#1a7a4c; --s5:#7a8594;
   --serif:"Source Serif 4",Georgia,"Times New Roman",serif;
   --sans:"IBM Plex Sans",system-ui,-apple-system,"Segoe UI",sans-serif;
   --mono:"IBM Plex Mono",ui-monospace,Consolas,monospace;
 }
 @media (prefers-color-scheme: dark){
   :root:not([data-theme="light"]){--bg:#0a1018; --surface:#111a27; --fg:#e4e9f0; --muted:#93a0b3; --line:#243042; --soft:#172232;
-    --band:#0d1b2f; --band-fg:#f2f5f9; --band-muted:#93a6bf; --accent:#7fb0ea; --good:#5fcf95; --bad:#f0857b; --warn:#e2b656; color-scheme:dark}
+    --band:#0d1b2f; --band-fg:#f2f5f9; --band-muted:#93a6bf; --accent:#7fb0ea; --good:#5fcf95; --bad:#f0857b; --warn:#e2b656; --s1:#7fb0ea; --s2:#f0a94a; --s3:#b39df0; --s4:#5fcf95; --s5:#9aa7b8; color-scheme:dark}
 }
 :root[data-theme="dark"]{--bg:#0a1018; --surface:#111a27; --fg:#e4e9f0; --muted:#93a0b3; --line:#243042; --soft:#172232;
-    --band:#0d1b2f; --band-fg:#f2f5f9; --band-muted:#93a6bf; --accent:#7fb0ea; --good:#5fcf95; --bad:#f0857b; --warn:#e2b656; color-scheme:dark}
+    --band:#0d1b2f; --band-fg:#f2f5f9; --band-muted:#93a6bf; --accent:#7fb0ea; --good:#5fcf95; --bad:#f0857b; --warn:#e2b656; --s1:#7fb0ea; --s2:#f0a94a; --s3:#b39df0; --s4:#5fcf95; --s5:#9aa7b8; color-scheme:dark}
 *{box-sizing:border-box}
 [hidden]{display:none!important}
 body{margin:0;background:var(--bg);color:var(--fg);font:15px/1.5 var(--sans)}
@@ -89,6 +89,8 @@ details{padding:10px 18px} summary{cursor:pointer;font-size:13px;color:var(--mut
 .ordbot{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}
 .ordbot button{color:var(--muted);border-color:var(--line)}
 .ordbot button[aria-pressed="true"]{background:var(--accent);border-color:var(--accent);color:var(--surface);font-weight:600}
+.leg{display:flex;flex-wrap:wrap;gap:6px 16px;font-size:13px;color:var(--muted);margin-top:8px}
+.leg i{display:inline-block;width:14px;height:3px;vertical-align:middle;margin-right:6px}
 .rodape{font-size:12px;color:var(--muted);border-top:1px solid var(--line);padding-top:14px}
 </style>
 </head>
@@ -114,6 +116,7 @@ details{padding:10px 18px} summary{cursor:pointer;font-size:13px;color:var(--mut
     <button type="button" role="tab" data-aba="spot" aria-selected="false">À vista + futuro</button>
     <button type="button" role="tab" data-aba="matriz" aria-selected="false">Todas as taxas</button>
     <button type="button" role="tab" data-aba="sim" aria-selected="false">Simulação</button>
+    <button type="button" role="tab" data-aba="rent" aria-selected="false">Rentabilidade</button>
   </div>
 
   <section id="aba-cruz">
@@ -153,6 +156,17 @@ details{padding:10px 18px} summary{cursor:pointer;font-size:13px;color:var(--mut
       <div class="scroll"><table><thead><tr><th>Ativo</th><th>Vendido em</th><th>Comprado em</th><th>Abertura</th><th>Fechamento</th><th>Funding</th><th>Taxas</th><th>Líquido (US$)</th></tr></thead><tbody id="sim-hist"></tbody></table></div>
     </div>
     <p class="note">Sem dinheiro real. O robô roda de hora em hora; o funding é estimado pela taxa de cada rodada. Esta aba pode levar alguns minutos para refletir a última rodada.</p>
+  </section>
+
+  <section id="aba-rent" hidden>
+    <h2>Rentabilidade da carteira simulada contra referências</h2>
+    <p class="sub" id="rent-sub">Carregando…</p>
+    <div class="box" id="rent-box" hidden style="margin-top:14px">
+      <div class="scroll"><table><thead><tr><th>Referência</th><th>No período</th><th>Equivalente ao ano</th><th>Diferença para a carteira</th></tr></thead><tbody id="rent-tb"></tbody></table></div>
+      <div id="rent-graf" style="margin-top:16px"></div>
+      <div class="leg" id="rent-leg"></div>
+    </div>
+    <p class="note">A carteira, o BTC e o ETH são medidos em dólar; o CDI rende em reais. O equivalente ao ano só aparece depois de 7 dias, porque antes disso o número não significa nada. CDI e dólar vêm do Banco Central e só mudam em dia útil.</p>
   </section>
 
   <div class="duas">
@@ -362,9 +376,33 @@ function desenha(){
 
 function dh(t){return new Date(t*1000).toLocaleString("pt-BR",{day:"2-digit",month:"2-digit",hour:"2-digit",minute:"2-digit"});}
 function sinal(v,c){return (v>=0?"+ ":"− ")+"US$ "+usd(Math.abs(v),c==null?3:c);}
+var SERIES=[["carteira","Carteira simulada","--s1"],["cdi","CDI","--s4"],["btc","Bitcoin","--s2"],["eth","Ethereum","--s3"],["usd","Dólar","--s5"]];
+function rent(c){
+  var cv=(c.curva||[]).filter(function(p){return p.carteira!=null;});
+  if(cv.length<2){$("rent-sub").textContent=cv.length?"O primeiro ponto foi registrado em "+dh(cv[0].t)+". A comparação aparece a partir da próxima rodada do robô.":"O robô ainda não registrou nenhum ponto. A comparação aparece depois da próxima rodada."; return;}
+  var t0=cv[0].t, t1=cv[cv.length-1].t, diasP=(t1-t0)/86400, linhas=[], ys=[];
+  SERIES.forEach(function(sr){ var k=sr[0], pts=cv.filter(function(p){return p[k]!=null;}); if(pts.length<2) return;
+    var b=pts[0][k], serie=pts.map(function(p){return [p.t,p[k]/b-1];}); linhas.push({k:k,nome:sr[1],cor:sr[2],serie:serie,ret:serie[serie.length-1][1]}); serie.forEach(function(p){ys.push(p[1]);}); });
+  var cart=linhas[0].ret;
+  $("rent-sub").textContent="De "+dh(t0)+" a "+dh(t1)+" ("+usd(diasP,1)+" dias).";
+  var tb=$("rent-tb"); tb.textContent="";
+  linhas.forEach(function(l){var tr=el("tr"); cel(tr,l.nome,"txt"); cel(tr,pct(l.ret,2),cls(l.ret));
+    cel(tr,diasP>=7?pct(Math.pow(1+l.ret,365/diasP)-1,1):"–",diasP>=7?cls(l.ret):"vazio");
+    if(l.k==="carteira") cel(tr,"–","vazio"); else {var d=cart-l.ret; cel(tr,pct(d,2)+(d>=0?" a favor":" contra"),cls(d));} tb.appendChild(tr);});
+  var W=800,H=260,L=58,R=12,T=12,B=26, lo=Math.min.apply(null,ys.concat([0])), hi=Math.max.apply(null,ys.concat([0])), pad=(hi-lo)*0.08||0.001; lo-=pad; hi+=pad;
+  var X=function(t){return L+(t-t0)/(t1-t0)*(W-L-R);}, Y=function(v){return T+(hi-v)/(hi-lo)*(H-T-B);};
+  var svg='<svg viewBox="0 0 '+W+' '+H+'" role="img" aria-label="Rentabilidade acumulada da carteira e das referências" style="display:block;width:100%;height:auto">';
+  [lo+pad,0,hi-pad].forEach(function(v){svg+='<line x1="'+L+'" x2="'+(W-R)+'" y1="'+Y(v)+'" y2="'+Y(v)+'" stroke="var(--line)" stroke-width="1"/><text x="'+(L-8)+'" y="'+(Y(v)+4)+'" text-anchor="end" font-size="12" fill="var(--muted)" font-family="var(--mono)">'+pct(v,2)+'</text>';});
+  linhas.slice().reverse().forEach(function(l){svg+='<polyline fill="none" stroke="var('+l.cor+')" stroke-width="'+(l.k==="carteira"?3:1.6)+'" points="'+l.serie.map(function(p){return X(p[0]).toFixed(1)+","+Y(p[1]).toFixed(1);}).join(" ")+'"/>';});
+  svg+='<text x="'+L+'" y="'+(H-6)+'" font-size="12" fill="var(--muted)" font-family="var(--mono)">'+dh(t0)+'</text><text x="'+(W-R)+'" y="'+(H-6)+'" text-anchor="end" font-size="12" fill="var(--muted)" font-family="var(--mono)">'+dh(t1)+'</text></svg>';
+  $("rent-graf").innerHTML=svg;
+  var lg=$("rent-leg"); lg.textContent=""; linhas.forEach(function(l){var s=el("span"); var i=el("i"); i.style.background="var("+l.cor+")"; s.appendChild(i); s.appendChild(document.createTextNode(l.nome+" "+pct(l.ret,2))); lg.appendChild(s);});
+  $("rent-box").hidden=false;
+}
 function carregaSim(){
-  if(window.SNAP){$("sim-sub").textContent="A simulação aparece só na versão ao vivo do site."; return;}
+  if(window.SNAP){$("sim-sub").textContent="A simulação aparece só na versão ao vivo do site."; $("rent-sub").textContent="A rentabilidade aparece só na versão ao vivo do site."; return;}
   fetch("carteira.json?t="+Date.now()).then(function(r){ if(!r.ok) throw 0; return r.json(); }).then(function(c){
+    try{rent(c);}catch(e){$("rent-sub").textContent="Não consegui montar a comparação.";}
     var hist=c.historico||[], p=c.posicao, ini=100, fechado=0; hist.forEach(function(h){fechado+=h.liquido;}); ini=c.saldo-fechado;
     var parcial=p?p.funding-p.taxas:0;
     $("sim-kpis").hidden=false;
@@ -385,7 +423,7 @@ function carregaSim(){
     }
     var tb=$("sim-hist"); tb.textContent=""; $("sim-hist-box").hidden=!hist.length;
     hist.slice().reverse().forEach(function(h){var tr=el("tr"); cel(tr,h.ativo); cel(tr,NOME[h.vender]||h.vender,"txt"); cel(tr,NOME[h.comprar]||h.comprar,"txt"); cel(tr,dh(h.aberto_em)); cel(tr,dh(h.fechado_em)); cel(tr,usd(h.funding,3)); cel(tr,usd(h.taxas,3)); cel(tr,sinal(h.liquido),cls(h.liquido)); tb.appendChild(tr);});
-  }).catch(function(){$("sim-sub").textContent="Ainda não há carteira simulada publicada.";});
+  }).catch(function(){$("sim-sub").textContent="Ainda não há carteira simulada publicada."; $("rent-sub").textContent="Ainda não há carteira simulada publicada.";});
 }
 var MORD="vol";
 document.querySelectorAll(".ordbot button").forEach(function(b){b.addEventListener("click",function(){ MORD=b.dataset.mord;

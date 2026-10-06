@@ -162,6 +162,39 @@ def ciclo(dados, ops, agora=None):
     return c
 
 
+def registrar(agora=None):
+    """Guarda um ponto por rodada: carteira e referências (BTC, ETH, CDI acumulado, dólar)."""
+    import datetime
+    agora = agora or time.time()
+    c = ler()
+    p = c["posicao"]
+    ponto = {"t": int(agora), "carteira": round(c["saldo"] + (p["funding"] - p["taxas"] if p else 0), 4)}
+    for nome, inst in (("btc", "BTC-USDT"), ("eth", "ETH-USDT")):
+        try:
+            ponto[nome] = float(radar.get("https://www.okx.com/api/v5/market/ticker?instId=" + inst)["data"][0]["last"])
+        except Exception:
+            pass
+    ini = c.setdefault("inicio", int(agora))
+    try:   # CDI diário (série 12 do Banco Central), acumulado desde o início
+        d0 = datetime.datetime.fromtimestamp(ini, datetime.timezone.utc).strftime("%d/%m/%Y")
+        d1 = datetime.datetime.fromtimestamp(agora, datetime.timezone.utc).strftime("%d/%m/%Y")
+        dias = radar.get(f"https://api.bcb.gov.br/dados/serie/bcdata.sgs.12/dados?formato=json&dataInicial={d0}&dataFinal={d1}")
+        fator = 1.0
+        for d in dias[1:]:               # o primeiro dia é o do início; rende a partir do seguinte
+            fator *= 1 + float(d["valor"]) / 100
+        ponto["cdi"] = round(fator, 8)
+    except Exception:
+        pass
+    try:   # dólar PTAX (série 1)
+        ponto["usd"] = float(radar.get("https://api.bcb.gov.br/dados/serie/bcdata.sgs.1/dados/ultimos/1?formato=json")[0]["valor"])
+    except Exception:
+        pass
+    c.setdefault("curva", []).append(ponto)
+    c["curva"] = c["curva"][-9000:]
+    gravar(c)
+    return ponto
+
+
 def main():
     if MODO == "real" and not REAL:
         raise SystemExit('Modo real pede CONFIRMO_DINHEIRO_REAL=sim. Nada foi feito.')
@@ -170,6 +203,7 @@ def main():
         raise SystemExit("Menos de duas corretoras responderam: " + ", ".join(falhas))
     try:
         ciclo(dados, [] if ler()["posicao"] else radar.oportunidades(dados, VOL))
+        registrar()
     except Exception as e:
         avisar("ERRO, confira as posições na corretora: " + str(e))
         raise
