@@ -1,0 +1,35 @@
+name: Acervo de fontes
+on:
+  schedule:
+    - cron: "13,43 * * * *"   # a cada 30 minutos; cada fonte respeita o proprio intervalo
+  workflow_dispatch:
+permissions:
+  contents: write
+concurrency:
+  group: acervo
+  cancel-in-progress: false
+jobs:
+  acervo:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: pip install requests pyyaml
+      - name: Recuperar o acervo anterior
+        run: |
+          curl -sfL "https://raw.githubusercontent.com/${GITHUB_REPOSITORY}/acervo/acervo.json" -o acervo.json || true
+          curl -sfL "https://raw.githubusercontent.com/${GITHUB_REPOSITORY}/acervo/acervo_estado.json" -o acervo_estado.json || true
+      - run: python acervo.py
+      - name: Publicar no ramo acervo (um unico commit, sem reconstruir o site)
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          mkdir -p /tmp/pub && cp acervo.json acervo_estado.json /tmp/pub/ && cd /tmp/pub
+          git init -q -b acervo
+          git config user.name "radar-bot"
+          git config user.email "radar-bot@users.noreply.github.com"
+          git add . && git commit -qm "Acervo de fontes"
+          git push -qf "https://x-access-token:${GH_TOKEN}@github.com/${GITHUB_REPOSITORY}.git" acervo
