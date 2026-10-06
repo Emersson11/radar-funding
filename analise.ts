@@ -9,7 +9,7 @@ const CORS = {
 };
 const json = (o: unknown, status = 200) => new Response(JSON.stringify(o), { status, headers: { ...CORS, "Content-Type": "application/json" } });
 const UA = "Mozilla/5.0 (compatible; alpha-radar/1.0)";
-const MODELOS = ["gemini-flash-latest", "gemini-2.5-flash", "gemini-2.0-flash"];
+const MODELOS = ["gemini-flash-latest", "gemini-3.8-flash", "gemini-flash-lite-latest", "gemini-2.5-flash"];
 
 const SISTEMA = `Você é o analista-chefe de research da Alpha Radar, casa brasileira de análise de mercado com foco em cripto. Escreva em português do Brasil.
 O relatório é uma análise ORIGINAL e APROFUNDADA da Alpha Radar: as casas de research são a matéria-prima, não o texto final.
