@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Painel Cripto</title>
+<title>Alpha Radar</title>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Source+Serif+4:opsz,wght@8..60,500;8..60,600&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
 <style>
 /* Layout: faixa institucional no topo, parâmetros, indicadores, fichas de operação com as duas pernas lado a lado, tabela geral, método e riscos. */
@@ -100,6 +100,7 @@ details{padding:10px 18px} summary{cursor:pointer;font-size:13px;color:var(--mut
 .faixa{position:relative} #marca-topo{display:flex;align-items:center;justify-content:center;gap:14px;font:300 clamp(22px,2.2vw,30px)/1 var(--sans);letter-spacing:.22em;text-transform:uppercase;color:var(--band-fg);margin-bottom:14px}
 #marca-topo[hidden]{display:none} #marca-topo b{font-weight:700} #marca-topo .mt-txt{padding:10px 0 9px;border-block:1px solid rgba(255,255,255,.28);margin-right:-.22em;padding-right:.22em}
 #marca-topo svg{width:38px;height:38px;flex:none}
+#marca-topo img{display:block;width:clamp(210px,19vw,300px);height:auto} #rel-doc .rmarca img{display:block;width:230px;height:auto}
 @media (min-width:1100px){ #marca-topo{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);margin:0;white-space:nowrap;pointer-events:none} }
 @media (min-width:900px){ body{padding-left:56px} #lado{position:fixed;left:0;top:0;bottom:0;width:56px;box-sizing:border-box;padding:14px 8px;overflow:hidden;border-right:1px solid rgba(255,255,255,.12);z-index:25;transition:width .18s ease,box-shadow .18s ease}
   #lado-bt{display:block;width:40px;height:40px;padding:0;font-size:20px;line-height:1;border:0;color:var(--band-fg);margin-bottom:18px}
@@ -234,7 +235,7 @@ button.mini{font-size:12px;color:var(--muted)}
       <button type="button" data-area="admin" aria-current="false" id="bt-admin" hidden>Administração</button>
     </nav>
 </aside>
-<header class="faixa"><div id="marca-topo" hidden></div><div class="in">
+<header class="faixa"><div id="marca-topo"><img src="logo_escuro.png" alt="Alpha Radar, Mercado Global" width="300" height="65"></div><div class="in">
   <div>
     <h1 id="titulo">Minha Carteira</h1>
     <p id="cart-status">Buscando preços…</p>
@@ -1354,9 +1355,7 @@ function abasLe(){ [].forEach.call(document.querySelectorAll("#adm-abas input"),
 function abasSalva(l){ var v=JSON.stringify(l); SB.from("config_site").upsert({chave:"abas",valor:v}).then(function(r){ if(r.error){ $("adm-abas-msg").textContent="Não consegui salvar as abas."; return; } try{ localStorage.setItem("abas_menu",v); }catch(e){} abasAplica(l); $("adm-abas-msg").textContent="Abas salvas."; }); }
 document.addEventListener("DOMContentLoaded",function(){ $("adm-abas-salvar").addEventListener("click",function(){ abasLe(); abasSalva(ABAS); }); $("adm-abas-padrao").addEventListener("click",function(){ abasSalva(ABASP.map(function(x){return {id:x[0],nome:x[1]};})); }); abasAdm(); });
 function nomeMenu(n){ $("marca").textContent=n||"Menu"; $("marca").hidden=false; if($("adm-nome-menu")) $("adm-nome-menu").value=n||""; }
-function nomeSite(n){ if(!n) return; document.title=n; var mt=$("marca-topo"), ps=n.trim().split(/\s+/), tx=el("span","mt-txt"); mt.textContent="";
-  mt.insertAdjacentHTML("afterbegin",'<svg viewBox="0 0 40 40" aria-hidden="true"><rect x="1" y="1" width="38" height="38" rx="9" fill="none" stroke="#7fb0ea" stroke-width="1.5"/><path d="M8 27l7-8 5 5 6-11 6 7" fill="none" stroke="#7fb0ea" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/><circle cx="26" cy="13" r="2.6" fill="#f2f5f9"/></svg>');
-  tx.appendChild(el("b",null,ps[0])); if(ps.length>1) tx.appendChild(document.createTextNode(" "+ps.slice(1).join(" "))); mt.appendChild(tx); mt.setAttribute("aria-label",n); mt.hidden=false; if($("marca").hidden) nomeMenu(""); if($("adm-nome")) $("adm-nome").value=n; }
+function nomeSite(n){ if(!n) return; document.title=n;  if($("marca").hidden) nomeMenu(""); if($("adm-nome")) $("adm-nome").value=n; }
 function conteudoCarrega(){
   if(!SB) return Promise.resolve(false);
   return Promise.all([SB.from("modulos").select("*"),SB.from("aulas").select("*"),SB.from("config_site").select("*")]).then(function(r){
@@ -1636,7 +1635,7 @@ function relGera(){ var doc=$("rel-doc"); $("rel-status").textContent="Montando 
       TB=function(cab,linhas){ var sc=el("div","scroll"), t=el("table"), h=el("tr"); cab.forEach(function(c,i){h.appendChild(el("th",i===0?"txt":null,c));}); t.appendChild(h); linhas.forEach(function(l){ var tr=el("tr"); l.forEach(function(c,i){ var v=Array.isArray(c)?c:[c,""]; cel(tr,v[0],(i===0?"txt ":"")+v[1]); }); t.appendChild(tr); }); sc.appendChild(t); doc.appendChild(sc); },
       S=function(nome,dir,txt){ sin.push({n:nome,d:dir,t:txt}); }, mov=function(v,a,b){ return v>=b?"forte alta":v>=a?"alta":v>-a?"estabilidade":v>-b?"queda":"forte queda"; };
     /* cabeçalho com a identidade do site */
-    var cab=el("div","rcab"), mk=el("div","rmarca"); mk.innerHTML=$("marca-topo").innerHTML||""; if(!mk.textContent.trim()) mk.textContent=document.title; cab.appendChild(mk);
+    var cab=el("div","rcab"), mk=el("div","rmarca"); mk.innerHTML=$("marca-topo").innerHTML||"";  cab.appendChild(mk);
     var ct=el("div","rtit"); ct.appendChild(el("h1",null,"Relatório de mercado cripto")); ct.appendChild(el("p",null,agora.toLocaleDateString("pt-BR",{weekday:"long",day:"2-digit",month:"long",year:"numeric"})+" · "+agora.toLocaleTimeString("pt-BR",{hour:"2-digit",minute:"2-digit"}))); cab.appendChild(ct); doc.appendChild(cab);
     var g=MERC&&MERC.panorama, fng=MERC&&MERC.fng, btc=PRECOS.BTC, eth=PRECOS.ETH, pr=PRINCIPAIS.filter(function(a){return PRECOS[a];}), sobe=pr.filter(function(a){return PRECOS[a].v>0;}).length;
     var liq=Object.keys(PRECOS).filter(function(k){return PRECOS[k].vol>=2e7;}).sort(function(a,b){return PRECOS[b].v-PRECOS[a].v;});

@@ -194,9 +194,9 @@ def coleta(f, est):
                     if r.status_code >= 400:
                         raise RuntimeError(f"página respondeu {r.status_code}")
                     brutos = [(t, l, None, "") for t, l in links_da_pagina(url, pagina)]
-                    if not vistos:  # primeira leitura de uma página sem feed: só guarda o que já existe
-                        vistos = [b[1] for b in brutos[maxi:]][:300]
-                        brutos = brutos[:maxi]
+                    if not vistos:  # primeira leitura de uma página sem feed: só registra os links que já existem (menus, rodapé, textos antigos)
+                        vistos = [b[1] for b in brutos][:400]
+                        brutos = []
                     situacao = "ok (página, sem feed)"
             if feed:
                 brutos = itens_feed(s.get(feed, timeout=PRAZO).content)
@@ -235,6 +235,10 @@ def main():
     print(f"{len(fontes)} fontes ativas, {len(devidas)} na vez")
     with ThreadPoolExecutor(max_workers=12) as ex:
         res = list(ex.map(lambda f: (f, *coleta(f, estado.get(f["nome"]))), devidas))
+    if acervo.get("v") != 2:  # limpeza única: tira os links de menu que entraram na primeira leitura de páginas sem feed
+        sem_feed = {n for n, e in estado.items() if e.get("feed") == ""}
+        acervo["itens"] = [i for i in acervo["itens"] if i["fonte"] not in sem_feed]
+        acervo["v"] = 2
     conhecidos = {i["link"] for i in acervo["itens"]}
     entrou = 0
     for f, novos, e, sit in res:
