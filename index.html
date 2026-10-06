@@ -104,6 +104,7 @@ button.lnk.neg{color:var(--bad)}
 .bn{font:500 14px var(--mono)} .bt{background:var(--soft);height:10px;border-radius:2px;overflow:hidden;min-width:0} .bt i{display:block;height:100%;background:var(--accent)}
 .bv{font:400 13px var(--mono);color:var(--muted);white-space:nowrap}
 .kpi .sub{font:400 13px var(--mono)}
+td a{color:var(--accent);text-decoration:underline;text-underline-offset:3px}
 button.ord{border:0;padding:0;background:none;color:inherit;font:inherit;letter-spacing:inherit;text-transform:inherit;white-space:nowrap}
 button.ord:hover{color:var(--fg)}
 .direita{display:flex;flex-wrap:wrap;gap:10px;align-items:center;justify-content:flex-end}
@@ -484,7 +485,6 @@ button.mini{font-size:12px;color:var(--muted)}
       <div class="controles" style="margin-top:12px">
         <label>Tamanho mínimo do pool<select id="pl-tvl"><option value="1e6">US$ 1 milhão</option><option value="1e7" selected>US$ 10 milhões</option><option value="1e8">US$ 100 milhões</option></select></label>
         <label>Tipo<select id="pl-tipo"><option value="todos">Todos os pares</option><option value="est">Só stablecoins</option><option value="semil">Sem risco de perda impermanente</option></select></label>
-        <label>Ordenar por<select id="pl-ord"><option value="apy">Maior rendimento hoje</option><option value="m30">Maior média de 30 dias</option><option value="tvl">Maior pool</option></select></label>
         <label>Ativo ou protocolo<input id="pl-busca" type="text" placeholder="ETH, uniswap…"></label>
       </div>
       <p class="sub" id="pl-status">Carregando…</p>
@@ -499,7 +499,6 @@ button.mini{font-size:12px;color:var(--muted)}
       <div class="controles" style="margin-top:12px">
         <label>Tamanho mínimo<select id="vt-tvl"><option value="1e6">US$ 1 milhão</option><option value="1e7" selected>US$ 10 milhões</option><option value="1e8">US$ 100 milhões</option></select></label>
         <label>Ativo<select id="vt-tipo"><option value="est">Stablecoins (dólar)</option><option value="BTC">Bitcoin</option><option value="ETH">Ethereum</option><option value="SOL">Solana</option><option value="todos">Todos</option></select></label>
-        <label>Ordenar por<select id="vt-ord"><option value="apy">Maior rendimento hoje</option><option value="m30">Maior média de 30 dias</option><option value="tvl">Maior vault</option></select></label>
         <label>Ativo ou protocolo<input id="vt-busca" type="text" placeholder="USDC, aave…"></label>
       </div>
       <p class="sub" id="vt-status">Carregando…</p>
@@ -1245,24 +1244,31 @@ var EST={pools:null,carregando:false,nomes:{},quando:0};
 function estJanela(j){ document.querySelectorAll("#eabas button").forEach(function(o){ var on=o.dataset.est===j; o.setAttribute("aria-selected",on?"true":"false"); $("est-"+o.dataset.est).hidden=!on; });
   $("atualizado").hidden=j!=="funding"; if(j==="pools"||j==="vaults") estPools(); if(j==="trades") estTrades(); if(j==="opcoes") estOpcoes(); }
 document.querySelectorAll("#eabas button").forEach(function(b){ b.addEventListener("click",function(){ estJanela(b.dataset.est); }); });
+var ORD={"pl-corpo":{c:4,d:-1},"vt-corpo":{c:4,d:-1},"tr-corpo":{c:null,d:-1},"op-corpo":{c:null,d:1}}, ORDL={}, PK=["symbol","project","chain","tvlUsd","apy","apyMean30d","ilRisk"];
+function ordCab(id,redes){ var th=$(id).parentNode.tHead, st=ORD[id]; if(!ORDL[id]) ORDL[id]=[].map.call(th.rows[0].cells,function(c){return [c.textContent,c.className];});
+  th.textContent=""; var trh=el("tr"); ORDL[id].forEach(function(c,i){ var h=el("th",c[1]), b=el("button","ord",c[0]+(st.c===i?(st.d<0?" ▼":" ▲"):" ↕")); b.type="button";
+    b.setAttribute("aria-label","Ordenar por "+c[0]+(st.c===i?(st.d<0?", do maior para o menor":", do menor para o maior"):""));
+    b.addEventListener("click",function(){ if(st.c===i) st.d=-st.d; else { st.c=i; st.d=c[1]==="txt"?1:-1; } redes(); }); h.appendChild(b); trh.appendChild(h); }); th.appendChild(trh); }
+function ordDom(id){ var st=ORD[id], tb=$(id); ordCab(id,function(){ordDom(id);}); if(st.c==null) return; var l=[].slice.call(tb.rows);
+  l.sort(function(a,b){ var x=a._v[st.c], y=b._v[st.c]; if(x==null&&y==null) return 0; if(x==null) return 1; if(y==null) return -1; if(typeof x==="string") return st.d*(x<y?-1:x>y?1:0); return st.d*(x-y); }); l.forEach(function(r){tb.appendChild(r);}); }
 function milhoes(v){ return v>=1e9?"US$ "+usd(v/1e9,2)+" bi":"US$ "+usd(v/1e6,1)+" mi"; }
 function aa(v){ return v==null?"–":usd(v,1)+"%"; }
 function estNomes(){ if(estNomes.ok) return; estNomes.ok=true; fetch("https://api.llama.fi/protocols").then(function(r){return r.json();}).then(function(l){ l.forEach(function(p){ if(p.slug&&/^https:\/\//.test(p.url||"")) EST.nomes[p.slug]={n:p.name,u:p.url}; }); estPoolsDes(); }).catch(function(){ estNomes.ok=false; }); }
 function estPools(){ estNomes(); if(EST.pools&&Date.now()-EST.quando<600000){ estPoolsDes(); return; } if(EST.carregando) return; EST.carregando=true;
   fetch("https://yields.llama.fi/pools").then(function(r){return r.json();}).then(function(j){ EST.pools=(j.data||[]).filter(function(p){return p.tvlUsd>=1e6&&p.apy>0&&p.apy<1000&&!p.outlier;}); EST.carregando=false; EST.quando=Date.now(); estPoolsDes(); })
   .catch(function(){ EST.carregando=false; $("pl-status").textContent=$("vt-status").textContent="Não consegui buscar os dados agora. Tente de novo em instantes."; }); }
-function estLista(multi,pre){ var tvl=+$(pre+"-tvl").value, tipo=$(pre+"-tipo").value, ord=$(pre+"-ord").value, b=$(pre+"-busca").value.trim().toUpperCase();
+function estLista(multi,pre){ var tvl=+$(pre+"-tvl").value, tipo=$(pre+"-tipo").value, b=$(pre+"-busca").value.trim().toUpperCase();
   var l=EST.pools.filter(function(p){ if((p.exposure==="multi")!==multi) return false; if(p.tvlUsd<tvl) return false;
     if(tipo==="est"&&!p.stablecoin) return false; if(tipo==="semil"&&p.ilRisk!=="no") return false;
     if(!multi&&tipo!=="est"&&tipo!=="todos"&&String(p.symbol).toUpperCase().indexOf(tipo)<0) return false;
     if(b&&(String(p.symbol)+" "+p.project).toUpperCase().indexOf(b)<0) return false; return true; });
-  var k=ord==="tvl"?"tvlUsd":ord==="m30"?"apyMean30d":"apy"; l.sort(function(x,y){return (y[k]||0)-(x[k]||0);}); return l; }
-function estPoolsDes(){ if(!EST.pools) return;
+  var st=ORD[pre+"-corpo"], k=PK[st.c]; l.sort(function(x,y){ var p=x[k], q=y[k]; if(typeof p==="string"||typeof q==="string"){ p=String(p||"").toUpperCase(); q=String(q||"").toUpperCase(); return st.d*(p<q?-1:p>q?1:0); } return st.d*((p||0)-(q||0)); }); return l; }
+function estPoolsDes(){ if(!EST.pools) return; ordCab("pl-corpo",estPoolsDes); ordCab("vt-corpo",estPoolsDes);
   [["pl",true],["vt",false]].forEach(function(c){ var pre=c[0], l=estLista(c[1],pre), corpo=$(pre+"-corpo"); corpo.textContent="";
     $(pre+"-status").textContent=l.length?l.length+" opções encontradas. Mostrando as "+Math.min(60,l.length)+" primeiras. Atualizado às "+new Date(EST.quando).toLocaleTimeString("pt-BR")+"; atualiza sozinho a cada 10 minutos.":"Nada encontrado com esses filtros.";
     l.slice(0,60).forEach(function(p){ var tr=el("tr"); var t1=cel(tr,"","txt"), a1=el("a",null,p.symbol); a1.href="https://defillama.com/yields/pool/"+encodeURIComponent(p.pool); a1.target="_blank"; a1.rel="noopener"; a1.title="Abrir este mercado: histórico de rendimento e link para depositar"; t1.appendChild(a1); if(p.poolMeta) t1.appendChild(el("span","sub"," "+p.poolMeta)); var t2=cel(tr,"","txt"), a2=el("a",null,(EST.nomes[p.project]||{}).n||p.project); a2.href=(EST.nomes[p.project]||{}).u||("https://defillama.com/protocol/"+encodeURIComponent(p.project)); a2.target="_blank"; a2.rel="noopener"; a2.title="Abrir o site do protocolo"; t2.appendChild(a2); cel(tr,p.chain,"txt"); cel(tr,milhoes(p.tvlUsd)); cel(tr,aa(p.apy),"pos"); cel(tr,aa(p.apyMean30d));
       if(c[1]) cel(tr,p.ilRisk==="no"?"Não":"Sim","txt "+(p.ilRisk==="no"?"":"neg")); corpo.appendChild(tr); }); }); }
-["pl-tvl","pl-tipo","pl-ord","vt-tvl","vt-tipo","vt-ord"].forEach(function(i){ $(i).addEventListener("change",estPoolsDes); }); ["pl-busca","vt-busca"].forEach(function(i){ $(i).addEventListener("input",estPoolsDes); });
+["pl-tvl","pl-tipo","vt-tvl","vt-tipo"].forEach(function(i){ $(i).addEventListener("change",estPoolsDes); }); ["pl-busca","vt-busca"].forEach(function(i){ $(i).addEventListener("input",estPoolsDes); });
 
 function ema(v,n){ var k=2/(n+1), e=v[0]; for(var i=1;i<v.length;i++) e=v[i]*k+e*(1-k); return e; }
 function rsi(v,n){ var g=0,p=0,i; for(i=1;i<=n;i++){ var d=v[i]-v[i-1]; if(d>0) g+=d; else p-=d; } g/=n; p/=n; for(;i<v.length;i++){ var x=v[i]-v[i-1]; g=(g*(n-1)+(x>0?x:0))/n; p=(p*(n-1)+(x<0?-x:0))/n; } return p===0?100:100-100/(1+g/p); }
@@ -1275,7 +1281,7 @@ function estTrades(){ if(Date.now()-TRU<60000) return; TRU=Date.now(); var jf=fu
       botaoAtivo(td,TRA[i]);
       cel(tr,"US$ "+prc(p)); var v=r[3]?+r[3].priceChangePercent/100:null; cel(tr,v==null?"–":pct(v),v==null?"":v>=0?"pos":"neg"); cel(tr,t[0],"txt "+t[1]);
       cel(tr,usd(rs_,0),rs_>=70?"neg":rs_<=30?"pos":""); var f=r[1]&&r[1].lastFundingRate!=null?+r[1].lastFundingRate*3*365:null; cel(tr,f==null?"–":pct(f),f==null?"":f>=0?"pos":"neg");
-      var ls=r[2]&&r[2][0]?r[2][0]:null; cel(tr,ls?usd(+ls.longAccount*100,0)+"% / "+usd(+ls.shortAccount*100,0)+"%":"–"); corpo.appendChild(tr); });
+      var ls=r[2]&&r[2][0]?r[2][0]:null; cel(tr,ls?usd(+ls.longAccount*100,0)+"% / "+usd(+ls.shortAccount*100,0)+"%":"–"); tr._v=[TRA[i],p,v,t[0],rs_,f,ls?+ls.longAccount:null]; corpo.appendChild(tr); }); ordDom("tr-corpo");
     $("tr-status").textContent=ok?"Atualizado às "+new Date().toLocaleTimeString("pt-BR")+". Atualiza a cada minuto.":"Não consegui buscar os dados agora."; if(!ok) TRU=0; }); }
 setInterval(function(){ if($("area-funding").hidden) return; if(!$("est-trades").hidden) estTrades(); if(!$("est-pools").hidden||!$("est-vaults").hidden) estPools(); },61000);
 setInterval(function(){ if(!$("area-funding").hidden&&!$("est-opcoes").hidden) estOpcoes(); },120000);
@@ -1289,7 +1295,7 @@ function estOpcoes(){ var a=$("op-ativo").value; $("op-status").textContent="Car
     var l=Object.keys(g).map(function(k){return g[k];}).filter(function(x){return x.t>Date.now()&&(x.c+x.p)>0;}).sort(function(x,y){return x.t-y.t;}), corpo=$("op-corpo"); corpo.textContent="";
     l.forEach(function(x){ var dias=Math.max((x.t-Date.now())/864e5,0.05), tr=el("tr"), mx=Object.keys(x.st).sort(function(p,q){return x.st[q]-x.st[p];})[0];
       var tv=cel(tr,"","txt"), av=el("a",null,new Date(x.t).toLocaleDateString("pt-BR",{timeZone:"UTC"})); av.href="https://www.deribit.com/options/"+a+"/"+a+"-"+x.k; av.target="_blank"; av.rel="noopener"; av.title="Abrir este vencimento na Deribit"; tv.appendChild(av); cel(tr,usd(dias,dias<3?1:0)); cel(tr,x.iv?usd(x.iv,1)+"%":"–"); cel(tr,x.iv?"± "+usd(x.iv*Math.sqrt(dias/365),1)+"%":"–");
-      cel(tr,usd(x.c,0)+" "+a); cel(tr,usd(x.p,0)+" "+a); var pc=x.c?x.p/x.c:null; cel(tr,pc==null?"–":usd(pc,2),pc==null?"":pc>1?"neg":"pos"); cel(tr,"US$ "+usd(+mx,0)); corpo.appendChild(tr); });
+      cel(tr,usd(x.c,0)+" "+a); cel(tr,usd(x.p,0)+" "+a); var pc=x.c?x.p/x.c:null; cel(tr,pc==null?"–":usd(pc,2),pc==null?"":pc>1?"neg":"pos"); cel(tr,"US$ "+usd(+mx,0)); tr._v=[x.t,dias,x.iv,x.iv?x.iv*Math.sqrt(dias/365):null,x.c,x.p,pc,+mx]; corpo.appendChild(tr); }); ordDom("op-corpo");
     $("op-status").textContent=l.length?a+" agora: US$ "+usd(spot||l[0].und,0)+". "+l.length+" vencimentos.":"Sem dados no momento."; })
   .catch(function(){ $("op-status").textContent="Não consegui buscar os dados da Deribit agora."; }); }
 $("op-ativo").addEventListener("change",estOpcoes);
