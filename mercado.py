@@ -126,6 +126,54 @@ def referencias():
     return out
 
 
+FONTES_PT = {"Portal do Bitcoin", "Livecoins", "Cointelegraph Brasil"}
+
+
+def _traduz_lote(textos):
+    """Traduz uma lista de frases do inglês para o português em uma única chamada. Devolve None se algo não bater."""
+    r = S.get("https://translate.googleapis.com/translate_a/single",
+              params={"client": "gtx", "sl": "en", "tl": "pt", "dt": "t", "q": "\n".join(textos)}, timeout=25)
+    r.raise_for_status()
+    junto = "".join(seg[0] for seg in r.json()[0] if seg and seg[0])
+    partes = [p.strip() for p in junto.split("\n")]
+    return partes if len(partes) == len(textos) and all(partes) else None
+
+
+def traduz_tudo(m):
+    """Põe em português os títulos das notícias em inglês e os nomes dos eventos do calendário.
+    Guarda o que já traduziu em m["trad"] para não repetir a cada coleta. Se a tradução falhar, fica o original."""
+    memo = m.get("trad") or {}
+    itens = [n for n in m.get("noticias", []) if n.get("fonte") not in FONTES_PT]
+    itens += [e for e in m.get("calendario", []) if e.get("moeda") == "USD" and e.get("impacto") in ("High", "Medium")]
+    for x in itens:
+        x.setdefault("titulo_original", x["titulo"])
+    falta = []
+    for x in itens:
+        o = x["titulo_original"]
+        if o and o not in memo and o not in falta:
+            falta.append(o)
+    falta = falta[:120]
+    for i in range(0, len(falta), 20):
+        lote = [t.replace("\n", " ") for t in falta[i:i + 20]]
+        try:
+            pt = _traduz_lote(lote)
+            if pt is None:
+                pt = []
+                for t in lote:
+                    um = _traduz_lote([t])
+                    pt.append(um[0] if um else t)
+                    time.sleep(0.3)
+            for o, p in zip(falta[i:i + 20], pt):
+                memo[o] = p[:240]
+        except Exception:
+            break
+        time.sleep(0.5)
+    for x in itens:
+        x["titulo"] = memo.get(x["titulo_original"], x["titulo_original"])
+    usados = {x["titulo_original"] for x in itens}
+    m["trad"] = {k: v for k, v in memo.items() if k in usados}
+
+
 def main():
     m = json.loads(ARQ.read_text()) if ARQ.exists() else {}
     erros = []
@@ -145,6 +193,10 @@ def main():
         erros += ["referência sem resposta: " + k for k in ("cdi", "ibov", "spx") if k not in novo]
     except Exception as e:
         erros.append(f"referencias: {e}")
+    try:
+        traduz_tudo(m)
+    except Exception as e:
+        erros.append(f"traducao: {e}")
     m["t"] = int(time.time())
     m["erros"] = erros
     ARQ.write_text(json.dumps(m, ensure_ascii=False))

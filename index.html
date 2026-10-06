@@ -137,10 +137,18 @@ th.txt{text-align:left} table.tprot td,table.tprot th{padding:9px 12px} table.tp
 table.tprot .peso{display:flex;align-items:center;gap:8px;min-width:150px} table.tprot .peso em{flex:1;height:8px;border-radius:4px;background:var(--soft);overflow:hidden} table.tprot .peso em i{display:block;height:100%;background:var(--accent);border-radius:4px} table.tprot .peso span{font:400 12px var(--mono);color:var(--muted);min-width:42px;text-align:right}
 table.tprot .chip{display:inline-block;font-size:12px;padding:2px 9px;border-radius:10px;background:var(--soft);color:var(--muted)}
 #ef-nots{max-height:330px;overflow-y:auto} .pers{display:flex;flex-wrap:wrap;gap:6px;margin-top:10px} .pers button{font-size:13px;padding:5px 11px;color:var(--muted);border-color:var(--line)} .pers button[aria-pressed="true"]{background:var(--accent);border-color:var(--accent);color:#fff}
+.relbar{position:sticky;top:0;z-index:15;display:flex;flex-wrap:wrap;gap:12px;justify-content:space-between;align-items:center;background:var(--band);color:var(--band-fg);padding:12px 18px;border-radius:4px;max-width:980px;margin:0 auto;width:100%;box-sizing:border-box}
+.relbar strong{font:600 17px var(--serif);margin-right:12px} .relbar .sub{color:var(--band-muted)} .relbar>div{display:flex;gap:8px;align-items:center;flex-wrap:wrap} .relbar button{border-color:var(--band-fg);color:var(--band-fg);background:transparent} .relbar #rel-pdf{background:var(--band-fg);color:var(--band);font-weight:600}
+#rel-doc{background:var(--surface);border:1px solid var(--line);border-radius:4px;margin:0 auto;width:100%;box-sizing:border-box}
+#rel-doc .rcab{background:#0b2545;color:#f2f5f9;margin:-36px -40px 26px;padding:26px 40px;display:flex;flex-wrap:wrap;gap:16px 28px;align-items:center;justify-content:space-between;border-radius:4px 4px 0 0;border-bottom:4px solid #7fb0ea}
+#rel-doc .rmarca{display:flex;align-items:center;gap:12px;font:300 20px/1 var(--sans);letter-spacing:.22em;text-transform:uppercase} #rel-doc .rmarca b{font-weight:700} #rel-doc .rmarca svg{width:34px;height:34px;margin:0;flex:none} #rel-doc .rmarca .mt-txt{padding:8px 0 7px;border-block:1px solid rgba(255,255,255,.28)}
+#rel-doc .rtit{text-align:right} #rel-doc .rtit h1{color:#f2f5f9;font-size:22px} #rel-doc .rtit p{color:#a9b8cc;font-size:13px;margin-top:4px}
+#rel-doc p{margin:8px 0;text-align:justify;hyphens:auto} #rel-doc .rtema{font-weight:600;margin:12px 0 2px;text-align:left} #rel-doc h3{font:600 16px var(--serif);margin:22px 0 4px;color:var(--accent)}
+@media print{ body.so-rel #rel-doc .rcab{margin:0 0 20px;border-radius:0} }
 #rel-doc{max-width:980px;padding:36px 40px} #rel-doc h1{font:600 28px/1.2 var(--serif);margin:0} #rel-doc h2{margin:26px 0 8px;padding-bottom:6px;border-bottom:2px solid var(--accent);font-size:19px} #rel-doc h3{font:600 14px var(--sans);margin:14px 0 4px}
 #rel-doc p,#rel-doc li{font-size:14px;line-height:1.5;max-width:none} #rel-doc ul{margin:6px 0;padding-left:20px} #rel-doc table{font-size:13px;margin-top:6px} #rel-doc .cab{display:flex;justify-content:space-between;align-items:flex-end;gap:16px;border-bottom:3px solid var(--fg);padding-bottom:12px} #rel-doc .rk{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-top:10px} #rel-doc .rk div{border:1px solid var(--line);padding:10px 12px;border-radius:3px} #rel-doc .rk b{display:block;font:500 17px var(--mono)} #rel-doc .rk span{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.06em} #rel-doc svg{width:100%;height:auto;margin-top:8px} #rel-doc .leg{display:flex;flex-wrap:wrap;gap:6px 16px;font-size:12px;margin-top:6px} #rel-doc .leg i{display:inline-block;width:14px;height:3px;vertical-align:middle;margin-right:5px}
 @media (max-width:700px){#rel-doc{padding:18px} #rel-doc .rk{grid-template-columns:repeat(2,1fr)}}
-@media print{ body.so-rel{padding:0!important;background:#fff} body.so-rel #lado,body.so-rel header,body.so-rel #mabas,body.so-rel .no-print,body.so-rel #grafico{display:none!important} body.so-rel main{padding:0;max-width:none} body.so-rel main>.area:not(#area-mercado){display:none!important} body.so-rel #rel-doc{border:0;max-width:none;padding:0;margin:0!important;box-shadow:none} body.so-rel #rel-doc h2{break-after:avoid} body.so-rel #rel-doc table,body.so-rel #rel-doc svg,body.so-rel #rel-doc .rk{break-inside:avoid} @page{margin:16mm 14mm} }
+@media print{ body.so-rel{padding:0!important;background:#fff} body.so-rel #lado,body.so-rel header,body.so-rel #mabas,body.so-rel .no-print,body.so-rel #grafico{display:none!important} body.so-rel main{padding:0;max-width:none} body.so-rel main>.area:not(#area-relatorio){display:none!important} body.so-rel{-webkit-print-color-adjust:exact;print-color-adjust:exact} body.so-rel #rel-doc{border:0;max-width:none;padding:0;margin:0!important;box-shadow:none;background:#fff} body.so-rel #rel-doc h2{break-after:avoid} body.so-rel #rel-doc table,body.so-rel #rel-doc svg,body.so-rel #rel-doc .rk{break-inside:avoid} @page{margin:16mm 14mm} }
 button.ord{border:0;padding:0;background:none;color:inherit;font:inherit;letter-spacing:inherit;text-transform:inherit;white-space:nowrap}
 button.ord:hover{color:var(--fg)}
 .direita{display:flex;flex-wrap:wrap;gap:10px;align-items:center;justify-content:flex-end}
@@ -220,6 +228,7 @@ button.mini{font-size:12px;color:var(--muted)}
       <button type="button" data-area="carteira" aria-current="page">Carteira</button>
       <button type="button" data-area="funding" aria-current="false">Estratégias</button>
       <button type="button" data-area="aulas" aria-current="false">Aulas</button>
+      <button type="button" data-area="relatorio" aria-current="false">Relatório</button>
       <button type="button" data-area="admin" aria-current="false" id="bt-admin" hidden>Administração</button>
     </nav>
 </aside>
@@ -355,7 +364,6 @@ button.mini{font-size:12px;color:var(--muted)}
       <button type="button" role="tab" data-mj="defi" aria-selected="false">DeFi</button>
       <button type="button" role="tab" data-mj="onchain" aria-selected="false">On-chain</button>
       <button type="button" role="tab" data-mj="etfs" aria-selected="false">ETFs</button>
-      <button type="button" role="tab" data-mj="relatorio" aria-selected="false">Relatório</button>
     </div>
     <section id="mj-resumo">
       <div class="kpis">
@@ -430,14 +438,13 @@ button.mini{font-size:12px;color:var(--muted)}
       </div>
       <p class="note">Fluxos: BGeometrics (bitcoin-data.com), soma dos ETFs à vista de Bitcoin dos EUA, publicada com 1 a 3 dias úteis de atraso. O valor em dólares usa o preço de fechamento do Bitcoin em cada dia. A página confere dados novos a cada 2 horas; as notícias, a cada 10 minutos.</p>
     </section>
-    <section id="mj-relatorio" hidden>
-      <div class="box no-print"><h2>Relatório de mercado</h2><p class="sub">Junta o resumo das últimas 24 horas, DeFi, ETFs, on-chain, calendário, as notícias de todas as fontes e o desempenho da sua carteira contra as referências. É montado na hora, com os dados mais recentes.</p>
-        <p style="margin-top:12px"><button type="button" id="rel-gerar">Atualizar relatório</button> <button type="button" id="rel-pdf">Salvar em PDF</button> <span class="sub" id="rel-status"></span></p>
-        <p class="note">Em "Salvar em PDF", escolha "Salvar como PDF" no destino da impressão.</p></div>
-      <article id="rel-doc" class="box" style="margin-top:20px"></article>
-    </section>
   </div>
 
+  <div id="area-relatorio" class="area" hidden>
+    <div class="relbar no-print"><div><strong>Relatório de mercado</strong><span class="sub" id="rel-status"></span></div><div><button type="button" class="sec" id="rel-gerar">Atualizar dados</button><button type="button" id="rel-pdf">⤓ Baixar PDF</button></div></div>
+    <article id="rel-doc"></article>
+    <p class="note no-print">Ao clicar em "Baixar PDF", escolha "Salvar como PDF" no destino da impressão e deixe marcada a opção de gráficos de plano de fundo para manter as cores.</p>
+  </div>
   <div id="area-aulas" class="area" hidden>
     <p class="sub" id="au-status">Carregando as aulas…</p>
     <div class="aulas" id="au-wrap" hidden>
@@ -1036,7 +1043,7 @@ function vnum(i){ var t=String($(i).value).trim().replace(/[^0-9.,]/g,""); if(t.
 function rotPreco(){ var sm=$("f-moeda").value==="BRL"?"R$":"US$", total=$("f-modo").value==="total"; $("f-preco-rot").textContent=(total?"Total pago (":"Preço de 1 unidade (")+sm+")";
   var q=+$("f-qtd").value, v=vnum("f-preco"), a=$("f-ativo").value.trim().toUpperCase()||"unidade"; $("f-conta").textContent=(q>0&&v>0)?(total?"Preço por "+a+": "+sm+" "+prc(v/q)+".":"Total da operação: "+sm+" "+usd(v*q)+"."):""; }
 function limpaForm(){ EDIT=null; var mo=$("f-moeda").value, cl=$("f-classe").value, md=$("f-modo").value; $("c-form").reset(); $("f-moeda").value=mo; $("f-classe").value=cl; $("f-modo").value=md; rotPreco(); if(DOLAR) $("f-cambio").value=DOLAR.toFixed(4); $("f-data").value=new Date().toISOString().slice(0,10); $("f-salvar").textContent="Adicionar"; $("f-cancelar").hidden=true; $("f-erro").hidden=true; }
-var TITULOS={carteira:"Minha Carteira",mercado:"Mercado",funding:"Estratégias",aulas:"Aulas",admin:"Administração"};
+var TITULOS={carteira:"Minha Carteira",mercado:"Mercado",funding:"Estratégias",aulas:"Aulas",relatorio:"Relatório",admin:"Administração"};
 var AUTHURL=/access_token=|refresh_token=|error_description=|type=(signup|magiclink|recovery)/.test(location.hash)||/[?&](code|token_hash)=/.test(location.search);
 function area(a){ if(!TITULOS[a]) a=(typeof ABAINI!=="undefined"&&ABAINI)||"mercado"; Object.keys(TITULOS).forEach(function(x){ $("area-"+x).hidden=x!==a; }); document.querySelectorAll("#areas button").forEach(function(o){o.setAttribute("aria-current",o.dataset.area===a?"page":"false");});
   $("titulo").textContent=TITULOS[a]; $("atualizado").hidden=a!=="funding"; $("cart-status").hidden=a==="funding"||a==="aulas"||a==="admin"; if(a==="admin"&&typeof admCarrega==="function") admCarrega(); if(!AUTHURL){ try{history.replaceState(null,"","#"+a);}catch(e){} } }
@@ -1302,7 +1309,7 @@ function sessao(s){
 var MODS=[], EDM=null, EDA=null;
 function ytId(v){ v=(v||"").trim(); var m=v.match(/(?:v=|youtu\.be\/|embed\/|shorts\/)([\w-]{6,20})/); return m?m[1]:(/^[\w-]{6,20}$/.test(v)?v:""); }
 function admErro(t){ $("adm-c-erro").textContent=t||""; $("adm-c-erro").hidden=!t; }
-var ABASP=[["mercado","Mercado"],["carteira","Carteira"],["funding","Estratégias"],["aulas","Aulas"]], ABAS=ABASP.map(function(x){return {id:x[0],nome:x[1]};});
+var ABASP=[["mercado","Mercado"],["carteira","Carteira"],["funding","Estratégias"],["aulas","Aulas"],["relatorio","Relatório"]], ABAS=ABASP.map(function(x){return {id:x[0],nome:x[1]};});
 function abasAplica(l){ var ok=[], nav=$("areas"); (Array.isArray(l)?l:[]).forEach(function(x){ if(x&&ABASP.some(function(p){return p[0]===x.id;})&&!ok.some(function(o){return o.id===x.id;})) ok.push({id:x.id,nome:String(x.nome||"").trim().slice(0,24)||ABASP.filter(function(p){return p[0]===x.id;})[0][1]}); });
   ABASP.forEach(function(p){ if(!ok.some(function(o){return o.id===p[0];})) ok.push({id:p[0],nome:p[1]}); }); ABAS=ok;
   ABAS.forEach(function(a){ var b=nav.querySelector('button[data-area="'+a.id+'"]'); if(!b) return; b.textContent=a.nome; nav.insertBefore(b,$("bt-admin")); TITULOS[a.id]=a.id==="carteira"&&a.nome==="Carteira"?"Minha Carteira":a.nome; if(!$("area-"+a.id).hidden) $("titulo").textContent=TITULOS[a.id]; });
@@ -1591,34 +1598,97 @@ function svgLinhas(series){ var W=900,H=300,L=50,R=10,T=10,B=24, xs=[], lo=0, hi
 function relGera(){ var doc=$("rel-doc"); $("rel-status").textContent="Montando o relatório…";
   var CORES={carteira:"#1f4e8c",cdi:"#1a7f4b",btc:"#d98a00",eth:"#7a5cc2",ibov:"#c0392b",spx:"#9a6b00",usd:"#6b7686"};
   return Promise.all([defiCarrega().catch(function(){return null;}),ocCarrega().catch(function(){return null;}),etfCarrega().catch(function(){return null;}),(typeof perfCalcula==="function"&&CART.lanc.length&&!CART.exemplo?perfCalcula():Promise.resolve(null)).catch(function(){return null;})]).then(function(r){
-    var d=r[0], o=r[1], e=r[2], p=r[3], agora=new Date(); doc.textContent="";
-    var H=function(t){ doc.appendChild(el("h2",null,t)); }, P=function(t,c){ doc.appendChild(el("p",c||null,t)); }, UL=function(l){ var u=el("ul"); l.forEach(function(x){u.appendChild(el("li",null,x));}); doc.appendChild(u); },
+    var d=r[0], o=r[1], e=r[2], p=r[3], agora=new Date(), sin=[]; doc.textContent="";
+    var H=function(t){ doc.appendChild(el("h2",null,t)); }, H3=function(t){ doc.appendChild(el("h3",null,t)); }, P=function(t,c){ doc.appendChild(el("p",c||null,t)); }, UL=function(l){ var u=el("ul"); l.forEach(function(x){u.appendChild(el("li",null,x));}); doc.appendChild(u); },
       KP=function(l){ var k=el("div","rk"); l.forEach(function(x){ var c=el("div"); c.appendChild(el("span",null,x[0])); c.appendChild(el("b",null,x[1])); if(x[2]) c.appendChild(el("span",null,x[2])); k.appendChild(c); }); doc.appendChild(k); },
-      TB=function(cab,linhas){ var sc=el("div","scroll"), t=el("table"), h=el("tr"); cab.forEach(function(c,i){h.appendChild(el("th",i===0?"txt":null,c));}); t.appendChild(h); linhas.forEach(function(l){ var tr=el("tr"); l.forEach(function(c,i){ var v=Array.isArray(c)?c:[c,""]; cel(tr,v[0],(i===0?"txt ":"")+v[1]); }); t.appendChild(tr); }); sc.appendChild(t); doc.appendChild(sc); };
-    var cab=el("div","cab"), esq=el("div"); esq.appendChild(el("span","rot",document.title||"Relatório")); esq.appendChild(el("h1",null,"Relatório de mercado cripto")); cab.appendChild(esq); cab.appendChild(el("p","sub",agora.toLocaleDateString("pt-BR",{weekday:"long",day:"2-digit",month:"long",year:"numeric"})+", "+agora.toLocaleTimeString("pt-BR",{hour:"2-digit",minute:"2-digit"}))); doc.appendChild(cab);
-    H("1. Resumo das últimas 24 horas"); var fr=[].map.call(document.querySelectorAll("#g-texto li"),function(li){return li.textContent;}); if(fr.length) UL(fr); else P("Sem dados de mercado no momento.");
-    var g=MERC&&MERC.panorama; if(g) KP([["Valor de mercado",grande(g.cap),pct(g.var24/100)+" em 24h"],["Volume em 24h",grande(g.vol)],["Dominância do Bitcoin",usd(g.dom_btc,1)+"%"],["Medo e ganância",MERC.fng?MERC.fng.valor+" / 100":"–",MERC.fng?(FNG_PT[MERC.fng.classe]||MERC.fng.classe):""]]);
+      TB=function(cab,linhas){ var sc=el("div","scroll"), t=el("table"), h=el("tr"); cab.forEach(function(c,i){h.appendChild(el("th",i===0?"txt":null,c));}); t.appendChild(h); linhas.forEach(function(l){ var tr=el("tr"); l.forEach(function(c,i){ var v=Array.isArray(c)?c:[c,""]; cel(tr,v[0],(i===0?"txt ":"")+v[1]); }); t.appendChild(tr); }); sc.appendChild(t); doc.appendChild(sc); },
+      S=function(nome,dir,txt){ sin.push({n:nome,d:dir,t:txt}); }, mov=function(v,a,b){ return v>=b?"forte alta":v>=a?"alta":v>-a?"estabilidade":v>-b?"queda":"forte queda"; };
+    /* cabeçalho com a identidade do site */
+    var cab=el("div","rcab"), mk=el("div","rmarca"); mk.innerHTML=$("marca-topo").innerHTML||""; if(!mk.textContent.trim()) mk.textContent=document.title; cab.appendChild(mk);
+    var ct=el("div","rtit"); ct.appendChild(el("h1",null,"Relatório de mercado cripto")); ct.appendChild(el("p",null,agora.toLocaleDateString("pt-BR",{weekday:"long",day:"2-digit",month:"long",year:"numeric"})+" · "+agora.toLocaleTimeString("pt-BR",{hour:"2-digit",minute:"2-digit"}))); cab.appendChild(ct); doc.appendChild(cab);
+    var g=MERC&&MERC.panorama, fng=MERC&&MERC.fng, btc=PRECOS.BTC, eth=PRECOS.ETH, pr=PRINCIPAIS.filter(function(a){return PRECOS[a];}), sobe=pr.filter(function(a){return PRECOS[a].v>0;}).length;
     var liq=Object.keys(PRECOS).filter(function(k){return PRECOS[k].vol>=2e7;}).sort(function(a,b){return PRECOS[b].v-PRECOS[a].v;});
-    if(liq.length>6){ H("2. Ativos"); var pr=PRINCIPAIS.filter(function(a){return PRECOS[a];}); doc.appendChild(el("h3",null,"Principais")); TB(["Ativo","Preço (US$)","24h"],pr.slice(0,10).map(function(a){return [a,prc(PRECOS[a].p),[pct(PRECOS[a].v),cls(PRECOS[a].v)]];}));
-      doc.appendChild(el("h3",null,"Maiores altas e quedas (volume acima de US$ 20 milhões)")); var lin=[]; for(var i=0;i<5;i++){ var a=liq[i], b=liq[liq.length-1-i]; lin.push([a,[pct(PRECOS[a].v),"pos"],b,[pct(PRECOS[b].v),"neg"]]); } TB(["Alta","24h","Queda","24h"],lin); }
-    H("3. ETFs de Bitcoin"); if(e&&e.fl.length){ UL(etfFrases(e)); TB(["Dia","Fluxo (BTC)","Fluxo (US$)"],e.fl.slice(-7).reverse().map(function(x){return [x.time.split("-").reverse().join("/"),[(x.btc>=0?"+":"− ")+usd(Math.abs(x.btc),0),cls(x.btc)],[dinG(x.usd),cls(x.usd)]];})); } else P("Os fluxos de ETF não estavam disponíveis na hora em que este relatório foi montado.");
-    var en=etfNots().slice(0,5); if(en.length){ doc.appendChild(el("h3",null,"Notícias sobre ETFs")); UL(en.map(function(n){return n.titulo+" ("+n.fonte+")";})); }
-    H("4. DeFi"); if(d){ var u=d.tvl[d.tvl.length-1].value, v1=varP(u,atras(d.tvl,1)), v7=varP(u,atras(d.tvl,7)), v30=varP(u,atras(d.tvl,30)), su=d.stb.length?d.stb[d.stb.length-1].value:null;
-      KP([["TVL total",dinG(u),v1==null?"":pct(v1)+" em 24h"],["TVL em 7 / 30 dias",(v7==null?"–":pct(v7))+" / "+(v30==null?"–":pct(v30))],["Stablecoins",dinG(su)],["Volume em DEX (24h)",d.dex?dinG(d.dex.v):"–"]]);
-      doc.appendChild(el("h3",null,"Maiores redes")); TB(["Rede","TVL","Participação"],d.redes.slice(0,6).map(function(c){return [c.name,dinG(c.tvl),usd(c.tvl/u*100,1)+"%"];}));
-      doc.appendChild(el("h3",null,"Maiores protocolos")); TB(["Protocolo","Categoria","TVL","24h","7 dias"],d.prot.slice(0,10).map(function(x){return [x.name,x.category||"–",dinG(x.tvl),[x.change_1d==null?"–":pct(x.change_1d/100),cls(x.change_1d||0)],[x.change_7d==null?"–":pct(x.change_7d/100),cls(x.change_7d||0)]];})); } else P("Os dados de DeFi não estavam disponíveis.");
-    H("5. On-chain"); if(o){ var ab=serie(o.btc,"AdrActCnt"), mv=serie(o.btc,"CapMVRVCur"), txb=serie(o.btc,"TxCnt"), k=[]; if(o.hash&&o.hash.currentHashrate) k.push(["Hashrate do Bitcoin",usd(o.hash.currentHashrate/1e18,0)+" EH/s"]); if(o.dif) k.push(["Próximo ajuste de dificuldade",pct(o.dif.difficultyChange/100)]); if(o.taxa) k.push(["Taxa rápida",o.taxa.fastestFee+" sat/vB"]); if(o.fila) k.push(["Transações na fila",usd(o.fila.count,0)]);
-      if(ab.length) k.push(["Endereços ativos (BTC)",usd(ab[ab.length-1].value,0)]); if(txb.length) k.push(["Transações por dia (BTC)",usd(txb[txb.length-1].value,0)]); if(mv.length) k.push(["MVRV do Bitcoin",usd(mv[mv.length-1].value,2)]); var ae=serie(o.eth,"AdrActCnt"); if(ae.length) k.push(["Endereços ativos (ETH)",usd(ae[ae.length-1].value,0)]); if(k.length) KP(k); else P("Os dados on-chain não estavam disponíveis."); } else P("Os dados on-chain não estavam disponíveis.");
-    H("6. Calendário econômico dos EUA"); var ev=((MERC&&MERC.calendario)||[]).filter(function(x){return (x.impacto==="High"||x.impacto==="Medium")&&x.moeda==="USD"&&Date.parse(x.data)>Date.now()-36e5;}).sort(function(a,b){return Date.parse(a.data)-Date.parse(b.data);});
-    if(ev.length) TB(["Quando","Importância","Evento"],ev.slice(0,14).map(function(x){return [new Date(x.data).toLocaleString("pt-BR",{weekday:"short",day:"2-digit",month:"2-digit",hour:"2-digit",minute:"2-digit"}),x.impacto==="High"?"★★★":"★★",x.titulo];})); else P("Nenhum evento importante dos EUA até o fim da semana.");
-    H("7. Notícias das últimas 24 horas, por fonte"); var nt=((MERC&&MERC.noticias)||[]).filter(function(n){return n.t*1000>Date.now()-864e5;}), fontes={}; nt.forEach(function(n){ (fontes[n.fonte]=fontes[n.fonte]||[]).push(n); });
-    var nf=Object.keys(fontes).sort(); if(!nf.length) P("Nenhuma notícia coletada nas últimas 24 horas."); nf.forEach(function(f){ doc.appendChild(el("h3",null,f+" ("+fontes[f].length+")")); UL(fontes[f].sort(function(a,b){return b.t-a.t;}).slice(0,5).map(function(n){return n.titulo;})); });
-    H("8. Sua carteira contra as referências"); if(p&&p.carteira&&p.carteira.length){ var ss=[], lin2=[], fimC=null; PDEF.forEach(function(df){ var s=p[df[0]]; if(!s||!s.length) return; var fim=s[s.length-1][1]; if(df[0]==="carteira") fimC=fim; ss.push({c:CORES[df[0]],w:df[0]==="carteira"?3:1.6,p:s,n:df[1]}); lin2.push([df[1],[pct(fim,2),cls(fim)],df[0]==="carteira"?"–":[pct(fimC-fim,2)+(fimC-fim>=0?" a favor":" contra"),cls(fimC-fim)]]); });
-      var v=p.valor&&p.valor.length?p.valor[p.valor.length-1][2]:null; P("Período: de "+p.dias[0].split("-").reverse().join("/")+" até hoje."+(v!=null?" Valor atual da carteira: "+simb()+usd(v)+".":""));
-      doc.insertAdjacentHTML("beforeend",svgLinhas(ss)); var lg=el("div","leg"); ss.forEach(function(s){ var sp=el("span"), i=el("i"); i.style.background=s.c; sp.appendChild(i); sp.appendChild(document.createTextNode(s.n)); lg.appendChild(sp); }); doc.appendChild(lg);
+    var nt=((MERC&&MERC.noticias)||[]).filter(function(n){return n.t*1000>Date.now()-864e5;}).sort(function(a,b){return b.t-a.t;});
+    var ev=((MERC&&MERC.calendario)||[]).filter(function(x){return (x.impacto==="High"||x.impacto==="Medium")&&x.moeda==="USD"&&Date.parse(x.data)>Date.now()-36e5;}).sort(function(a,b){return Date.parse(a.data)-Date.parse(b.data);});
+    var quando=function(x){ return new Date(x.data).toLocaleString("pt-BR",{weekday:"long",day:"2-digit",month:"2-digit",hour:"2-digit",minute:"2-digit"}); };
+
+    /* ---------- 1. Introdução ---------- */
+    H("1. Introdução"); var i1="Este relatório reúne, em um só documento, o que aconteceu no mercado de criptoativos nas últimas 24 horas e o que os principais indicadores dizem sobre o momento atual. ";
+    if(g) i1+="O mercado como um todo vale "+grande(g.cap)+" e teve "+mov(g.var24/100,0.005,0.03)+" de "+pct(g.var24/100)+" no período, com "+grande(g.vol)+" negociados. ";
+    if(btc) i1+="O Bitcoin é cotado a US$ "+usd(btc.p,0)+" ("+pct(btc.v)+" em 24 horas)"+(g?" e responde por "+usd(g.dom_btc,1)+"% do valor total":"")+(eth?"; o Ethereum, a US$ "+usd(eth.p,0)+" ("+pct(eth.v)+")":"")+". ";
+    if(fng) i1+="O índice de medo e ganância marca "+fng.valor+" de 100, na faixa de "+(FNG_PT[fng.classe]||fng.classe)+"."; P(i1);
+    P("O desenvolvimento a seguir analisa seis frentes: preços e sentimento, o fluxo de dinheiro institucional pelos ETFs, a atividade em finanças descentralizadas (DeFi), os dados registrados nas próprias redes (on-chain), a agenda econômica dos Estados Unidos e as notícias do dia em todas as fontes acompanhadas."+(p?" Em seguida, compara o desempenho da sua carteira com as principais referências.":"")+" A conclusão resume os sinais e aponta o que observar nos próximos dias.");
+    if(g) KP([["Valor de mercado",grande(g.cap),pct(g.var24/100)+" em 24h"],["Volume em 24h",grande(g.vol)],["Dominância do Bitcoin",usd(g.dom_btc,1)+"%"],["Medo e ganância",fng?fng.valor+" / 100":"–",fng?(FNG_PT[fng.classe]||fng.classe):""]]);
+
+    /* ---------- 2. Desenvolvimento ---------- */
+    H("2. Desenvolvimento");
+    H3("2.1 Preços e sentimento"); var t="";
+    if(btc){ S("Preço do Bitcoin em 24h",btc.v>0.01?1:btc.v<-0.01?-1:0,pct(btc.v)); t+="O Bitcoin registra "+mov(btc.v,0.01,0.04)+" no dia. "; }
+    if(pr.length){ var fr=sobe/pr.length; t+=sobe+" dos "+pr.length+" principais ativos estão no positivo, o que mostra um movimento "+(fr>=0.7?"amplo de alta, espalhado pelo mercado":fr<=0.3?"amplo de queda, espalhado pelo mercado":"dividido, sem direção única")+". "; S("Amplitude do mercado",fr>=0.6?1:fr<=0.4?-1:0,sobe+" de "+pr.length+" em alta"); }
+    if(btc&&eth) t+=(eth.v-btc.v>0.01?"O Ethereum anda melhor que o Bitcoin, sinal de mais apetite por risco. ":btc.v-eth.v>0.01?"O Bitcoin se sai melhor que o Ethereum, comportamento típico de dias mais defensivos. ":"Bitcoin e Ethereum caminham juntos. ");
+    if(liq.length>1) t+="Entre os ativos com bom volume, o destaque positivo é "+liq[0]+" ("+pct(PRECOS[liq[0]].v)+") e o negativo é "+liq[liq.length-1]+" ("+pct(PRECOS[liq[liq.length-1]].v)+"). ";
+    if(fng){ var f=+fng.valor; t+="O sentimento está em "+(FNG_PT[fng.classe]||fng.classe)+" ("+f+"): "+(f>=75?"níveis assim costumam aparecer perto de topos de curto prazo, quando o otimismo já está no preço.":f>=55?"há otimismo, mas sem exagero.":f>=45?"o mercado não demonstra convicção para nenhum lado.":f>=25?"há cautela entre os investidores.":"níveis assim costumam aparecer em momentos de capitulação."); S("Sentimento",f>=75?-1:f<=25?1:0,f+" de 100"); }
+    P(t||"Sem dados de preço no momento.");
+    if(liq.length>6){ var lin=[]; for(var i=0;i<5;i++){ var a=liq[i], b=liq[liq.length-1-i]; lin.push([a,[pct(PRECOS[a].v),"pos"],b,[pct(PRECOS[b].v),"neg"]]); } TB(["Maiores altas","24h","Maiores quedas","24h"],lin); }
+
+    H3("2.2 Fluxo institucional: ETFs de Bitcoin");
+    if(e&&e.fl.length){ var fl=e.fl, n=fl.length, u=fl[n-1], som=function(q){ var x=0; fl.slice(-q).forEach(function(y){x+=y.usd;}); return x; }, s5=som(5), s21=som(21), m21=fl.slice(-21), pos=m21.filter(function(x){return x.btc>0;}).length, seq=1; while(seq<n&&(fl[n-1-seq].btc>=0)===(u.btc>=0)) seq++;
+      var dt=u.time.split("-").reverse().slice(0,2).join("/"); t="Os ETFs à vista de Bitcoin dos Estados Unidos são hoje o principal canal de entrada de dinheiro institucional no mercado. No último pregão com dados ("+dt+"), eles "+(u.btc>=0?"compraram":"venderam")+" o equivalente a "+dinG(Math.abs(u.usd))+" ("+usd(Math.abs(u.btc),0)+" BTC)"+(seq>1?", no "+seq+"º dia seguido de "+(u.btc>=0?"entrada":"saída"):", invertendo o sentido do dia anterior")+". ";
+      t+="Na semana o saldo é de "+dinG(s5)+" e, no mês, de "+dinG(s21)+", com entrada líquida em "+pos+" dos últimos "+m21.length+" pregões. "+(s21>0&&s5>0?"A leitura é de demanda institucional consistente, que funciona como apoio para o preço.":s21>0&&s5<=0?"O mês ainda é positivo, mas a semana mostra perda de fôlego na demanda, o que merece atenção.":s21<=0&&s5>0?"O mês é negativo, mas a semana indica retomada das compras.":"A leitura é de retirada de dinheiro institucional, o que pressiona o preço.");
+      if(e.tot.length){ var T=e.tot[e.tot.length-1].value; t+=" Somados, os fundos guardam "+usd(T,0)+" BTC, ou "+usd(T/21e6*100,2)+"% de todos os bitcoins que vão existir."; } P(t); S("Fluxo dos ETFs na semana",s5>0?1:-1,dinG(s5)); S("Fluxo dos ETFs no mês",s21>0?1:-1,dinG(s21));
+      TB(["Dia","Fluxo (BTC)","Fluxo (US$)"],fl.slice(-5).reverse().map(function(x){return [x.time.split("-").reverse().join("/"),[(x.btc>=0?"+":"− ")+usd(Math.abs(x.btc),0),cls(x.btc)],[dinG(x.usd),cls(x.usd)]];}));
+      var en=etfNots().slice(0,4); if(en.length){ P("No noticiário, os ETFs aparecem em "+etfNots().length+" manchetes recentes. As principais:"); UL(en.map(function(n){return n.titulo+" ("+n.fonte+")";})); } }
+    else P("Os fluxos de ETF não estavam disponíveis na hora em que este relatório foi montado; a fonte limita o número de consultas por hora.");
+
+    H3("2.3 Finanças descentralizadas (DeFi)");
+    if(d){ var uu=d.tvl[d.tvl.length-1].value, v1=varP(uu,atras(d.tvl,1)), v7=varP(uu,atras(d.tvl,7)), v30=varP(uu,atras(d.tvl,30)), mx=Math.max.apply(null,d.tvl.map(function(x){return x.value;})), su=d.stb.length?d.stb[d.stb.length-1].value:null, s7=d.stb.length?varP(su,atras(d.stb,7)):null, s30=d.stb.length?varP(su,atras(d.stb,30)):null, sr=0; d.redes.forEach(function(c){sr+=c.tvl;});
+      t="O valor total depositado em protocolos DeFi (TVL) é de "+dinG(uu)+", com variação de "+(v7==null?"–":pct(v7))+" em 7 dias e "+(v30==null?"–":pct(v30))+" em 30 dias. O número está "+usd((1-uu/mx)*100,0)+"% abaixo do recorde histórico de "+dinG(mx)+". "+(v30>0.03?"O crescimento no mês indica capital voltando a buscar rendimento dentro do ecossistema. ":v30<-0.03?"A queda no mês indica capital saindo dos protocolos, em parte pelo próprio recuo de preço dos ativos depositados. ":"O quadro no mês é de estabilidade. ");
+      if(d.redes.length) t+="A concentração segue alta: "+d.redes[0].name+" detém "+usd(d.redes[0].tvl/(sr||uu)*100,1)+"% do total"+(d.redes[1]?", seguida por "+d.redes[1].name+" ("+usd(d.redes[1].tvl/(sr||uu)*100,1)+"%)":"")+(d.redes[2]?" e "+d.redes[2].name+" ("+usd(d.redes[2].tvl/(sr||uu)*100,1)+"%)":"")+". ";
+      if(d.cats&&d.cats.length>1) t+="Por tipo de protocolo, lideram "+d.cats[0].name+" ("+dinG(d.cats[0].tvl)+") e "+d.cats[1].name+" ("+dinG(d.cats[1].tvl)+"). ";
+      if(su!=null){ t+="As stablecoins em circulação somam "+dinG(su)+" ("+(s7==null?"–":pct(s7))+" em 7 dias"+(s30==null?"":", "+pct(s30)+" em 30 dias")+"); "+(s30>0.005?"a expansão dessa base significa dinheiro novo entrando no mercado, um dos indicadores mais confiáveis de liquidez.":s30<-0.005?"a contração dessa base significa dinheiro saindo do mercado.":"a base está estável, sem entrada ou saída relevante de dinheiro novo."); S("Stablecoins em 30 dias",s30>0.005?1:s30<-0.005?-1:0,s30==null?"–":pct(s30)); }
+      if(d.dex) t+=" As corretoras descentralizadas movimentaram "+dinG(d.dex.v)+" em 24 horas"+(d.dex.c!=null?" ("+pct(d.dex.c/100)+" contra o dia anterior)":"")+"."; P(t); S("TVL de DeFi em 30 dias",v30>0.03?1:v30<-0.03?-1:0,v30==null?"–":pct(v30));
+      TB(["Protocolo","Categoria","TVL","24h","7 dias"],d.prot.slice(0,8).map(function(x){return [x.name,x.category||"–",dinG(x.tvl),[x.change_1d==null?"–":pct(x.change_1d/100),cls(x.change_1d||0)],[x.change_7d==null?"–":pct(x.change_7d/100),cls(x.change_7d||0)]];})); }
+    else P("Os dados de DeFi não estavam disponíveis na hora em que este relatório foi montado.");
+
+    H3("2.4 Dados on-chain");
+    if(o){ var ab=serie(o.btc,"AdrActCnt"), mv=serie(o.btc,"CapMVRVCur"), txb=serie(o.btc,"TxCnt"), ae=serie(o.eth,"AdrActCnt"), k=[]; t="";
+      if(o.hash&&o.hash.currentHashrate){ t+="A rede do Bitcoin opera com "+usd(o.hash.currentHashrate/1e18,0)+" EH/s de poder de mineração"; if(o.dif){ t+=", e o próximo ajuste de dificuldade está estimado em "+pct(o.dif.difficultyChange/100)+": "+(o.dif.difficultyChange>0?"os mineradores seguem ampliando a capacidade, sinal de confiança de quem tem custos fixos altos":"parte dos mineradores desligou máquinas, o que costuma acontecer quando a margem aperta"); } t+=". "; k.push(["Hashrate",usd(o.hash.currentHashrate/1e18,0)+" EH/s"]); }
+      if(o.taxa&&o.fila){ t+="As taxas estão em "+o.taxa.fastestFee+" sat/vB para confirmação rápida, com "+usd(o.fila.count,0)+" transações na fila: "+(o.taxa.fastestFee<=5?"a rede está folgada, sem disputa por espaço nos blocos":o.taxa.fastestFee<=30?"há uso moderado":"há congestionamento, típico de momentos de muita movimentação")+". "; k.push(["Taxa rápida",o.taxa.fastestFee+" sat/vB"]); }
+      if(ab.length){ var a7=varP(ab[ab.length-1].value,atras(ab,7)), a30=varP(ab[ab.length-1].value,atras(ab,30)); t+="O Bitcoin teve "+usd(ab[ab.length-1].value,0)+" endereços ativos no último dia fechado ("+(a7==null?"–":pct(a7))+" em 7 dias"+(a30==null?"":", "+pct(a30)+" em 30 dias")+")"+(ae.length?"; o Ethereum, "+usd(ae[ae.length-1].value,0):"")+". "+(a30>0.05?"O uso da rede cresce, o que dá sustentação ao movimento de preço. ":a30<-0.05?"O uso da rede recua, sinal de menor participação. ":"O uso da rede está estável. "); S("Endereços ativos do Bitcoin em 30 dias",a30>0.05?1:a30<-0.05?-1:0,a30==null?"–":pct(a30)); k.push(["Endereços ativos (BTC)",usd(ab[ab.length-1].value,0)]); }
+      if(mv.length){ var M=mv[mv.length-1].value; t+="O MVRV, que compara o preço de mercado com o preço médio pago pelas moedas em circulação, está em "+usd(M,2)+": "+(M>=3.5?"historicamente uma zona de euforia, em que a maior parte dos detentores tem lucro grande e a tentação de vender aumenta.":M>=2.4?"o mercado está em lucro confortável, mas ainda abaixo dos níveis que marcaram topos anteriores.":M>=1?"uma zona neutra, longe tanto da euforia (acima de 3,5) quanto da capitulação (abaixo de 1).":"abaixo de 1, o detentor médio está no prejuízo, situação que marcou fundos de ciclos anteriores."); S("MVRV do Bitcoin",M>=3.5?-1:M<1?1:0,usd(M,2)); k.push(["MVRV",usd(M,2)]); }
+      P(t||"As métricas on-chain não responderam agora."); if(k.length) KP(k); }
+    else P("Os dados on-chain não estavam disponíveis na hora em que este relatório foi montado.");
+
+    H3("2.5 Agenda econômica dos Estados Unidos");
+    var fortes=ev.filter(function(x){return x.impacto==="High";});
+    if(ev.length){ P("Decisões de juros e dados de inflação e emprego dos Estados Unidos mexem com o dólar e, por consequência, com os ativos de risco, incluindo cripto. Até o fim da semana há "+ev.length+" evento"+(ev.length>1?"s":"")+" relevante"+(ev.length>1?"s":"")+", "+(fortes.length?fortes.length+" de importância máxima. O principal é "+fortes[0].titulo+", "+quando(fortes[0])+"; costuma haver mais oscilação nas horas próximas à divulgação.":"nenhum de importância máxima, o que reduz a chance de sustos vindos da macroeconomia."));
+      TB(["Quando","Importância","Evento"],ev.slice(0,10).map(function(x){return [new Date(x.data).toLocaleString("pt-BR",{weekday:"short",day:"2-digit",month:"2-digit",hour:"2-digit",minute:"2-digit"}),x.impacto==="High"?"★★★":"★★",x.titulo];})); }
+    else P("Não há eventos importantes dos Estados Unidos até o fim da semana, o que reduz a chance de oscilações vindas da macroeconomia.");
+
+    H3("2.6 O que as notícias dizem");
+    if(nt.length){ var fontes={}, TEMAS=[["ETFs e investidores institucionais",/\bETFs?\b|BlackRock|institucion|institution|Grayscale|tesouraria|treasury/i],["Regulação e governos",/\bSEC\b|regula|lei\b|law|congress|senado|senate|governo|government|tribunal|court|CVM|banco central|Fed\b/i],["Bitcoin",/bitcoin|\bBTC\b/i],["Ethereum",/ethereum|\bETH\b/i],["Altcoins",/solana|\bXRP\b|ripple|cardano|dogecoin|\bBNB\b|altcoin/i],["DeFi e stablecoins",/defi|stablecoin|tether|USDC|\bUSDT\b|staking/i],["Ataques e segurança",/hack|exploit|ataque|golpe|scam|roub|stolen|invas/i],["Empresas e corretoras",/binance|coinbase|\bOKX\b|kraken|bybit|corretora|exchange|IPO/i]];
+      nt.forEach(function(n){ (fontes[n.fonte]=fontes[n.fonte]||[]).push(n); }); var nf=Object.keys(fontes).sort(), cont=TEMAS.map(function(T){ var l=nt.filter(function(n){return T[1].test(n.titulo);}); return {n:T[0],l:l}; }).filter(function(x){return x.l.length;}).sort(function(a,b){return b.l.length-a.l.length;});
+      P("Nas últimas 24 horas foram coletadas "+nt.length+" notícias em "+nf.length+" fontes ("+nf.join(", ")+"). "+(cont.length?"Os assuntos mais presentes foram "+cont.slice(0,3).map(function(x){return x.n.toLowerCase()+" ("+x.l.length+" manchetes)";}).join(", ")+". A seguir, as manchetes mais recentes de cada assunto.":""));
+      var usadas={}; cont.slice(0,5).forEach(function(c){ var l=c.l.filter(function(n){return !usadas[n.link];}).slice(0,3); if(!l.length) return; doc.appendChild(el("p","rtema",c.n)); UL(l.map(function(n){ usadas[n.link]=1; return n.titulo+" ("+n.fonte+")"; })); });
+      var resto=nt.filter(function(n){return !usadas[n.link];}).slice(0,4); if(resto.length){ doc.appendChild(el("p","rtema","Outros destaques")); UL(resto.map(function(n){return n.titulo+" ("+n.fonte+")";})); } }
+    else P("Nenhuma notícia foi coletada nas últimas 24 horas.");
+
+    if(p&&p.carteira&&p.carteira.length){ H3("2.7 Sua carteira frente às referências"); var ss=[], lin2=[], fimC=null, res={}; PDEF.forEach(function(df){ var s=p[df[0]]; if(!s||!s.length) return; var fim=s[s.length-1][1]; res[df[0]]=fim; if(df[0]==="carteira") fimC=fim; ss.push({c:CORES[df[0]],w:df[0]==="carteira"?3:1.6,p:s,n:df[1]}); lin2.push([df[1],[pct(fim,2),cls(fim)],df[0]==="carteira"?"–":[pct(fimC-fim,2)+(fimC-fim>=0?" a favor":" contra"),cls(fimC-fim)]]); });
+      var v=p.valor&&p.valor.length?p.valor[p.valor.length-1][2]:null, ganha=[], perde=[]; PDEF.forEach(function(df){ if(df[0]==="carteira"||res[df[0]]==null) return; (fimC>=res[df[0]]?ganha:perde).push(df[1]); });
+      t="Desde "+p.dias[0].split("-").reverse().join("/")+", a carteira rende "+pct(fimC,2)+(v!=null?" e vale hoje "+simb()+usd(v):"")+". "; if(res.cdi!=null) t+="No mesmo período o CDI, referência da renda fixa no Brasil, rendeu "+pct(res.cdi,2)+": a carteira está "+pct(Math.abs(fimC-res.cdi),2).replace("+","")+(fimC>=res.cdi?" à frente":" atrás")+" do investimento sem risco. ";
+      if(res.btc!=null) t+="Contra o Bitcoin ("+pct(res.btc,2)+"), a diferença é de "+pct(fimC-res.btc,2)+"; "+(Math.abs(fimC-res.btc)<0.02?"o resultado acompanha de perto o do próprio ativo, o que é esperado em uma carteira concentrada nele. ":fimC>res.btc?"os momentos de compra escolhidos ajudaram o resultado. ":"os momentos de compra pesaram contra o resultado. ");
+      t+=(ganha.length?"A carteira supera: "+ganha.join(", ")+". ":"")+(perde.length?"Fica atrás de: "+perde.join(", ")+".":""); P(t);
+      doc.insertAdjacentHTML("beforeend",svgLinhas(ss)); var lg=el("div","leg"); ss.forEach(function(s){ var sp=el("span"), ii=el("i"); ii.style.background=s.c; sp.appendChild(ii); sp.appendChild(document.createTextNode(s.n)); lg.appendChild(sp); }); doc.appendChild(lg);
       TB(["Referência","Rendimento no período","Carteira contra a referência"],lin2); P("A linha da carteira mede o rendimento das posições, descontando o efeito de novos aportes. CDI e Ibovespa em reais; S&P 500 em dólar.","note"); }
-    else P(CART.exemplo||!CART.lanc.length?"Cadastre suas compras em Carteira → Lançamentos para esta seção aparecer.":"Não consegui montar o histórico da carteira agora.");
-    P("Fontes: Binance, CoinGecko, Alternative.me, DeFiLlama, mempool.space, Coin Metrics, BGeometrics, Forex Factory, Banco Central do Brasil, Yahoo Finance e os portais de notícias listados na seção 7. Documento informativo, gerado automaticamente; não é recomendação de investimento.","note");
+
+    /* ---------- 3. Conclusão ---------- */
+    H("3. Conclusão"); var fav=sin.filter(function(x){return x.d>0;}), con=sin.filter(function(x){return x.d<0;}), neu=sin.filter(function(x){return x.d===0;}), sal=fav.length-con.length;
+    P("Dos "+sin.length+" indicadores avaliados neste relatório, "+fav.length+" apontam para um quadro favorável, "+con.length+" para um quadro desfavorável e "+neu.length+" estão neutros. O conjunto descreve um mercado "+(sal>=3?"em condição construtiva, com a maior parte dos sinais alinhada do lado positivo":sal>=1?"levemente favorável, mas sem unanimidade entre os sinais":sal===0?"dividido, sem direção definida":sal>=-2?"levemente desfavorável, com mais sinais de cautela do que de força":"em condição frágil, com a maior parte dos sinais do lado negativo")+".");
+    if(fav.length) P("Pesam a favor: "+fav.map(function(x){return x.n.toLowerCase()+" ("+x.t+")";}).join("; ")+".");
+    if(con.length) P("Pesam contra: "+con.map(function(x){return x.n.toLowerCase()+" ("+x.t+")";}).join("; ")+".");
+    var ob=[]; if(fortes.length) ob.push("a divulgação de "+fortes[0].titulo+", "+quando(fortes[0])); if(e&&e.fl.length) ob.push("se os ETFs mantêm o sentido do fluxo dos últimos dias"); if(d) ob.push("a evolução das stablecoins, que mostra se entra dinheiro novo"); if(fng&&(+fng.valor>=75||+fng.valor<=25)) ob.push("o sentimento em nível extremo, que costuma anteceder correções de rota");
+    if(ob.length) P("Para os próximos dias, vale acompanhar: "+ob.join("; ")+".");
+    P("Fontes: Binance, CoinGecko, Alternative.me, DeFiLlama, mempool.space, Coin Metrics, BGeometrics, Forex Factory, Banco Central do Brasil, Yahoo Finance e os portais de notícias citados. As leituras deste documento são geradas automaticamente a partir de regras fixas aplicadas aos dados; têm caráter informativo e não são recomendação de investimento.","note");
     $("rel-status").textContent="Relatório montado às "+agora.toLocaleTimeString("pt-BR")+"."; }).catch(function(x){ $("rel-status").textContent="Não consegui montar o relatório agora. Tente de novo."; if(window.console) console.error(x); }); }
 $("rel-gerar").addEventListener("click",relGera);
 $("rel-pdf").addEventListener("click",function(){ var go=function(){ var th=document.documentElement.getAttribute("data-theme"); document.documentElement.setAttribute("data-theme","light"); document.body.classList.add("so-rel");
@@ -1627,7 +1697,8 @@ $("rel-pdf").addEventListener("click",function(){ var go=function(){ var th=docu
 
 ORD["df-prot"]={c:null,d:-1};
 pers("df-per","dfPer","d",defiDes); pers("ef-per","efPer","d",etfDes); pers("ef-un","efUn","u",etfDes);
-function m2Abre(j){ if(j==="defi") defiDes(); else if(j==="onchain") ocDes(); else if(j==="etfs") etfDes(); else if(j==="relatorio") relGera(); }
+function m2Abre(j){ if(j==="defi") defiDes(); else if(j==="onchain") ocDes(); else if(j==="etfs") etfDes(); }
+[].forEach.call(document.querySelectorAll('#areas button[data-area="relatorio"]'),function(b){ b.addEventListener("click",function(){ setTimeout(relGera,50); }); }); if(location.hash==="#relatorio") setTimeout(relGera,2500);
 setInterval(function(){ if($("area-mercado").hidden) return; if(!$("mj-defi").hidden) defiDes(); if(!$("mj-onchain").hidden) ocDes(); if(!$("mj-etfs").hidden) etfDes(); },120000);
 </script>
 </body>
