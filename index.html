@@ -96,8 +96,14 @@ details{padding:10px 18px} summary{cursor:pointer;font-size:13px;color:var(--mut
 #lado{background:var(--band);color:var(--band-fg);padding:14px 16px 0}
 #lado .marca{font:600 26px/1.15 var(--serif);letter-spacing:0;text-transform:none;color:var(--band-fg);margin-bottom:12px}
 #lado button{background:none}
-@media (min-width:900px){ body{padding-left:232px} #lado{position:fixed;left:0;top:0;bottom:0;width:232px;box-sizing:border-box;padding:28px 16px;overflow-y:auto;border-right:1px solid rgba(255,255,255,.12);z-index:20}
-  #lado .marca{font-size:28px;margin-bottom:26px;padding-left:14px} #lado .areas{flex-direction:column;gap:4px} #lado .areas button{width:100%;text-align:left;padding:11px 14px;font-size:15px} }
+#lado-bt{display:none}
+@media (min-width:900px){ body{padding-left:56px} #lado{position:fixed;left:0;top:0;bottom:0;width:56px;box-sizing:border-box;padding:14px 8px;overflow:hidden;border-right:1px solid rgba(255,255,255,.12);z-index:25;transition:width .18s ease,box-shadow .18s ease}
+  #lado-bt{display:block;width:40px;height:40px;padding:0;font-size:20px;line-height:1;border:0;color:var(--band-fg);margin-bottom:18px}
+  #lado .marca,#lado .areas{width:206px;opacity:0;pointer-events:none;transition:opacity .15s ease}
+  #lado:hover,#lado:focus-within,#lado.aberto{width:232px;padding-inline:13px;box-shadow:6px 0 24px rgba(0,0,0,.28);overflow-y:auto}
+  #lado:hover .marca,#lado:hover .areas,#lado:focus-within .marca,#lado:focus-within .areas,#lado.aberto .marca,#lado.aberto .areas{opacity:1;pointer-events:auto}
+  #lado .marca{font-size:28px;margin-bottom:26px;padding-left:14px;white-space:nowrap} #lado .areas{flex-direction:column;gap:4px} #lado .areas button{width:100%;text-align:left;padding:11px 14px;font-size:15px} }
+@media (prefers-reduced-motion:reduce){ #lado,#lado .marca,#lado .areas{transition:none} }
 .areas button{border:1px solid transparent;color:var(--band-muted);padding:6px 14px;font-weight:500}
 .areas button[aria-current="page"]{border-color:var(--band-fg);color:var(--band-fg);font-weight:600}
 button.sec,label.arq{color:var(--muted);border:1px solid var(--line);background:transparent}
@@ -184,6 +190,7 @@ button.mini{font-size:12px;color:var(--muted)}
 <body>
 <script>try{var _t=localStorage.getItem("tema");if(_t==="dark"||_t==="light")document.documentElement.setAttribute("data-theme",_t);}catch(e){}</script>
 <aside id="lado">
+    <button type="button" id="lado-bt" aria-label="Abrir ou fechar o menu" aria-expanded="false">☰</button>
     <div class="marca" id="marca" hidden></div>
     <nav class="areas" id="areas" aria-label="Áreas do painel">
       <button type="button" data-area="mercado" aria-current="false">Mercado</button>
@@ -1307,6 +1314,9 @@ function temaPoe(t){ try{ if(t) localStorage.setItem("tema",t); else localStorag
 [].forEach.call(document.querySelectorAll(".tema-sis"),function(b){ b.addEventListener("click",function(){ temaPoe(null); }); });
 if(window.matchMedia) try{ matchMedia("(prefers-color-scheme: dark)").addEventListener("change",temaDesenha); }catch(x){}
 temaDesenha();
+$("lado-bt").addEventListener("click",function(ev){ ev.stopPropagation(); var ab=$("lado").classList.toggle("aberto"); this.setAttribute("aria-expanded",ab?"true":"false"); if(!ab) this.blur(); });
+document.addEventListener("click",function(ev){ var l=$("lado"); if(!l.contains(ev.target)){ l.classList.remove("aberto"); $("lado-bt").setAttribute("aria-expanded","false"); } });
+[].forEach.call(document.querySelectorAll("#areas button"),function(b){ b.addEventListener("click",function(){ $("lado").classList.remove("aberto"); b.blur(); }); });
 function perfilMenu(ab){ $("perfil-menu").hidden=!ab; $("perfil-bt").setAttribute("aria-expanded",ab?"true":"false"); }
 $("perfil-bt").addEventListener("click",function(ev){ ev.stopPropagation(); perfilMenu($("perfil-menu").hidden); });
 document.addEventListener("click",function(ev){ if(!$("perfil-menu").hidden&&!$("perfil-menu").contains(ev.target)) perfilMenu(false); });
