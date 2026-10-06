@@ -1,0 +1,374 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Radar de Funding</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Source+Serif+4:opsz,wght@8..60,500;8..60,600&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+/* Layout: faixa institucional no topo, parâmetros, indicadores, fichas de operação com as duas pernas lado a lado, tabela geral, método e riscos. */
+:root{
+  --bg:#f4f5f7; --surface:#ffffff; --fg:#0e1a2b; --muted:#5a6678; --line:#d9dee6; --soft:#eef1f5;
+  --band:#0b2545; --band-fg:#f2f5f9; --band-muted:#a9b8cc; --accent:#1f4e8c;
+  --good:#1a7a4c; --bad:#b23a30; --warn:#8f6408;
+  --serif:"Source Serif 4",Georgia,"Times New Roman",serif;
+  --sans:"IBM Plex Sans",system-ui,-apple-system,"Segoe UI",sans-serif;
+  --mono:"IBM Plex Mono",ui-monospace,Consolas,monospace;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){--bg:#0a1018; --surface:#111a27; --fg:#e4e9f0; --muted:#93a0b3; --line:#243042; --soft:#172232;
+    --band:#0d1b2f; --band-fg:#f2f5f9; --band-muted:#93a6bf; --accent:#7fb0ea; --good:#5fcf95; --bad:#f0857b; --warn:#e2b656; color-scheme:dark}
+}
+:root[data-theme="dark"]{--bg:#0a1018; --surface:#111a27; --fg:#e4e9f0; --muted:#93a0b3; --line:#243042; --soft:#172232;
+    --band:#0d1b2f; --band-fg:#f2f5f9; --band-muted:#93a6bf; --accent:#7fb0ea; --good:#5fcf95; --bad:#f0857b; --warn:#e2b656; color-scheme:dark}
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+body{margin:0;background:var(--bg);color:var(--fg);font:15px/1.5 var(--sans)}
+p{margin:0}
+.faixa{background:var(--band);color:var(--band-fg);padding-block:26px;padding-inline:16px}
+.faixa .in{max-width:1080px;margin:0 auto;display:flex;flex-wrap:wrap;gap:12px 24px;align-items:flex-end;justify-content:space-between}
+.marca{font:500 12px/1 var(--sans);letter-spacing:.14em;text-transform:uppercase;color:var(--band-muted);margin-bottom:8px}
+h1{font:600 30px/1.15 var(--serif);margin:0;text-wrap:balance}
+.faixa p{color:var(--band-muted);margin-top:6px;max-width:60ch}
+.faixa button{border-color:var(--band-fg);color:var(--band-fg)}
+main{max-width:1080px;margin:0 auto;padding-block:22px 48px;padding-inline:16px;display:flex;flex-direction:column;gap:20px}
+h2{font:600 20px/1.25 var(--serif);margin:0 0 4px;text-wrap:balance}
+.rot{font:600 11px/1.2 var(--sans);letter-spacing:.1em;text-transform:uppercase;color:var(--muted)}
+.sub{color:var(--muted)}
+.box{background:var(--surface);border:1px solid var(--line);border-radius:3px;padding:18px;min-width:0}
+.controles{display:flex;flex-wrap:wrap;gap:12px 18px;align-items:end}
+label{display:flex;flex-direction:column;gap:4px;font-size:12px;color:var(--muted)}
+input,select{font:500 14px var(--mono);padding:7px 9px;border:1px solid var(--line);border-radius:3px;background:var(--bg);color:var(--fg);width:160px;max-width:100%}
+button{font:500 14px var(--sans);padding:8px 14px;border-radius:3px;border:1px solid var(--accent);background:transparent;color:var(--accent);cursor:pointer}
+button:focus-visible,input:focus-visible,select:focus-visible,a:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));border:1px solid var(--line);background:var(--surface);border-radius:3px}
+.kpi{padding:14px 18px;border-left:1px solid var(--line);margin-left:-1px;min-width:0}
+.kpi b{display:block;font:500 22px/1.2 var(--mono);font-variant-numeric:tabular-nums;margin-top:4px}
+.abas{display:flex;flex-wrap:wrap;gap:0;border-bottom:1px solid var(--line)}
+.abas button{border:0;border-bottom:3px solid transparent;border-radius:0;color:var(--muted);padding:10px 16px}
+.abas button[aria-selected="true"]{color:var(--fg);border-bottom-color:var(--accent);font-weight:600}
+.fichas{display:flex;flex-direction:column;gap:14px;margin-top:14px}
+.ficha{border:1px solid var(--line);border-radius:3px;background:var(--surface);min-width:0}
+.ftopo{display:flex;flex-wrap:wrap;gap:8px 14px;align-items:center;justify-content:space-between;padding:12px 18px;border-bottom:1px solid var(--line)}
+.ativo{font:600 20px/1 var(--serif)}
+.ordem{font:500 12px var(--mono);color:var(--muted);margin-right:10px}
+.selo{font:600 11px/1 var(--sans);letter-spacing:.06em;text-transform:uppercase;padding:6px 9px;border-radius:2px;border:1px solid currentColor}
+.selo.bom{color:var(--good)} .selo.pico{color:var(--warn)} .selo.ruim{color:var(--bad)} .selo.neutro{color:var(--muted)}
+.pernas{display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr))}
+.perna{padding:14px 18px;border-left:1px solid var(--line);margin-left:-1px;min-width:0;display:flex;flex-direction:column;gap:6px}
+.acao{font:600 11px/1 var(--sans);letter-spacing:.1em;text-transform:uppercase}
+.acao.venda{color:var(--bad)} .acao.compra{color:var(--good)}
+.onde{font:600 17px/1.25 var(--sans)}
+.oque{color:var(--muted);font-size:14px}
+.kv{display:grid;grid-template-columns:1fr auto;gap:2px 12px;font-size:13px;margin:4px 0 0}
+.kv dt{color:var(--muted)} .kv dd{margin:0;font-family:var(--mono);font-variant-numeric:tabular-nums;text-align:right}
+.perna a{font-size:13px;color:var(--accent);text-underline-offset:3px;margin-top:2px}
+.fres{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));background:var(--soft);border-top:1px solid var(--line)}
+.fres div{padding:10px 18px;min-width:0}
+.fres b{display:block;font:500 15px var(--mono);font-variant-numeric:tabular-nums}
+.pos{color:var(--good)} .neg{color:var(--bad)} .vazio{color:var(--muted)}
+.scroll{overflow-x:auto;margin-top:12px}
+table{border-collapse:collapse;width:100%;font-size:14px}
+th,td{padding:7px 10px;border-bottom:1px solid var(--line);text-align:right;white-space:nowrap;font-variant-numeric:tabular-nums}
+th{font-weight:600;color:var(--muted);font-size:11px;letter-spacing:.06em;text-transform:uppercase}
+td{font-family:var(--mono)} th:first-child,td:first-child{text-align:left}
+td.txt{font-family:var(--sans);text-align:left}
+.note{font-size:13px;color:var(--muted);margin-top:10px;max-width:75ch}
+.duas{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:20px}
+ol,ul{margin:8px 0 0;padding-left:20px;display:flex;flex-direction:column;gap:6px}
+.liq{padding:16px 18px;border-bottom:1px solid var(--line)}
+.liq b{display:block;font:500 30px/1.2 var(--mono);font-variant-numeric:tabular-nums;margin:4px 0 6px}
+.liq p{font-size:13px;max-width:60ch}
+.ordens{display:flex;flex-direction:column}
+.ordemL{display:flex;flex-wrap:wrap;gap:8px 14px;align-items:center;padding:12px 18px;border-bottom:1px solid var(--line)}
+.num{font:500 13px/26px var(--mono);width:26px;height:26px;text-align:center;border:1px solid var(--line);border-radius:50%;flex:none}
+.otxt{flex:1 1 180px;min-width:0} .o1{font-weight:600;font-size:16px} .o1 .acao{font-size:16px;letter-spacing:0;text-transform:none}
+.abrir{font:600 14px var(--sans);padding:7px 12px;border:1px solid var(--accent);border-radius:3px;color:var(--accent);text-decoration:none;white-space:nowrap}
+.abrir.sem{border-color:var(--line);color:var(--muted)}
+details{padding:10px 18px} summary{cursor:pointer;font-size:13px;color:var(--muted)}
+.ordbot{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}
+.ordbot button{color:var(--muted);border-color:var(--line)}
+.ordbot button[aria-pressed="true"]{background:var(--accent);border-color:var(--accent);color:var(--surface);font-weight:600}
+.rodape{font-size:12px;color:var(--muted);border-top:1px solid var(--line);padding-top:14px}
+</style>
+</head>
+<body>
+<header class="faixa"><div class="in">
+  <div>
+    <div class="marca">Arbitragem de funding · Delta neutro</div>
+    <h1>Radar de Funding</h1>
+    <p id="atualizado">Buscando taxas…</p>
+  </div>
+  <button id="recarregar" type="button">Atualizar taxas</button>
+</div></header>
+<main>
+  <section class="box controles" aria-label="Parâmetros">
+    <label>Capital (US$)<input id="capital" type="number" min="1" step="1" value="100"></label>
+    <label>Alavancagem<select id="alav"><option value="1">1x</option><option value="2">2x</option><option value="3">3x</option></select></label>
+    <label>Volume mínimo em 24h<select id="vol"><option value="1e7">US$ 10 milhões</option><option value="5e7" selected>US$ 50 milhões</option><option value="2e8">US$ 200 milhões</option></select></label>
+    <label>Ativo<input id="busca" type="text" placeholder="BTC, ETH…"></label>
+  </section>
+
+  <div class="abas" role="tablist">
+    <button type="button" role="tab" data-aba="cruz" aria-selected="true">Entre corretoras</button>
+    <button type="button" role="tab" data-aba="spot" aria-selected="false">À vista + futuro</button>
+    <button type="button" role="tab" data-aba="matriz" aria-selected="false">Todas as taxas</button>
+  </div>
+
+  <section id="aba-cruz">
+    <h2>Vender o futuro em uma corretora, comprar em outra</h2>
+    <p class="sub">Duas ordens do mesmo valor. O resultado usa a média de funding dos últimos 30 dias e já desconta as taxas.</p>
+    <div class="fichas" id="f-cruz"></div>
+  </section>
+
+  <section id="aba-spot" hidden>
+    <h2>Comprar o ativo à vista e vender o futuro</h2>
+    <p class="sub">Duas ordens do mesmo valor. O resultado usa a média de funding dos últimos 30 dias e já desconta as taxas.</p>
+    <div class="fichas" id="f-spot"></div>
+  </section>
+
+  <section class="box" id="aba-matriz" hidden>
+    <h2>Taxa anualizada de agora, por ativo e corretora</h2>
+    <p class="sub">Positiva: quem está vendido recebe. Negativa: quem está comprado recebe.</p>
+    <div class="ordbot" role="group" aria-label="Ordenar a tabela">
+      <button type="button" data-mord="vol" aria-pressed="true">Maior volume</button>
+      <button type="button" data-mord="maior" aria-pressed="false">Maiores taxas</button>
+      <button type="button" data-mord="menor" aria-pressed="false">Menores taxas</button>
+    </div>
+    <div class="scroll"><table><thead id="th-matriz"></thead><tbody id="tb-matriz"></tbody></table></div>
+  </section>
+
+  <div class="duas">
+    <section class="box">
+      <h2>Como executar</h2>
+      <ol>
+        <li>Escolha uma ficha com resultado positivo.</li>
+        <li>Deposite a margem indicada em cada perna.</li>
+        <li>Envie as duas ordens em seguida, no mesmo valor em dólares.</li>
+        <li>Acompanhe a margem das duas pernas e reponha a que estiver perdendo.</li>
+        <li>Feche as duas juntas quando a diferença encolher ou inverter.</li>
+      </ol>
+    </section>
+    <section class="box">
+      <h2>Riscos</h2>
+      <ul>
+        <li><strong>A taxa muda</strong> a cada 1 a 8 horas e pode virar contra a posição.</li>
+        <li><strong>Liquidação de uma perna</strong> em movimento forte, antes de repor a margem.</li>
+        <li><strong>Custos</strong> de 0,2% a 0,3% do valor para abrir e fechar, mais saques.</li>
+        <li><strong>Plataforma:</strong> saque travado, falha de contrato ou de oráculo.</li>
+        <li><strong>Mesmo código, ativos diferentes</strong> em moedas novas; confira antes.</li>
+      </ul>
+    </section>
+  </div>
+  <p class="rodape">Dados públicos de Binance, Bybit, OKX, Bitget, Gate, Hyperliquid e dYdX. Taxas anualizadas a partir do funding de cada período. Esta página não envia ordens nem acessa contas. Não é recomendação de investimento.</p>
+</main>
+
+<script>
+var VENUES=[["binance","Binance"],["bybit","Bybit"],["okx","OKX"],["bitget","Bitget"],["gate","Gate"],["hyper","Hyperliquid"],["dydx","dYdX"]];
+var NOME={}; VENUES.forEach(function(v){NOME[v[0]]=v[1];});
+var DATA={}, STATUS={};
+function $(id){return document.getElementById(id);}
+
+function getJ(url,opts){
+  var c=new AbortController(); var t=setTimeout(function(){c.abort();},20000);
+  var o=opts||{}; o.signal=c.signal;
+  return fetch(url,o).then(function(r){clearTimeout(t); if(!r.ok) throw new Error("HTTP "+r.status); return r.json();});
+}
+function tenta(p,alt){return p.catch(function(){return alt;});}
+function norm(b){
+  var pre=["1000000","10000","1000","1M"];
+  for(var i=0;i<pre.length;i++){ if(b.indexOf(pre[i])===0 && b.length>pre[i].length){ b=b.slice(pre[i].length); break; } }
+  if(b.length>1 && b[0]==="k" && b[1]===b[1].toUpperCase()) b=b.slice(1);
+  return b.toUpperCase();
+}
+function linha(b,rate,h,vol,sym){ if(!isFinite(rate)||!(h>0)) return null; return {b:norm(b),rate:rate,h:h,apr:rate*(24/h)*365,vol:vol||0,sym:sym}; }
+
+var LOAD={
+  binance:function(){
+    return Promise.all([getJ("https://fapi.binance.com/fapi/v1/premiumIndex"),tenta(getJ("https://fapi.binance.com/fapi/v1/fundingInfo"),[]),tenta(getJ("https://fapi.binance.com/fapi/v1/ticker/24hr"),[])]).then(function(r){
+      var h={},v={}; r[1].forEach(function(x){h[x.symbol]=x.fundingIntervalHours;}); r[2].forEach(function(x){v[x.symbol]=+x.quoteVolume;});
+      return r[0].filter(function(x){return /USDT$/.test(x.symbol)&&x.symbol.indexOf("_")<0;}).map(function(x){return linha(x.symbol.slice(0,-4),+x.lastFundingRate,h[x.symbol]||8,v[x.symbol],x.symbol);});
+    });
+  },
+  bybit:function(){
+    return getJ("https://api.bybit.com/v5/market/tickers?category=linear").then(function(r){
+      return r.result.list.filter(function(x){return /USDT$/.test(x.symbol)&&x.symbol.indexOf("-")<0&&x.fundingRate!=="";}).map(function(x){return linha(x.symbol.slice(0,-4),+x.fundingRate,+x.fundingIntervalHour||8,+x.turnover24h,x.symbol);});
+    });
+  },
+  okx:function(){
+    return Promise.all([getJ("https://www.okx.com/api/v5/public/funding-rate?instId=ANY"),tenta(getJ("https://www.okx.com/api/v5/market/tickers?instType=SWAP"),{data:[]})]).then(function(r){
+      var v={}; r[1].data.forEach(function(x){v[x.instId]=(+x.volCcy24h)*(+x.last);});
+      return r[0].data.filter(function(x){return /-USDT-SWAP$/.test(x.instId);}).map(function(x){var h=((+x.nextFundingTime)-(+x.fundingTime))/3.6e6; return linha(x.instId.split("-")[0],+x.fundingRate,h>0?h:8,v[x.instId],x.instId);});
+    });
+  },
+  bitget:function(){
+    return Promise.all([getJ("https://api.bitget.com/api/v2/mix/market/current-fund-rate?productType=USDT-FUTURES"),tenta(getJ("https://api.bitget.com/api/v2/mix/market/tickers?productType=USDT-FUTURES"),{data:[]})]).then(function(r){
+      var v={}; r[1].data.forEach(function(x){v[x.symbol]=+x.usdtVolume;});
+      return r[0].data.filter(function(x){return /USDT$/.test(x.symbol);}).map(function(x){return linha(x.symbol.slice(0,-4),+x.fundingRate,+x.fundingRateInterval||8,v[x.symbol],x.symbol);});
+    });
+  },
+  gate:function(){
+    return Promise.all([getJ("https://api.gateio.ws/api/v4/futures/usdt/contracts"),tenta(getJ("https://api.gateio.ws/api/v4/futures/usdt/tickers"),[])]).then(function(r){
+      var v={}; r[1].forEach(function(x){v[x.contract]=+x.volume_24h_quote;});
+      return r[0].filter(function(x){return /_USDT$/.test(x.name)&&!x.in_delisting;}).map(function(x){return linha(x.name.slice(0,-5),+x.funding_rate,(+x.funding_interval)/3600||8,v[x.name],x.name);});
+    });
+  },
+  hyper:function(){
+    return getJ("https://api.hyperliquid.xyz/info",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({type:"metaAndAssetCtxs"})}).then(function(r){
+      return r[0].universe.map(function(u,i){ if(u.isDelisted) return null; var c=r[1][i]; return linha(u.name,+c.funding,1,+c.dayNtlVlm,u.name); });
+    });
+  },
+  dydx:function(){
+    return getJ("https://indexer.dydx.trade/v4/perpetualMarkets").then(function(r){
+      return Object.keys(r.markets).map(function(k){var m=r.markets[k]; if(m.status!=="ACTIVE"||!/-USD$/.test(m.ticker)) return null; return linha(m.ticker.split("-")[0],+m.nextFundingRate,1,+m.volume24H,m.ticker);});
+    });
+  }
+};
+
+var HIST={}, FILA=[], ATIVOS=0, redes=null;
+var HL={
+  binance:function(s,t){return getJ("https://fapi.binance.com/fapi/v1/fundingRate?symbol="+s+"&startTime="+t+"&limit=1000").then(function(r){return r.map(function(x){return [+x.fundingTime,+x.fundingRate];});});},
+  bybit:function(s){return getJ("https://api.bybit.com/v5/market/funding/history?category=linear&symbol="+s+"&limit=200").then(function(r){return r.result.list.map(function(x){return [+x.fundingRateTimestamp,+x.fundingRate];});});},
+  okx:function(s){return getJ("https://www.okx.com/api/v5/public/funding-rate-history?instId="+s+"&limit=100").then(function(r){return r.data.map(function(x){return [+x.fundingTime,+(x.realizedRate||x.fundingRate)];});});},
+  bitget:function(s){return getJ("https://api.bitget.com/api/v2/mix/market/history-fund-rate?symbol="+s+"&productType=USDT-FUTURES&pageSize=100").then(function(r){return r.data.map(function(x){return [+x.fundingTime,+x.fundingRate];});});},
+  gate:function(s){return getJ("https://api.gateio.ws/api/v4/futures/usdt/funding_rate?contract="+s+"&limit=100").then(function(r){return r.map(function(x){return [x.t*1000,+x.r];});});},
+  hyper:function(s,t){var q=function(t0){return getJ("https://api.hyperliquid.xyz/info",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({type:"fundingHistory",coin:s,startTime:t0})});};
+    return Promise.all([q(t),q(t+15*864e5)]).then(function(r){var m={}; r[0].concat(r[1]).forEach(function(x){m[x.time]=+x.fundingRate;}); return Object.keys(m).map(function(k){return [+k,m[k]];});});},
+  dydx:function(s){return getJ("https://indexer.dydx.trade/v4/historicalFunding/"+s+"?limit=720").then(function(r){return r.historicalFunding.map(function(x){return [Date.parse(x.effectiveAt),+x.rate];});});}
+};
+function medias(pts,h){
+  var agora=Date.now(), f=(24/h)*365, s7=0,n7=0,s30=0,n30=0;
+  pts.forEach(function(p){ if(!isFinite(p[1])) return; if(p[0]>=agora-30*864e5){s30+=p[1];n30++;} if(p[0]>=agora-7*864e5){s7+=p[1];n7++;} });
+  return {a7:n7?s7/n7*f:null, a30:n30?s30/n30*f:null};
+}
+function proxima(){
+  while(ATIVOS<4&&FILA.length){ (function(j){ ATIVOS++;
+    HL[j.v](j.r.sym,Date.now()-30*864e5).then(function(pts){HIST[j.k]=medias(pts,j.r.h);}).catch(function(){HIST[j.k]=null;})
+      .then(function(){ATIVOS--; clearTimeout(redes); redes=setTimeout(desenha,400); proxima();}); })(FILA.shift()); }
+}
+function hist(v,r){
+  var k=v+"|"+r.b; if(HIST[k]!==undefined) return HIST[k];
+  if(window.SNAP||!r.sym){HIST[k]=null; return null;}
+  HIST[k]="p"; FILA.push({k:k,v:v,r:r}); proxima(); return "p";
+}
+
+var URLS={
+  binance:function(b){return "https://www.binance.com/en/futures/"+b+"USDT";},
+  bybit:function(b){return "https://www.bybit.com/trade/usdt/"+b+"USDT";},
+  okx:function(b){return "https://www.okx.com/trade-swap/"+b.toLowerCase()+"-usdt-swap";},
+  bitget:function(b){return "https://www.bitget.com/futures/usdt/"+b+"USDT";},
+  gate:function(b){return "https://www.gate.com/futures/USDT/"+b+"_USDT";},
+  hyper:function(b){return "https://app.hyperliquid.xyz/trade/"+b;},
+  dydx:function(b){return "https://dydx.trade/trade/"+b+"-USD";}
+};
+var DEX={hyper:1,dydx:1};
+function pct(v,casas){return (v>=0?"+":"")+(v*100).toLocaleString("pt-BR",{minimumFractionDigits:casas==null?1:casas,maximumFractionDigits:casas==null?1:casas})+"%";}
+function usd(v,c){return v.toLocaleString("pt-BR",{minimumFractionDigits:c==null?2:c,maximumFractionDigits:c==null?2:c});}
+function cls(v){return v>0?"pos":v<0?"neg":"";}
+function el(tag,c,txt){var e=document.createElement(tag); if(c) e.className=c; if(txt!=null) e.textContent=txt; return e;}
+function cel(tr,txt,c){var td=el("td",c,txt); tr.appendChild(td); return td;}
+function dias(custo,apr){ if(!(apr>0)) return "–"; var d=custo*365/apr; return d>999?"mais de 999":usd(d,1); }
+function hOk(h){return h&&h!=="p";}
+function txtM(h,campo){ if(h==="p") return "…"; if(!h||h[campo]==null) return "–"; return pct(h[campo]); }
+function kv(dl,k,v,c){dl.appendChild(el("dt",null,k)); dl.appendChild(el("dd",c,v));}
+function res(box,rot,val,c){var d=el("div"); d.appendChild(el("span","rot",rot)); d.appendChild(el("b",c,val)); box.appendChild(d);}
+
+function linhaOrdem(n,tipo,verbo,valor,ativo,oque,onde,link,extra){
+  var d=el("div","ordemL"); d.appendChild(el("span","num",String(n)));
+  var t=el("div","otxt"); var l1=el("div","o1"); l1.appendChild(el("span","acao "+tipo,verbo)); l1.appendChild(document.createTextNode(" US$ "+usd(valor)+" de "+ativo)); t.appendChild(l1);
+  t.appendChild(el("div","oque",oque+(extra?" · "+extra:""))); d.appendChild(t);
+  if(link){var a=el("a","abrir",onde); a.href=link; a.target="_blank"; a.rel="noopener"; d.appendChild(a);} else d.appendChild(el("span","abrir sem",onde));
+  return d;
+}
+function ficha(n,ativo,liq,ganho,custo,anual,cap,ordens,taxas){
+  var f=el("article","ficha"), t=el("div","ftopo"), esq=el("div");
+  esq.appendChild(el("span","ordem",(n<10?"0":"")+n)); esq.appendChild(el("span","ativo",ativo)); t.appendChild(esq);
+  t.appendChild(el("span","selo "+(liq>0?"bom":"ruim"),liq>0?"Positivo em 30 dias":"Não paga as taxas em 30 dias")); f.appendChild(t);
+  var r=el("div","liq"); r.appendChild(el("span","rot","Resultado líquido estimado em 30 dias"));
+  r.appendChild(el("b",cls(liq),(liq>=0?"+ ":"− ")+"US$ "+usd(Math.abs(liq),Math.abs(liq)<1?3:2)));
+  r.appendChild(el("p","sub","Funding US$ "+usd(ganho,ganho<1?3:2)+" menos taxas de entrada e saída US$ "+usd(custo,custo<1?3:2)+". Mantido por um ano, o funding equivale a "+pct(anual)+" sobre os US$ "+usd(cap,0)+"."));
+  f.appendChild(r);
+  var o=el("div","ordens"); ordens.forEach(function(x){o.appendChild(x);}); f.appendChild(o);
+  var d=el("details"); d.appendChild(el("summary",null,"Ver as taxas de funding")); var tb=el("table"), th=el("tr");
+  ["Onde","Agora","7 dias","30 dias"].forEach(function(h){th.appendChild(el("th",null,h));}); tb.appendChild(th);
+  taxas.forEach(function(x){var tr=el("tr"); cel(tr,x[0],"txt"); cel(tr,pct(x[1]),cls(x[1])); cel(tr,x[2]==null?"–":pct(x[2])); cel(tr,x[3]==null?"–":pct(x[3])); tb.appendChild(tr);});
+  var sc=el("div","scroll"); sc.appendChild(tb); d.appendChild(sc); f.appendChild(d); return f;
+}
+function aviso(box,msg){box.appendChild(el("div","box sub",msg));}
+
+function desenha(){
+  var cap=Math.max(0,+$("capital").value||0), L=+$("alav").value, minVol=+$("vol").value, q=$("busca").value.trim().toUpperCase();
+  var porAtivo={}, total=0, prontos=0;
+  Object.keys(DATA).forEach(function(v){DATA[v].forEach(function(r,b){ if(r.vol<minVol) return; var h=hist(v,r); total++; if(h!=="p") prontos++; if(q&&b.indexOf(q)<0) return; (porAtivo[b]=porAtivo[b]||[]).push({v:v,r:r,h:h}); });});
+  var carregando=prontos<total;
+  function ok(x){return hOk(x.h)&&x.h.a30!=null;}
+
+  // Entre corretoras: ordena pela média de 30 dias e exige que a diferença de agora também seja positiva
+  var cruz=[];
+  Object.keys(porAtivo).forEach(function(b){
+    var l=porAtivo[b].filter(ok); if(l.length<2) return;
+    l.sort(function(a,c){return c.h.a30-a.h.a30;}); var hi=l[0], lo=l[l.length-1], d30=hi.h.a30-lo.h.a30, agora=hi.r.apr-lo.r.apr;
+    if(d30>0&&agora>0) cruz.push({b:b,hi:hi,lo:lo,d30:d30});
+  });
+  cruz.sort(function(a,c){return c.d30-a.d30;});
+  var box=$("f-cruz"); box.textContent=""; var N=cap*L/2;
+  cruz.slice(0,10).forEach(function(x,i){ var ganho=N*x.d30*30/365, custo=N*0.002;
+    box.appendChild(ficha(i+1,x.b,ganho-custo,ganho,custo,x.d30*L/2,cap,[
+      linhaOrdem(1,"venda","Vender",N,x.b,"Futuro perpétuo, posição vendida",NOME[x.hi.v],URLS[x.hi.v](x.b),"margem US$ "+usd(cap/2)),
+      linhaOrdem(2,"compra","Comprar",N,x.b,"Futuro perpétuo, posição comprada",NOME[x.lo.v],URLS[x.lo.v](x.b),"margem US$ "+usd(cap/2))
+    ],[[NOME[x.hi.v]+" (vendido)",x.hi.r.apr,x.hi.h.a7,x.hi.h.a30],[NOME[x.lo.v]+" (comprado)",x.lo.r.apr,x.lo.h.a7,x.lo.h.a30]]));
+  });
+  if(!cruz.length) aviso(box,carregando?"Carregando o histórico de 30 dias…":"Nenhuma diferença positiva agora e em 30 dias com esse filtro.");
+
+  // À vista + futuro
+  var spot=[];
+  Object.keys(porAtivo).forEach(function(b){porAtivo[b].forEach(function(x){ if(ok(x)&&x.h.a30>0&&x.r.apr>0) spot.push({b:b,x:x}); });});
+  spot.sort(function(a,c){return c.x.h.a30-a.x.h.a30;});
+  box=$("f-spot"); box.textContent=""; var Ns=cap*L/(L+1);
+  spot.slice(0,10).forEach(function(s,i){ var x=s.x, ganho=Ns*x.h.a30*30/365, custo=Ns*0.003;
+    box.appendChild(ficha(i+1,s.b,ganho-custo,ganho,custo,x.h.a30*L/(L+1),cap,[
+      linhaOrdem(1,"compra","Comprar",Ns,s.b,"Mercado à vista (spot)",DEX[x.v]?"Outra corretora":NOME[x.v],null,null),
+      linhaOrdem(2,"venda","Vender",Ns,s.b,"Futuro perpétuo, posição vendida",NOME[x.v],URLS[x.v](s.b),"margem US$ "+usd(Ns/L))
+    ],[[NOME[x.v]+" (vendido)",x.r.apr,x.h.a7,x.h.a30]]));
+  });
+  if(!spot.length) aviso(box,carregando?"Carregando o histórico de 30 dias…":"Nenhum funding positivo agora e em 30 dias com esse filtro.");
+
+  // Matriz
+  var th=$("th-matriz"); th.textContent=""; var trh=el("tr"); trh.appendChild(el("th",null,"Ativo"));
+  VENUES.forEach(function(v){trh.appendChild(el("th",null,v[1]));}); th.appendChild(trh);
+  var ativos=Object.keys(porAtivo).map(function(b){var t=0,mx=-Infinity,mn=Infinity; porAtivo[b].forEach(function(x){t+=x.r.vol; mx=Math.max(mx,x.r.apr); mn=Math.min(mn,x.r.apr);}); return {b:b,t:t,mx:mx,mn:mn};})
+    .sort(function(a,c){return MORD==="maior"?c.mx-a.mx:MORD==="menor"?a.mn-c.mn:c.t-a.t;}).slice(0,60);
+  var tb=$("tb-matriz"); tb.textContent="";
+  ativos.forEach(function(a){var tr=el("tr"); cel(tr,a.b);
+    VENUES.forEach(function(v){var r=DATA[v[0]]&&DATA[v[0]].get(a.b); if(r&&r.vol>=minVol) cel(tr,pct(r.apr),cls(r.apr)); else cel(tr,"–","vazio");}); tb.appendChild(tr);});
+}
+
+var MORD="vol";
+document.querySelectorAll(".ordbot button").forEach(function(b){b.addEventListener("click",function(){ MORD=b.dataset.mord;
+  document.querySelectorAll(".ordbot button").forEach(function(o){o.setAttribute("aria-pressed",o===b?"true":"false");}); desenha(); });});
+function iniciar(){
+  if(window.SNAP){
+    DATA={}; STATUS={};
+    SNAP.rows.forEach(function(x){ if(!DATA[x[0]]) DATA[x[0]]=new Map(); DATA[x[0]].set(x[1],{b:x[1],apr:x[2]/100,vol:x[3]*1e6}); HIST[x[0]+"|"+x[1]]=(x[4]==null&&x[5]==null)?null:{a7:x[4]==null?null:x[4]/100,a30:x[5]==null?null:x[5]/100}; });
+    $("recarregar").hidden=true;
+    Array.prototype.slice.call($("vol").options).forEach(function(o){ if(+o.value<5e7) o.remove(); });
+    $("atualizado").textContent="Retrato das taxas em "+new Date(SNAP.t).toLocaleString("pt-BR")+". Não atualiza sozinho; a versão ao vivo é o arquivo do notebook.";
+    desenha(); return;
+  }
+  if(!Object.keys(DATA).length) $("atualizado").textContent="Buscando taxas…";
+  var pend=VENUES.length;
+  VENUES.forEach(function(v){
+    LOAD[v[0]]().then(function(rows){var m=new Map(); rows.forEach(function(r){ if(r&&(!m.has(r.b)||m.get(r.b).vol<r.vol)) m.set(r.b,r); }); DATA[v[0]]=m;})
+      .catch(function(){})
+      .then(function(){pend--; desenha(); if(!pend){var ok=Object.keys(DATA).length; $("atualizado").textContent=ok?"Taxas ao vivo, atualizadas em "+new Date().toLocaleString("pt-BR")+". Atualiza sozinho a cada minuto.":"Nenhuma fonte respondeu. Confira a internet e atualize.";}});
+  });
+}
+["capital","alav","vol","busca"].forEach(function(id){$(id).addEventListener("input",desenha);});
+document.querySelectorAll(".abas button").forEach(function(b){b.addEventListener("click",function(){
+  document.querySelectorAll(".abas button").forEach(function(o){o.setAttribute("aria-selected",o===b?"true":"false"); $("aba-"+o.dataset.aba).hidden=o!==b;});});});
+$("recarregar").addEventListener("click",iniciar);
+iniciar();
+if(!window.SNAP){ setInterval(iniciar,60000); setInterval(function(){HIST={};},3600000); }
+</script>
+</body>
+</html>
