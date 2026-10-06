@@ -129,17 +129,26 @@ button.aula.atual{border-color:var(--accent);font-weight:600}
 .video{position:relative;aspect-ratio:16/9;max-width:100%;background:var(--soft);border-radius:3px;overflow:hidden}
 .video iframe{position:absolute;inset:0;width:100%;height:100%;border:0}
 .semvideo{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;color:var(--muted);padding:16px;text-align:center}
+textarea{font:400 15px var(--sans);padding:9px;border:1px solid var(--line);border-radius:3px;background:var(--bg);color:var(--fg);width:100%;max-width:100%;resize:vertical}
+.admmod{margin:18px 0 6px;padding-top:12px;border-top:1px solid var(--line)}
+#com-lista li span:not(.meta){white-space:pre-wrap;overflow-wrap:anywhere}
+.pilha{display:flex;height:16px;border-radius:2px;overflow:hidden;background:var(--soft);margin:12px 0 4px}
+.pilha i{display:block;height:100%}
+.ponto{display:inline-block;width:10px;height:10px;border-radius:2px;margin-right:8px;vertical-align:baseline}
+input.pm{width:110px;padding:4px 6px;text-align:right}
 .rodape{font-size:12px;color:var(--muted);border-top:1px solid var(--line);padding-top:14px}
 </style>
 </head>
 <body>
 <header class="faixa"><div class="in">
   <div>
+    <div class="marca" id="marca" hidden></div>
     <nav class="areas" id="areas" aria-label="Áreas do painel">
       <button type="button" data-area="carteira" aria-current="page">Carteira</button>
       <button type="button" data-area="mercado" aria-current="false">Mercado</button>
       <button type="button" data-area="funding" aria-current="false">Funding</button>
       <button type="button" data-area="aulas" aria-current="false">Aulas</button>
+      <button type="button" data-area="admin" aria-current="false" id="bt-admin" hidden>Administração</button>
     </nav>
     <h1 id="titulo">Minha Carteira</h1>
     <p id="cart-status">Buscando preços…</p>
@@ -156,6 +165,11 @@ button.aula.atual{border-color:var(--accent);font-weight:600}
 <div class="in"><p id="conta-msg" hidden></p></div></header>
 <main>
   <div id="area-carteira" class="area">
+    <div class="ordbot" role="group" aria-label="Moeda de exibição da carteira" style="margin-top:0">
+      <button type="button" data-ver="USD" aria-pressed="true">Ver em dólar</button>
+      <button type="button" data-ver="BRL" aria-pressed="false">Ver em reais</button>
+      <span class="sub" id="c-cambio" style="align-self:center"></span>
+    </div>
     <div class="abas" role="tablist" id="cabas">
       <button type="button" role="tab" data-cj="resumo" aria-selected="true">Resumo</button>
       <button type="button" role="tab" data-cj="posicoes" aria-selected="false">Posições</button>
@@ -181,22 +195,30 @@ button.aula.atual{border-color:var(--accent);font-weight:600}
           <div class="box"><h2>Maiores valorizações</h2><div class="scroll"><table><thead><tr><th>Ativo</th><th>Preço médio</th><th>Preço atual</th><th>Resultado</th></tr></thead><tbody id="c-altas"></tbody></table></div></div>
           <div class="box"><h2>Maiores quedas</h2><div class="scroll"><table><thead><tr><th>Ativo</th><th>Preço médio</th><th>Preço atual</th><th>Resultado</th></tr></thead><tbody id="c-baixas"></tbody></table></div></div>
         </div>
-        <div class="box" style="margin-top:20px"><h2>Distribuição da carteira</h2><div id="c-aloc"></div></div>
+        <div class="box" style="margin-top:20px">
+          <h2>Carteira por classe de ativo</h2>
+          <div class="pilha" id="c-pilha" role="img" aria-label="Participação de cada classe na carteira"></div>
+          <div class="scroll"><table><thead><tr><th>Classe</th><th>Ativos</th><th>Investido</th><th>Valor atual</th><th>Resultado</th><th>Resultado %</th><th>Peso</th></tr></thead><tbody id="c-classes"></tbody></table></div>
+        </div>
+        <div class="box" style="margin-top:20px"><h2>Distribuição por ativo</h2><div id="c-aloc"></div></div>
       </div>
     </section>
 
     <section id="cj-posicoes" class="box" hidden>
       <h2>Posições abertas</h2>
-      <p class="sub">Preço médio ponderado das compras. Clique em um ativo para ver as compras dele.</p>
-      <div class="scroll"><table><thead><tr><th>Ativo</th><th>Quantidade</th><th>Preço médio</th><th>Preço atual</th><th>24h</th><th>Investido</th><th>Valor atual</th><th>Resultado (US$)</th><th>Resultado</th><th>Peso</th></tr></thead><tbody id="c-pos"></tbody></table></div>
+      <p class="sub">Preço médio ponderado das compras. Clique em um ativo para ver as compras dele. Cripto e DeFi usam o preço da Binance; nas outras classes, digite o preço atual na própria tabela.</p>
+      <div class="scroll"><table><thead><tr><th>Ativo</th><th>Classe</th><th>Quantidade</th><th>Preço médio</th><th>Preço atual</th><th>24h</th><th>Investido</th><th>Valor atual</th><th>Resultado</th><th>Resultado %</th><th>Peso</th></tr></thead><tbody id="c-pos"></tbody></table></div>
     </section>
 
     <section id="cj-lanc" hidden>
       <form class="box controles" id="c-form">
         <label>Ativo<input id="f-ativo" type="text" placeholder="BTC" required maxlength="12"></label>
+        <label>Classe<select id="f-classe"><option value="cripto">Cripto</option><option value="defi">DeFi</option><option value="rv">Renda variável tradicional</option><option value="rf">Renda fixa</option><option value="outros">Outros</option></select></label>
         <label>Operação<select id="f-tipo"><option value="compra">Compra</option><option value="venda">Venda</option></select></label>
         <label>Quantidade<input id="f-qtd" type="number" step="any" min="0" required placeholder="0,05"></label>
-        <label>Preço unitário (US$)<input id="f-preco" type="number" step="any" min="0" required placeholder="85000"></label>
+        <label>Moeda da compra<select id="f-moeda"><option value="USD">Dólar (US$)</option><option value="BRL">Real (R$)</option></select></label>
+        <label><span id="f-preco-rot">Preço unitário (US$)</span><input id="f-preco" type="number" step="any" min="0" required placeholder="85000"></label>
+        <label>Dólar no dia (R$)<input id="f-cambio" type="number" step="any" min="0" required placeholder="5,40"></label>
         <label>Data<input id="f-data" type="date" required></label>
         <button type="submit" id="f-salvar">Adicionar</button>
         <button type="button" id="f-cancelar" class="sec" hidden>Cancelar edição</button>
@@ -205,7 +227,7 @@ button.aula.atual{border-color:var(--accent);font-weight:600}
       <div class="box" style="margin-top:14px">
         <h2>Lançamentos</h2>
         <p class="sub" id="c-filtro" hidden></p>
-        <div class="scroll"><table><thead><tr><th>Data</th><th>Ativo</th><th>Operação</th><th>Quantidade</th><th>Preço (US$)</th><th>Total (US$)</th><th></th></tr></thead><tbody id="c-lanc"></tbody></table></div>
+        <div class="scroll"><table><thead><tr><th>Data</th><th>Ativo</th><th>Operação</th><th>Quantidade</th><th>Preço pago</th><th>Total pago</th><th>Dólar no dia</th><th></th></tr></thead><tbody id="c-lanc"></tbody></table></div>
         <p style="margin-top:14px"><button type="button" id="c-exportar" class="sec">Salvar cópia de segurança</button> <label class="arq sec">Restaurar cópia<input type="file" id="c-importar" accept="application/json,.json" hidden></label></p>
       </div>
       <p class="aviso" id="c-migrar" hidden><span id="c-migrar-txt"></span> <button type="button" id="c-migrar-ok" class="sec">Enviar para a minha conta</button></p>
@@ -270,6 +292,54 @@ button.aula.atual{border-color:var(--accent);font-weight:600}
         <h2 id="au-titulo" style="margin-top:14px"></h2>
         <p class="sub" id="au-desc"></p>
         <p style="margin-top:12px"><button type="button" id="au-feito" class="sec">Marcar como assistida</button> <button type="button" id="au-prox">Próxima aula</button></p>
+        <h2 style="margin-top:24px;font-size:17px">Comentários</h2>
+        <p class="sub" id="com-aviso"></p>
+        <ul class="nots" id="com-lista"></ul>
+        <form id="com-form" hidden style="margin-top:12px"><label for="com-texto" class="so-leitor">Seu comentário</label><textarea id="com-texto" rows="3" maxlength="2000" placeholder="Escreva um comentário sobre esta aula" required></textarea><p style="margin-top:8px"><button type="submit">Publicar comentário</button></p></form>
+      </div>
+    </div>
+  </div>
+
+  <div id="area-admin" class="area" hidden>
+    <div class="box" id="adm-negado"><h2>Área do administrador</h2><p class="sub">Só a conta de administrador abre esta área.</p></div>
+    <div id="adm-painel" hidden>
+      <div class="kpis">
+        <div class="kpi"><span class="rot">Usuários</span><b id="adm-n">–</b></div>
+        <div class="kpi"><span class="rot">Assinantes</span><b id="adm-ass">–</b></div>
+        <div class="kpi"><span class="rot">Gratuitos</span><b id="adm-gra">–</b></div>
+        <div class="kpi"><span class="rot">Administradores</span><b id="adm-adm">–</b></div>
+      </div>
+      <div class="box" style="margin-top:20px">
+        <h2>Usuários e acesso</h2>
+        <p class="sub">Mude o plano para liberar ou retirar o acesso. A mudança vale na próxima vez que a pessoa abrir o site.</p>
+        <div class="controles" style="margin:10px 0"><label>Buscar e-mail<input id="adm-busca" type="text" placeholder="nome@…"></label></div>
+        <div class="scroll"><table><thead><tr><th>E-mail</th><th>Cadastro</th><th>Plano</th></tr></thead><tbody id="adm-tb"></tbody></table></div>
+        <p class="neg" id="adm-erro" hidden style="margin-top:8px"></p>
+      </div>
+      <div class="box" style="margin-top:20px">
+        <h2>Nome do site</h2>
+        <form class="controles" id="adm-nome-form" style="margin-top:10px"><label>Nome que aparece no topo e na aba do navegador<input id="adm-nome" type="text" maxlength="40" style="width:260px"></label><button type="submit">Salvar nome</button></form>
+      </div>
+      <div class="box" style="margin-top:20px">
+        <h2>Módulos e aulas</h2>
+        <p class="sub">O que você salvar aqui aparece na área Aulas para todos.</p>
+        <form class="controles" id="adm-mod-form" style="margin:12px 0">
+          <label>Módulo<input id="am-titulo" type="text" required maxlength="80" placeholder="Título do módulo" style="width:220px"></label>
+          <label>Descrição<input id="am-desc" type="text" maxlength="200" style="width:220px"></label>
+          <label>Ordem<input id="am-ordem" type="number" value="1" style="width:80px"></label>
+          <button type="submit" id="am-salvar">Adicionar módulo</button><button type="button" class="sec" id="am-cancelar" hidden>Cancelar</button>
+        </form>
+        <form class="controles" id="adm-aula-form" style="margin:12px 0">
+          <label>Aula do módulo<select id="aa-mod" required style="width:200px"></select></label>
+          <label>Título da aula<input id="aa-titulo" type="text" required maxlength="120" style="width:220px"></label>
+          <label>Link ou código do YouTube<input id="aa-yt" type="text" maxlength="200" style="width:220px"></label>
+          <label>Duração<input id="aa-dur" type="text" maxlength="12" placeholder="12 min" style="width:90px"></label>
+          <label>Ordem<input id="aa-ordem" type="number" value="1" style="width:80px"></label>
+          <label>Descrição<input id="aa-desc" type="text" maxlength="500" style="width:300px"></label>
+          <button type="submit" id="aa-salvar">Adicionar aula</button><button type="button" class="sec" id="aa-cancelar" hidden>Cancelar</button>
+        </form>
+        <p class="neg" id="adm-c-erro" hidden></p>
+        <div id="adm-conteudo"></div>
       </div>
     </div>
   </div>
@@ -633,16 +703,30 @@ function cLer(){ try{ var j=JSON.parse(localStorage.getItem(CHAVE)); if(j&&Array
 function cGravar(){ if(typeof USUARIO!=="undefined"&&USUARIO) return true; try{ localStorage.setItem(CHAVE,JSON.stringify(CART)); return true; }catch(e){ return false; } }
 function num(v,c){ return v.toLocaleString("pt-BR",{maximumFractionDigits:c==null?8:c}); }
 function prc(p){ return p==null?"sem preço":p>0&&p<0.01?p.toLocaleString("pt-BR",{maximumSignificantDigits:4}):usd(p,p<1?4:2); }
-function precoDe(a){ if(a==="USDT"||a==="USDC") return {p:1,v:0}; return PRECOS[a]||null; }
+var VER="USD", DOLAR=null;
+try{ if(localStorage.getItem("carteira_ver")==="BRL") VER="BRL"; }catch(e){}
+function simb(){ return VER==="BRL"?"R$ ":"US$ "; }
+function fat(){ return VER==="BRL"&&DOLAR?DOLAR:1; }
+function sinalC(v){ return (v>=0?"+ ":"− ")+simb()+usd(Math.abs(v),2); }
+function precoL(l){ return VER==="BRL"?l.preco*(l.cambio||DOLAR||1):l.preco; }   // preço do lançamento na moeda de exibição
+var CLASSES={cripto:["Cripto","--s1"],defi:["DeFi","--s3"],rv:["Renda variável tradicional","--s2"],rf:["Renda fixa","--s4"],outros:["Outros","--s5"]};
+function precoPos(p){   // preço atual da posição: Binance para cripto/DeFi; senão o preço digitado; senão o preço médio
+  var auto=(p.classe==="cripto"||p.classe==="defi")?precoDe(p.ativo):null; if(auto) return auto;
+  var man=CART.manual&&CART.manual[p.ativo]; if(man!=null) return {p:man*fat(),v:null,manual:true};
+  if(p.classe!=="cripto"&&p.classe!=="defi") return {p:p.custo/p.qtd,v:null,manual:true,semPreco:true};
+  return null;
+}
+function precoDe(a){ var f=fat(); if(a==="USDT"||a==="USDC") return {p:f,v:0}; var x=PRECOS[a]; return x?{p:x.p*f,v:x.v}:null; }
 function posicoes(){
   var m={};
   CART.lanc.slice().sort(function(a,b){return a.data<b.data?-1:a.data>b.data?1:a.id-b.id;}).forEach(function(l){
-    var p=m[l.ativo]||(m[l.ativo]={ativo:l.ativo,qtd:0,custo:0,real:0});
-    if(l.tipo==="compra"){ p.qtd+=l.qtd; p.custo+=l.qtd*l.preco; }
-    else { var q=Math.min(l.qtd,p.qtd), pm=p.qtd>0?p.custo/p.qtd:0; p.real+=(l.preco-pm)*q; p.custo-=pm*q; p.qtd-=q; }
+    var p=m[l.ativo]||(m[l.ativo]={ativo:l.ativo,qtd:0,custo:0,real:0}); p.classe=l.classe||"cripto";
+    var pl=precoL(l);
+    if(l.tipo==="compra"){ p.qtd+=l.qtd; p.custo+=l.qtd*pl; }
+    else { var q=Math.min(l.qtd,p.qtd), pm=p.qtd>0?p.custo/p.qtd:0; p.real+=(pl-pm)*q; p.custo-=pm*q; p.qtd-=q; }
   });
   var lista=[], real=0, total=0;
-  Object.keys(m).forEach(function(k){ var p=m[k]; real+=p.real; if(p.qtd>1e-12){ var x=precoDe(k); p.pm=p.custo/p.qtd; p.preco=x?x.p:null; p.var24=x?x.v:null; p.valor=x?p.qtd*x.p:null; p.lp=x?p.valor-p.custo:null; p.lpp=x&&p.custo>0?p.lp/p.custo:null; if(p.valor!=null) total+=p.valor; lista.push(p); } });
+  Object.keys(m).forEach(function(k){ var p=m[k]; real+=p.real; if(p.qtd>1e-12){ var x=precoPos(p); p.manual=!!(x&&x.manual); p.semPreco=!!(x&&x.semPreco); p.pm=p.custo/p.qtd; p.preco=x?x.p:null; p.var24=x?x.v:null; p.valor=x?p.qtd*x.p:null; p.lp=x?p.valor-p.custo:null; p.lpp=x&&p.custo>0?p.lp/p.custo:null; if(p.valor!=null) total+=p.valor; lista.push(p); } });
   lista.forEach(function(p){ p.peso=p.valor!=null&&total>0?p.valor/total:null; });
   lista.sort(function(a,b){return (b.valor||0)-(a.valor||0);});
   return {lista:lista,real:real,total:total};
@@ -654,33 +738,46 @@ function cDesenha(){
   $("c-vazio").hidden=tem; $("c-cheio").hidden=!tem; $("c-aviso-ex").hidden=!CART.exemplo;
   var inv=0, d24=0, comPreco=0; L.forEach(function(p){ if(p.valor!=null){ inv+=p.custo; comPreco++; if(p.var24!=null) d24+=p.valor-p.valor/(1+p.var24); } });
   var lp=r.total-inv;
-  $("k-valor").textContent="US$ "+usd(r.total); $("k-inv").textContent="US$ "+usd(inv);
-  $("k-lp").textContent=sinal(lp,2); $("k-lp").className=cls(lp); $("k-lpp").textContent=inv>0?pct(lp/inv):"";
-  $("k-24").textContent=sinal(d24,2); $("k-24").className=cls(d24);
-  $("k-real").textContent=sinal(r.real,2); $("k-real").className=cls(r.real);
+  $("k-valor").textContent=simb()+usd(r.total); $("k-inv").textContent=simb()+usd(inv);
+  document.querySelectorAll("[data-ver]").forEach(function(b){b.setAttribute("aria-pressed",b.dataset.ver===VER?"true":"false");});
+  $("c-cambio").textContent=DOLAR?"Dólar agora: R$ "+usd(DOLAR,4)+(VER==="BRL"?". O custo de cada compra usa o dólar do dia informado no lançamento.":""):"";
+  $("k-lp").textContent=sinalC(lp); $("k-lp").className=cls(lp); $("k-lpp").textContent=inv>0?pct(lp/inv):"";
+  $("k-24").textContent=sinalC(d24); $("k-24").className=cls(d24);
+  $("k-real").textContent=sinalC(r.real); $("k-real").className=cls(r.real);
   var ord=L.filter(function(p){return p.lpp!=null;}).sort(function(a,b){return b.lpp-a.lpp;});
   var ta=$("c-altas"), tq=$("c-baixas"); ta.textContent=""; tq.textContent="";
   var altas=ord.filter(function(p){return p.lpp>0;}).slice(0,5), baixas=ord.filter(function(p){return p.lpp<0;}).reverse().slice(0,5);
   altas.forEach(function(p){linhaMov(ta,p);}); baixas.forEach(function(p){linhaMov(tq,p);});
   if(!altas.length) semLinhas(ta,4,"Nenhuma posição no lucro agora."); if(!baixas.length) semLinhas(tq,4,"Nenhuma posição no prejuízo agora.");
+  var porC={}; L.forEach(function(p){ if(p.valor==null) return; var c=porC[p.classe]||(porC[p.classe]={n:0,custo:0,valor:0}); c.n++; c.custo+=p.custo; c.valor+=p.valor; });
+  var pilha=$("c-pilha"), tc=$("c-classes"); pilha.textContent=""; tc.textContent="";
+  Object.keys(CLASSES).filter(function(k){return porC[k];}).sort(function(a,b){return porC[b].valor-porC[a].valor;}).forEach(function(k){ var c=porC[k], peso=r.total>0?c.valor/r.total:0, res=c.valor-c.custo;
+    var seg=el("i"); seg.style.width=(peso*100)+"%"; seg.style.background="var("+CLASSES[k][1]+")"; seg.title=CLASSES[k][0]+" "+usd(peso*100,1)+"%"; pilha.appendChild(seg);
+    var tr=el("tr"), td=cel(tr,"","txt"), pt=el("span","ponto"); pt.style.background="var("+CLASSES[k][1]+")"; td.appendChild(pt); td.appendChild(document.createTextNode(CLASSES[k][0]));
+    cel(tr,String(c.n)); cel(tr,simb()+usd(c.custo)); cel(tr,simb()+usd(c.valor)); cel(tr,sinalC(res),cls(res)); cel(tr,c.custo>0?pct(res/c.custo):"–",cls(res)); cel(tr,usd(peso*100,1)+"%"); tc.appendChild(tr); });
+  if(!tc.children.length) semLinhas(tc,7,"Sem posições com preço para agrupar.");
   var al=$("c-aloc"); al.textContent="";
-  L.forEach(function(p){ if(p.peso==null) return; var d=el("div","barra"); d.appendChild(el("span","bn",p.ativo)); var t=el("span","bt"); var f=el("i"); f.style.width=Math.max(1,p.peso*100)+"%"; t.appendChild(f); d.appendChild(t); d.appendChild(el("span","bv",usd(p.peso*100,1)+"%  ·  US$ "+usd(p.valor))); al.appendChild(d); });
+  L.forEach(function(p){ if(p.peso==null) return; var d=el("div","barra"); d.appendChild(el("span","bn",p.ativo)); var t=el("span","bt"); var f=el("i"); f.style.width=Math.max(1,p.peso*100)+"%"; t.appendChild(f); d.appendChild(t); d.appendChild(el("span","bv",usd(p.peso*100,1)+"%  ·  "+simb()+usd(p.valor))); al.appendChild(d); });
 
   var tb=$("c-pos"); tb.textContent="";
   L.forEach(function(p){ var tr=el("tr"); var td=cel(tr,""); var b=el("button","lnk",p.ativo); b.type="button"; b.addEventListener("click",function(){FILTRO=p.ativo; janela("lanc"); cDesenha();}); td.appendChild(b);
-    cel(tr,num(p.qtd)); cel(tr,prc(p.pm)); cel(tr,prc(p.preco)); cel(tr,p.var24==null?"–":pct(p.var24),p.var24==null?"vazio":cls(p.var24)); cel(tr,usd(p.custo));
-    cel(tr,p.valor==null?"–":usd(p.valor)); cel(tr,p.lp==null?"–":sinal(p.lp,2),p.lp==null?"vazio":cls(p.lp)); cel(tr,p.lpp==null?"–":pct(p.lpp),p.lpp==null?"vazio":cls(p.lpp)); cel(tr,p.peso==null?"–":usd(p.peso*100,1)+"%"); tb.appendChild(tr); });
-  if(!L.length) semLinhas(tb,10,"Nenhuma posição aberta. Cadastre uma compra em Lançamentos.");
+    cel(tr,CLASSES[p.classe][0],"txt"); cel(tr,num(p.qtd)); cel(tr,prc(p.pm));
+    if(p.manual||p.preco==null){ var tdp=cel(tr,""), inp=document.createElement("input"); inp.type="number"; inp.step="any"; inp.min="0"; inp.className="pm"; inp.setAttribute("aria-label","Preço atual de "+p.ativo+" em "+(VER==="BRL"?"reais":"dólar")); inp.placeholder=p.semPreco||p.preco==null?"digite":""; if(p.preco!=null&&!p.semPreco) inp.value=+p.preco.toFixed(6);
+      inp.addEventListener("change",function(){ var v=+inp.value; CART.manual=CART.manual||{}; if(inp.value===""||!(v>=0)) delete CART.manual[p.ativo]; else CART.manual[p.ativo]=v/fat(); cGravar(); if(typeof nuvemPreco==="function") nuvemPreco(p.ativo,CART.manual[p.ativo]); cDesenha(); }); tdp.appendChild(inp); }
+    else cel(tr,prc(p.preco));
+    cel(tr,p.var24==null?"–":pct(p.var24),p.var24==null?"vazio":cls(p.var24)); cel(tr,usd(p.custo));
+    cel(tr,p.valor==null?"–":usd(p.valor)); cel(tr,p.lp==null?"–":sinalC(p.lp),p.lp==null?"vazio":cls(p.lp)); cel(tr,p.lpp==null?"–":pct(p.lpp),p.lpp==null?"vazio":cls(p.lpp)); cel(tr,p.peso==null?"–":usd(p.peso*100,1)+"%"); tb.appendChild(tr); });
+  if(!L.length) semLinhas(tb,11,"Nenhuma posição aberta. Cadastre uma compra em Lançamentos.");
 
   var tl=$("c-lanc"); tl.textContent="";
   var ls=CART.lanc.filter(function(l){return !FILTRO||l.ativo===FILTRO;}).sort(function(a,b){return a.data<b.data?1:a.data>b.data?-1:b.id-a.id;});
   $("c-filtro").hidden=!FILTRO; $("c-filtro").textContent=""; if(FILTRO){ $("c-filtro").appendChild(document.createTextNode("Mostrando só "+FILTRO+". ")); var bf=el("button","lnk","Mostrar todos"); bf.type="button"; bf.addEventListener("click",function(){FILTRO=null; cDesenha();}); $("c-filtro").appendChild(bf); }
-  ls.forEach(function(l){ var tr=el("tr"); cel(tr,l.data.split("-").reverse().join("/")); cel(tr,l.ativo); cel(tr,l.tipo==="compra"?"Compra":"Venda","txt "+(l.tipo==="compra"?"pos":"neg")); cel(tr,num(l.qtd)); cel(tr,prc(l.preco)); cel(tr,usd(l.qtd*l.preco));
+  ls.forEach(function(l){ var tr=el("tr"); cel(tr,l.data.split("-").reverse().join("/")); cel(tr,l.ativo); cel(tr,l.tipo==="compra"?"Compra":"Venda","txt "+(l.tipo==="compra"?"pos":"neg")); cel(tr,num(l.qtd)); var orig=l.moeda==="BRL"?l.preco*(l.cambio||DOLAR||1):l.preco, sm=l.moeda==="BRL"?"R$ ":"US$ "; cel(tr,sm+prc(orig)); cel(tr,sm+usd(l.qtd*orig)); cel(tr,l.cambio?usd(l.cambio,4):"–",l.cambio?"":"vazio");
     var td=cel(tr,"","txt"); var be=el("button","lnk","Editar"); be.type="button"; be.addEventListener("click",function(){editar(l);}); td.appendChild(be); td.appendChild(document.createTextNode("  "));
     var br=el("button","lnk neg","Remover"); br.type="button"; br.addEventListener("click",function(){ if(br.dataset.ok){ CART.lanc=CART.lanc.filter(function(x){return x.id!==l.id;}); nuvem("remove",l).catch(nuvemFalhou); cGravar(); cDesenha(); } else { br.dataset.ok="1"; br.textContent="Confirmar remoção"; } }); td.appendChild(br); tl.appendChild(tr); });
-  if(!ls.length) semLinhas(tl,7,"Nenhum lançamento ainda.");
+  if(!ls.length) semLinhas(tl,8,"Nenhum lançamento ainda.");
   var semPreco=L.filter(function(p){return p.preco==null;}).map(function(p){return p.ativo;});
-  $("cart-status").textContent=(Object.keys(PRECOS).length?"Preços atualizados em "+new Date().toLocaleTimeString("pt-BR")+". ":"Buscando preços… ")+(semPreco.length?"Sem preço na Binance: "+semPreco.join(", ")+".":"");
+  $("cart-status").textContent=(Object.keys(PRECOS).length?"Preços atualizados em "+new Date().toLocaleTimeString("pt-BR")+". ":"Buscando preços… ")+(semPreco.length?"Sem preço na Binance: "+semPreco.join(", ")+". ":"")+(L.some(function(p){return p.semPreco;})?"Há posições sem preço atual digitado; elas contam pelo valor investido.":"");
 }
 var VOLS={}, VFILA=[], VATIVOS=0, vredes=null;
 var MORDEM={"m-altas":{c:"v",d:-1},"m-baixas":{c:"v",d:1},"m-princ":{c:"vol",d:-1}};
@@ -709,31 +806,35 @@ function mDesenha(){
 function cPrecos(){
   getJ("https://data-api.binance.vision/api/v3/ticker/24hr").then(function(l){ var m={};
     l.forEach(function(x){ if(/USDT$/.test(x.symbol)&&+x.lastPrice>0&&+x.quoteVolume>0) m[x.symbol.slice(0,-4)]={p:+x.lastPrice,v:(+x.priceChangePercent)/100,vol:+x.quoteVolume}; });
-    PRECOS=m; cDesenha(); mDesenha(); mercResumo(); }).catch(function(){ $("cart-status").textContent="Não consegui buscar os preços. Confira a internet e clique em Atualizar."; });
+    PRECOS=m; l.forEach(function(x){ if(x.symbol==="USDTBRL"&&+x.lastPrice>0) DOLAR=+x.lastPrice; }); if(DOLAR&&!$("f-cambio").value) $("f-cambio").value=DOLAR.toFixed(4); cDesenha(); mDesenha(); mercResumo(); }).catch(function(){ $("cart-status").textContent="Não consegui buscar os preços. Confira a internet e clique em Atualizar."; });
 }
 function janela(j){ document.querySelectorAll("#cabas button").forEach(function(o){ var on=o.dataset.cj===j; o.setAttribute("aria-selected",on?"true":"false"); $("cj-"+o.dataset.cj).hidden=!on; }); }
-function editar(l){ EDIT=l.id; $("f-ativo").value=l.ativo; $("f-tipo").value=l.tipo; $("f-qtd").value=l.qtd; $("f-preco").value=l.preco; $("f-data").value=l.data; $("f-salvar").textContent="Salvar alteração"; $("f-cancelar").hidden=false; $("f-ativo").focus(); }
-function limpaForm(){ EDIT=null; $("c-form").reset(); $("f-data").value=new Date().toISOString().slice(0,10); $("f-salvar").textContent="Adicionar"; $("f-cancelar").hidden=true; $("f-erro").hidden=true; }
-var TITULOS={carteira:"Minha Carteira",mercado:"Mercado",funding:"Radar de Funding",aulas:"Aulas"};
+function editar(l){ EDIT=l.id; $("f-ativo").value=l.ativo; $("f-tipo").value=l.tipo; $("f-qtd").value=l.qtd; $("f-classe").value=l.classe||"cripto"; $("f-moeda").value=l.moeda||"USD"; $("f-cambio").value=l.cambio||(DOLAR?DOLAR.toFixed(4):""); $("f-preco").value=l.moeda==="BRL"?+(l.preco*(l.cambio||DOLAR||1)).toFixed(8):l.preco; rotPreco(); $("f-data").value=l.data; $("f-salvar").textContent="Salvar alteração"; $("f-cancelar").hidden=false; $("f-ativo").focus(); }
+function rotPreco(){ $("f-preco-rot").textContent="Preço unitário ("+($("f-moeda").value==="BRL"?"R$":"US$")+")"; }
+function limpaForm(){ EDIT=null; var mo=$("f-moeda").value, cl=$("f-classe").value; $("c-form").reset(); $("f-moeda").value=mo; $("f-classe").value=cl; rotPreco(); if(DOLAR) $("f-cambio").value=DOLAR.toFixed(4); $("f-data").value=new Date().toISOString().slice(0,10); $("f-salvar").textContent="Adicionar"; $("f-cancelar").hidden=true; $("f-erro").hidden=true; }
+var TITULOS={carteira:"Minha Carteira",mercado:"Mercado",funding:"Radar de Funding",aulas:"Aulas",admin:"Administração"};
 function area(a){ if(!TITULOS[a]) a="carteira"; Object.keys(TITULOS).forEach(function(x){ $("area-"+x).hidden=x!==a; }); document.querySelectorAll("#areas button").forEach(function(o){o.setAttribute("aria-current",o.dataset.area===a?"page":"false");});
-  $("titulo").textContent=TITULOS[a]; $("atualizado").hidden=a!=="funding"; $("cart-status").hidden=a==="funding"||a==="aulas"; try{history.replaceState(null,"","#"+a);}catch(e){} }
+  $("titulo").textContent=TITULOS[a]; $("atualizado").hidden=a!=="funding"; $("cart-status").hidden=a==="funding"||a==="aulas"||a==="admin"; if(a==="admin"&&typeof admCarrega==="function") admCarrega(); try{history.replaceState(null,"","#"+a);}catch(e){} }
 $("c-form").addEventListener("submit",function(ev){ ev.preventDefault();
-  var a=$("f-ativo").value.trim().toUpperCase().replace(/[^A-Z0-9]/g,""), q=+$("f-qtd").value, p=+$("f-preco").value, d=$("f-data").value, t=$("f-tipo").value, er=$("f-erro");
-  var msg=!a?"Informe o ativo, por exemplo BTC.":!(q>0)?"A quantidade precisa ser maior que zero.":!(p>=0)||$("f-preco").value===""?"Informe o preço unitário em dólar.":!d?"Informe a data.":"";
+  var a=$("f-ativo").value.trim().toUpperCase().replace(/[^A-Z0-9 ]/g,"").replace(/ +/g," "), q=+$("f-qtd").value, pd=+$("f-preco").value, mo=$("f-moeda").value, cb=+$("f-cambio").value, p=mo==="BRL"?(cb>0?pd/cb:NaN):pd, d=$("f-data").value, t=$("f-tipo").value, er=$("f-erro");
+  var msg=!a?"Informe o ativo, por exemplo BTC.":!(q>0)?"A quantidade precisa ser maior que zero.":!(cb>0)?"Informe a cotação do dólar no dia da operação, em reais.":!(p>=0)||$("f-preco").value===""?"Informe o preço unitário.":!d?"Informe a data.":"";
   if(!msg&&t==="venda"){ var disp=0; CART.lanc.forEach(function(l){ if(l.ativo===a&&l.id!==EDIT) disp+=l.tipo==="compra"?l.qtd:-l.qtd; }); if(q>disp+1e-9) msg="Você só tem "+num(Math.max(0,disp))+" "+a+" cadastrado para vender."; }
   if(msg){ er.textContent=msg; er.hidden=false; return; }
   if(CART.exemplo){ CART={lanc:[],exemplo:false}; }
-  var novo={id:EDIT||Date.now(),ativo:a,tipo:t,qtd:q,preco:p,data:d}, eraEdicao=!!EDIT;
+  var manAntes=CART.manual;
+  var novo={id:EDIT||Date.now(),ativo:a,tipo:t,qtd:q,preco:p,data:d,moeda:mo,cambio:cb,classe:$("f-classe").value}, eraEdicao=!!EDIT;
   if(EDIT) CART.lanc=CART.lanc.map(function(l){return l.id===EDIT?novo:l;}); else CART.lanc.push(novo);
   nuvem(eraEdicao?"altera":"novo",novo).then(function(salvo){ if(salvo.id!==novo.id){ CART.lanc=CART.lanc.map(function(l){return l.id===novo.id?salvo:l;}); cDesenha(); } }).catch(nuvemFalhou);
   if(!cGravar()){ er.textContent="Este navegador não deixou guardar os dados. O lançamento vale só até você fechar a página."; er.hidden=false; } 
   var manter=er.hidden; limpaForm(); if(!manter) er.hidden=false; cDesenha(); });
 $("f-cancelar").addEventListener("click",limpaForm);
+$("f-moeda").addEventListener("change",rotPreco);
+document.querySelectorAll("[data-ver]").forEach(function(b){b.addEventListener("click",function(){ VER=b.dataset.ver; try{localStorage.setItem("carteira_ver",VER);}catch(e){} cDesenha(); });});
 $("c-ir-lanc").addEventListener("click",function(){janela("lanc"); $("f-ativo").focus();});
-$("c-exemplo").addEventListener("click",function(){ CART={exemplo:true,lanc:[{id:1,ativo:"BTC",tipo:"compra",qtd:0.02,preco:62000,data:"2026-03-10"},{id:2,ativo:"BTC",tipo:"compra",qtd:0.01,preco:91000,data:"2026-07-02"},{id:3,ativo:"ETH",tipo:"compra",qtd:0.5,preco:3100,data:"2026-04-18"},{id:4,ativo:"SOL",tipo:"compra",qtd:6,preco:95,data:"2026-05-05"},{id:5,ativo:"SOL",tipo:"venda",qtd:2,preco:140,data:"2026-08-20"},{id:6,ativo:"LINK",tipo:"compra",qtd:25,preco:18,data:"2026-06-11"}]}; cDesenha(); });
+$("c-exemplo").addEventListener("click",function(){ CART={exemplo:true,lanc:[{id:1,ativo:"BTC",tipo:"compra",qtd:0.02,preco:62000,data:"2026-03-10"},{id:2,ativo:"BTC",tipo:"compra",qtd:0.01,preco:91000,data:"2026-07-02"},{id:3,ativo:"ETH",tipo:"compra",qtd:0.5,preco:3100,data:"2026-04-18"},{id:4,ativo:"SOL",tipo:"compra",qtd:6,preco:95,data:"2026-05-05"},{id:5,ativo:"SOL",tipo:"venda",qtd:2,preco:140,data:"2026-08-20"},{id:6,ativo:"AAVE",tipo:"compra",qtd:3,preco:150,data:"2026-06-11",classe:"defi"},{id:7,ativo:"IVVB11",tipo:"compra",qtd:10,preco:60,data:"2026-02-03",classe:"rv",moeda:"BRL",cambio:5.6},{id:8,ativo:"TESOURO SELIC",tipo:"compra",qtd:1,preco:900,data:"2026-01-15",classe:"rf",moeda:"BRL",cambio:5.7}],manual:{"IVVB11":66,"TESOURO SELIC":960}}; cDesenha(); });
 $("c-limpa-ex").addEventListener("click",function(){ CART={lanc:[],exemplo:false}; cGravar(); cDesenha(); });
 $("c-exportar").addEventListener("click",function(){ var a=document.createElement("a"); a.href=URL.createObjectURL(new Blob([JSON.stringify(CART,null,1)],{type:"application/json"})); a.download="carteira-"+new Date().toISOString().slice(0,10)+".json"; document.body.appendChild(a); a.click(); a.remove(); });
-$("c-importar").addEventListener("change",function(ev){ var f=ev.target.files[0]; if(!f) return; var rd=new FileReader(); rd.onload=function(){ try{ var j=JSON.parse(rd.result); if(!j||!Array.isArray(j.lanc)) throw 0; CART={exemplo:false,lanc:j.lanc.filter(function(l){return l&&l.ativo&&l.qtd>0&&l.preco>=0&&l.data;}).map(function(l,i){return {id:l.id||Date.now()+i,ativo:String(l.ativo).toUpperCase(),tipo:l.tipo==="venda"?"venda":"compra",qtd:+l.qtd,preco:+l.preco,data:String(l.data)};})}; cGravar(); cDesenha(); $("f-erro").hidden=true; if(SB&&USUARIO) SB.from("lancamentos").insert(CART.lanc.map(paraNuvem)).then(function(r){ if(r.error) nuvemFalhou(); else nuvemCarrega(); }); }catch(e){ $("f-erro").textContent="Esse arquivo não é uma cópia de segurança da carteira."; $("f-erro").hidden=false; } ev.target.value=""; }; rd.readAsText(f); });
+$("c-importar").addEventListener("change",function(ev){ var f=ev.target.files[0]; if(!f) return; var rd=new FileReader(); rd.onload=function(){ try{ var j=JSON.parse(rd.result); if(!j||!Array.isArray(j.lanc)) throw 0; CART={exemplo:false,manual:(j.manual&&typeof j.manual==="object")?j.manual:{},lanc:j.lanc.filter(function(l){return l&&l.ativo&&l.qtd>0&&l.preco>=0&&l.data;}).map(function(l,i){return {id:l.id||Date.now()+i,ativo:String(l.ativo).toUpperCase(),tipo:l.tipo==="venda"?"venda":"compra",qtd:+l.qtd,preco:+l.preco,data:String(l.data),moeda:l.moeda==="BRL"?"BRL":"USD",cambio:l.cambio>0?+l.cambio:null,classe:CLASSES[l.classe]?l.classe:"cripto"};})}; cGravar(); cDesenha(); $("f-erro").hidden=true; if(SB&&USUARIO) SB.from("lancamentos").insert(CART.lanc.map(paraNuvem)).then(function(r){ if(r.error) nuvemFalhou(); else nuvemCarrega(); }); }catch(e){ $("f-erro").textContent="Esse arquivo não é uma cópia de segurança da carteira."; $("f-erro").hidden=false; } ev.target.value=""; }; rd.readAsText(f); });
 document.querySelectorAll("#cabas button").forEach(function(b){b.addEventListener("click",function(){janela(b.dataset.cj);});});
 document.querySelectorAll("#areas button").forEach(function(b){b.addEventListener("click",function(){area(b.dataset.area);});});
 /* ---------- Mercado: resumo, notícias, calendário ---------- */
@@ -796,10 +897,11 @@ function auDesenha(){
   $("au-titulo").textContent=a.titulo; $("au-desc").textContent=a.descricao||"";
   $("au-feito").textContent=VISTAS[auChave(a)]?"Desmarcar como assistida":"Marcar como assistida"; $("au-prox").hidden=AU>=AULAS.length-1;
   var feitas=AULAS.filter(function(x){return VISTAS[auChave(x)];}).length; $("au-status").textContent=feitas+" de "+AULAS.length+" aulas assistidas.";
+  if(typeof comCarrega==="function") comCarrega();
 }
 function auCarrega(){ if(window.SNAP){$("au-status").textContent="As aulas aparecem só na versão ao vivo do site."; return;}
-  fetch("aulas.json?t="+Date.now()).then(function(r){ if(!r.ok) throw 0; return r.json(); }).then(function(j){ AULAS=[]; (j.modulos||[]).forEach(function(m){ (m.aulas||[]).forEach(function(a){ AULAS.push({modulo:m.titulo||"Módulo",titulo:a.titulo||"Aula",youtube:(a.youtube||"").trim(),duracao:a.duracao||"",descricao:a.descricao||""}); }); });
-    if(!AULAS.length){ $("au-status").textContent="Nenhuma aula cadastrada ainda."; return; } $("au-wrap").hidden=false; auDesenha(); }).catch(function(){ $("au-status").textContent="Não consegui carregar as aulas."; }); }
+  fetch("aulas.json?t="+Date.now()).then(function(r){ if(!r.ok) throw 0; return r.json(); }).then(function(j){ if(typeof MODS!=="undefined"&&MODS.length) return; AULAS=[]; (j.modulos||[]).forEach(function(m){ (m.aulas||[]).forEach(function(a){ AULAS.push({modulo:m.titulo||"Módulo",titulo:a.titulo||"Aula",youtube:(a.youtube||"").trim(),duracao:a.duracao||"",descricao:a.descricao||""}); }); });
+    if(MODS&&MODS.length) return; AULAS=AULAS; if(!AULAS.length){ $("au-status").textContent="Nenhuma aula cadastrada ainda."; return; } $("au-wrap").hidden=false; auDesenha(); }).catch(function(){ $("au-status").textContent="Não consegui carregar as aulas."; }); }
 $("au-feito").addEventListener("click",function(){ var k=auChave(AULAS[AU]); if(VISTAS[k]) delete VISTAS[k]; else VISTAS[k]=1; try{localStorage.setItem("aulas_vistas",JSON.stringify(VISTAS));}catch(e){} auDesenha(); });
 $("au-prox").addEventListener("click",function(){ if(AU<AULAS.length-1){ AU++; auDesenha(); } });
 mercCarrega(); auCarrega(); setInterval(mercCarrega,600000);
@@ -814,13 +916,36 @@ function contaDesenha(){
   $("funding-bloq").hidden=!bloq; $("funding-conteudo").hidden=bloq;
   $("funding-bloq-txt").textContent=USUARIO?"Sua conta ainda não tem acesso a esta área. Fale com o administrador para liberar.":"Entre com a sua conta para ver esta área.";
   $("c-nota-local").hidden=!!USUARIO; $("c-nota-nuvem").hidden=!USUARIO;
+  $("bt-admin").hidden=PLANO!=="admin"; if(!$("area-admin").hidden) admCarrega();
 }
-function deNuvem(r){ return {id:r.id,ativo:r.ativo,tipo:r.tipo,qtd:+r.qtd,preco:+r.preco,data:r.data}; }
-function paraNuvem(l){ return {ativo:l.ativo,tipo:l.tipo,qtd:l.qtd,preco:l.preco,data:l.data}; }
+var ADM=[];
+function admDesenha(){
+  var q=$("adm-busca").value.trim().toLowerCase(), tb=$("adm-tb"); tb.textContent="";
+  var c={gratis:0,assinante:0,admin:0}; ADM.forEach(function(p){c[p.plano]=(c[p.plano]||0)+1;});
+  $("adm-n").textContent=ADM.length; $("adm-ass").textContent=c.assinante; $("adm-gra").textContent=c.gratis; $("adm-adm").textContent=c.admin;
+  ADM.filter(function(p){return !q||(p.email||"").toLowerCase().indexOf(q)>=0;}).forEach(function(p){ var tr=el("tr"); cel(tr,p.email||"(sem e-mail)","txt"); cel(tr,p.criado_em?new Date(p.criado_em).toLocaleDateString("pt-BR"):"–");
+    var td=cel(tr,"","txt"), sel=document.createElement("select"); sel.setAttribute("aria-label","Plano de "+(p.email||"usuário"));
+    [["gratis","Gratuito"],["assinante","Assinante"],["admin","Administrador"]].forEach(function(o){var op=el("option",null,o[1]); op.value=o[0]; sel.appendChild(op);}); sel.value=p.plano;
+    if(USUARIO&&p.user_id===USUARIO.id){ sel.disabled=true; sel.title="Você não pode mudar o próprio plano por aqui."; }
+    sel.addEventListener("change",function(){ var novo=sel.value, antes=p.plano; $("adm-erro").hidden=true;
+      SB.from("perfis").update({plano:novo}).eq("user_id",p.user_id).select().single().then(function(r){ if(r.error||!r.data){ sel.value=antes; $("adm-erro").textContent="Não consegui mudar o plano de "+p.email+"."; $("adm-erro").hidden=false; } else { p.plano=novo; admDesenha(); } }); });
+    td.appendChild(sel); tb.appendChild(tr); });
+  if(!tb.children.length) semLinhas(tb,3,ADM.length?"Nenhum usuário com esse e-mail.":"Nenhum usuário cadastrado ainda.");
+}
+function admCarrega(){
+  var ok=!!(SB&&USUARIO&&PLANO==="admin"); $("adm-negado").hidden=ok; $("adm-painel").hidden=!ok; if(!ok) return;
+  SB.from("perfis").select("*").then(function(r){ if(r.error){ $("adm-erro").textContent="Não consegui ler a lista de usuários."; $("adm-erro").hidden=false; return; } ADM=(r.data||[]).slice().sort(function(a,b){return (a.email||"")<(b.email||"")?-1:1;}); admDesenha(); });
+}
+$("adm-busca").addEventListener("input",admDesenha);
+function deNuvem(r){ return {id:r.id,ativo:r.ativo,tipo:r.tipo,qtd:+r.qtd,preco:+r.preco,data:r.data,moeda:r.moeda||"USD",cambio:r.cambio!=null?+r.cambio:null,classe:r.classe||"cripto"}; }
+function paraNuvem(l){ return {ativo:l.ativo,tipo:l.tipo,qtd:l.qtd,preco:l.preco,data:l.data,moeda:l.moeda||"USD",cambio:l.cambio||null,classe:l.classe||"cripto"}; }
+function nuvemPreco(ativo,preco){ if(!SB||!USUARIO) return; (preco==null?SB.from("precos_manuais").delete().eq("ativo",ativo):SB.from("precos_manuais").upsert({ativo:ativo,preco:preco})).then(function(r){ if(r.error) nuvemFalhou(); }); }
 function nuvemCarrega(){
   return SB.from("lancamentos").select("*").then(function(r){ if(r.error) throw r.error;
     var local=[]; try{ var j=JSON.parse(localStorage.getItem(CHAVE)); if(j&&!j.exemplo&&Array.isArray(j.lanc)) local=j.lanc; }catch(e){}
-    CART={lanc:r.data.map(deNuvem),exemplo:false}; $("c-migrar").hidden=!(local.length&&!r.data.length); $("c-migrar").dataset.n=local.length;
+    CART={lanc:r.data.map(deNuvem),exemplo:false,manual:{}};
+    SB.from("precos_manuais").select("*").then(function(pm){ if(!pm.error){ (pm.data||[]).forEach(function(x){CART.manual[x.ativo]=+x.preco;}); cDesenha(); } });
+    $("c-migrar").hidden=!(local.length&&!r.data.length); $("c-migrar").dataset.n=local.length;
     $("c-migrar-txt").textContent="Este navegador tem "+local.length+" lançamento(s) guardado(s) fora da conta."; cDesenha(); });
 }
 function nuvem(op,l){
@@ -831,15 +956,75 @@ function nuvem(op,l){
 function nuvemFalhou(){ $("f-erro").textContent="Não consegui salvar na sua conta. Recarreguei os lançamentos; tente de novo."; $("f-erro").hidden=false; nuvemCarrega().catch(function(){}); }
 function sessao(s){
   USUARIO=s?s.user:null; PLANO=null;
-  if(!USUARIO){ cLer(); contaDesenha(); cDesenha(); return; }
+  if(!USUARIO){ cLer(); contaDesenha(); cDesenha(); comCarrega(); return; }
   contaDesenha();
-  SB.from("perfis").select("plano").eq("user_id",USUARIO.id).maybeSingle().then(function(r){ PLANO=r.data?r.data.plano:"gratis"; contaDesenha(); });
+  SB.from("perfis").select("plano").eq("user_id",USUARIO.id).maybeSingle().then(function(r){ PLANO=r.data?r.data.plano:"gratis"; contaDesenha(); comCarrega(); });
   nuvemCarrega().catch(function(){ $("cart-status").textContent="Não consegui ler os lançamentos da sua conta."; });
 }
+/* ---------- Conteúdo: módulos, aulas, comentários, nome do site ---------- */
+var MODS=[], EDM=null, EDA=null;
+function ytId(v){ v=(v||"").trim(); var m=v.match(/(?:v=|youtu\.be\/|embed\/|shorts\/)([\w-]{6,20})/); return m?m[1]:(/^[\w-]{6,20}$/.test(v)?v:""); }
+function admErro(t){ $("adm-c-erro").textContent=t||""; $("adm-c-erro").hidden=!t; }
+function nomeSite(n){ if(!n) return; document.title=n; $("marca").textContent=n; $("marca").hidden=false; if($("adm-nome")) $("adm-nome").value=n; }
+function conteudoCarrega(){
+  if(!SB) return Promise.resolve(false);
+  return Promise.all([SB.from("modulos").select("*"),SB.from("aulas").select("*"),SB.from("config_site").select("*")]).then(function(r){
+    if(r[0].error||r[1].error) return false;
+    var ord=function(a,b){return a.ordem-b.ordem||a.id-b.id;};
+    MODS=(r[0].data||[]).slice().sort(ord).map(function(m){ return {id:m.id,titulo:m.titulo,descricao:m.descricao||"",ordem:m.ordem,aulas:(r[1].data||[]).filter(function(a){return a.modulo_id===m.id;}).sort(ord)}; });
+    if(!r[2].error) (r[2].data||[]).forEach(function(c){ if(c.chave==="nome") nomeSite(c.valor); });
+    admConteudo();
+    if(!MODS.length) return false;
+    AULAS=[]; MODS.forEach(function(m){ m.aulas.forEach(function(a){ AULAS.push({id:a.id,modulo:m.titulo,titulo:a.titulo,youtube:a.youtube||"",duracao:a.duracao||"",descricao:a.descricao||""}); }); });
+    if(AU>=AULAS.length) AU=0;
+    if(AULAS.length){ $("au-wrap").hidden=false; auDesenha(); } else { $("au-wrap").hidden=true; $("au-status").textContent="Nenhuma aula cadastrada ainda."; }
+    return true; }).catch(function(){ return false; });
+}
+function botaoRemover(txt,fn){ var b=el("button","lnk neg",txt); b.type="button"; b.addEventListener("click",function(){ if(b.dataset.ok) fn(); else { b.dataset.ok="1"; b.textContent="Confirmar remoção"; } }); return b; }
+function admConteudo(){
+  var box=$("adm-conteudo"); if(!box) return; box.textContent="";
+  var sel=$("aa-mod"), atual=sel.value; sel.textContent=""; MODS.forEach(function(m){ var o=el("option",null,m.titulo); o.value=m.id; sel.appendChild(o); }); if(atual) sel.value=atual;
+  if(!MODS.length){ box.appendChild(el("p","sub","Nenhum módulo no banco ainda. Enquanto estiver vazio, o site mostra as aulas do arquivo aulas.json.")); return; }
+  MODS.forEach(function(m){
+    var h=el("div","admmod"); h.appendChild(el("strong",null,m.ordem+". "+m.titulo)); h.appendChild(document.createTextNode("  "));
+    var be=el("button","lnk","Editar módulo"); be.type="button"; be.addEventListener("click",function(){ EDM=m.id; $("am-titulo").value=m.titulo; $("am-desc").value=m.descricao; $("am-ordem").value=m.ordem; $("am-salvar").textContent="Salvar módulo"; $("am-cancelar").hidden=false; $("am-titulo").focus(); }); h.appendChild(be); h.appendChild(document.createTextNode("  "));
+    h.appendChild(botaoRemover("Remover módulo e aulas",function(){ SB.from("modulos").delete().eq("id",m.id).then(function(r){ if(r.error) admErro("Não consegui remover o módulo."); conteudoCarrega(); }); })); box.appendChild(h);
+    var sc=el("div","scroll"), tb=el("table"), th=el("tr"); ["Ordem","Aula","YouTube","Duração",""].forEach(function(x){th.appendChild(el("th",null,x));}); tb.appendChild(th);
+    m.aulas.forEach(function(a){ var tr=el("tr"); cel(tr,String(a.ordem)); cel(tr,a.titulo,"txt quebra"); cel(tr,a.youtube||"sem vídeo",a.youtube?"":"vazio"); cel(tr,a.duracao||"–"); var td=cel(tr,"","txt");
+      var b1=el("button","lnk","Editar"); b1.type="button"; b1.addEventListener("click",function(){ EDA=a.id; $("aa-mod").value=m.id; $("aa-titulo").value=a.titulo; $("aa-yt").value=a.youtube; $("aa-dur").value=a.duracao; $("aa-ordem").value=a.ordem; $("aa-desc").value=a.descricao; $("aa-salvar").textContent="Salvar aula"; $("aa-cancelar").hidden=false; $("aa-titulo").focus(); }); td.appendChild(b1); td.appendChild(document.createTextNode("  "));
+      td.appendChild(botaoRemover("Remover",function(){ SB.from("aulas").delete().eq("id",a.id).then(function(r){ if(r.error) admErro("Não consegui remover a aula."); conteudoCarrega(); }); })); tb.appendChild(tr); });
+    if(!m.aulas.length) semLinhas(tb,5,"Nenhuma aula neste módulo."); sc.appendChild(tb); box.appendChild(sc); });
+}
+function limpaMod(){ EDM=null; $("adm-mod-form").reset(); $("am-ordem").value=MODS.length+1; $("am-salvar").textContent="Adicionar módulo"; $("am-cancelar").hidden=true; }
+function limpaAula(){ var m=$("aa-mod").value; EDA=null; $("adm-aula-form").reset(); $("aa-mod").value=m; $("aa-salvar").textContent="Adicionar aula"; $("aa-cancelar").hidden=true; }
+$("adm-mod-form").addEventListener("submit",function(ev){ ev.preventDefault(); admErro("");
+  var row={titulo:$("am-titulo").value.trim(),descricao:$("am-desc").value.trim(),ordem:+$("am-ordem").value||0}; if(!row.titulo) return;
+  (EDM?SB.from("modulos").update(row).eq("id",EDM):SB.from("modulos").insert(row)).then(function(r){ if(r.error){ admErro("Não consegui salvar o módulo."); return; } limpaMod(); conteudoCarrega(); }); });
+$("adm-aula-form").addEventListener("submit",function(ev){ ev.preventDefault(); admErro("");
+  var bruto=$("aa-yt").value.trim(), id=ytId(bruto); if(bruto&&!id){ admErro("Não reconheci esse link do YouTube. Cole o link completo do vídeo ou só o código."); return; }
+  var row={modulo_id:+$("aa-mod").value,titulo:$("aa-titulo").value.trim(),youtube:id,duracao:$("aa-dur").value.trim(),descricao:$("aa-desc").value.trim(),ordem:+$("aa-ordem").value||0}; if(!row.modulo_id){ admErro("Crie um módulo antes de adicionar aulas."); return; }
+  (EDA?SB.from("aulas").update(row).eq("id",EDA):SB.from("aulas").insert(row)).then(function(r){ if(r.error){ admErro("Não consegui salvar a aula."); return; } limpaAula(); conteudoCarrega(); }); });
+$("am-cancelar").addEventListener("click",limpaMod); $("aa-cancelar").addEventListener("click",limpaAula);
+$("adm-nome-form").addEventListener("submit",function(ev){ ev.preventDefault(); var n=$("adm-nome").value.trim(); if(!n) return;
+  SB.from("config_site").upsert({chave:"nome",valor:n}).then(function(r){ if(r.error) admErro("Não consegui salvar o nome."); else nomeSite(n); }); });
+function comCarrega(){
+  var a=AULAS[AU], box=$("com-lista"); if(!box) return; box.textContent="";
+  var pode=!!(SB&&USUARIO&&a&&a.id); $("com-form").hidden=!pode;
+  $("com-aviso").hidden=pode; $("com-aviso").textContent=!SB?"Os comentários ficam disponíveis quando o login do site estiver ligado.":!USUARIO?"Entre com a sua conta para ler e escrever comentários.":"Esta aula ainda não aceita comentários.";
+  if(!pode) return;
+  SB.from("comentarios").select("*").eq("aula_id",a.id).then(function(r){ if(r.error){ $("com-aviso").textContent="Não consegui carregar os comentários."; $("com-aviso").hidden=false; return; }
+    var l=(r.data||[]).slice().sort(function(x,y){return x.criado_em<y.criado_em?-1:1;}); box.textContent="";
+    l.forEach(function(c){ var li=el("li"); li.appendChild(el("span","meta",c.autor+" · "+new Date(c.criado_em).toLocaleString("pt-BR",{day:"2-digit",month:"2-digit",hour:"2-digit",minute:"2-digit"}))); li.appendChild(el("span",null,c.texto));
+      if(c.user_id===USUARIO.id||PLANO==="admin") li.appendChild(botaoRemover("Remover",function(){ SB.from("comentarios").delete().eq("id",c.id).then(comCarrega); })); box.appendChild(li); });
+    if(!l.length) box.appendChild(el("li","vazio","Nenhum comentário ainda. Seja o primeiro.")); });
+}
+$("com-form").addEventListener("submit",function(ev){ ev.preventDefault(); var t=$("com-texto").value.trim(), a=AULAS[AU]; if(!t||!a||!a.id) return;
+  SB.from("comentarios").insert({aula_id:a.id,texto:t.slice(0,2000)}).then(function(r){ if(r.error){ $("com-aviso").textContent="Não consegui publicar o comentário."; $("com-aviso").hidden=false; return; } $("com-texto").value=""; comCarrega(); }); });
 if(CFG.supabaseUrl&&CFG.supabaseAnonKey&&window.supabase){
   SB=window.supabase.createClient(CFG.supabaseUrl,CFG.supabaseAnonKey);
   SB.auth.getSession().then(function(r){ sessao(r.data.session); });
   SB.auth.onAuthStateChange(function(ev,s){ if(ev==="SIGNED_IN"||ev==="SIGNED_OUT") sessao(s); });
+  conteudoCarrega();
 }
 $("conta-form").addEventListener("submit",function(ev){ ev.preventDefault(); var e=$("conta-campo").value.trim(); if(!e) return;
   contaMsg("Enviando…"); SB.auth.signInWithOtp({email:e,options:{emailRedirectTo:location.origin+location.pathname}}).then(function(r){
