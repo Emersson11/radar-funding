@@ -23,7 +23,8 @@ def main():
     ops = [o for o in radar.oportunidades(dados, VOL) if LIMITE <= o["d30"] <= MAXIMO][:8]
     chave = sorted(f'{o["ativo"]}|{o["vender"]}|{o["comprar"]}' for o in ops)
     antes = json.loads(ESTADO.read_text()) if ESTADO.exists() else []
-    if chave == antes:
+    manual = os.environ.get("GITHUB_EVENT_NAME") == "workflow_dispatch"   # disparo manual sempre envia
+    if chave == antes and not manual:
         print("Sem mudança nas oportunidades; nada enviado.")
         return
     ESTADO.write_text(json.dumps(chave))
