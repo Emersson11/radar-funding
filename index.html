@@ -105,6 +105,7 @@ button.lnk.neg{color:var(--bad)}
 .bv{font:400 13px var(--mono);color:var(--muted);white-space:nowrap}
 .kpi .sub{font:400 13px var(--mono)}
 td a{color:var(--accent);text-decoration:underline;text-underline-offset:3px}
+#av-estrelas button{border:0;background:none;padding:0 2px;font-size:26px;line-height:1;color:var(--line)} #av-estrelas button.on{color:#d99a00} #av-estrelas button:disabled{cursor:default}
 button.ord{border:0;padding:0;background:none;color:inherit;font:inherit;letter-spacing:inherit;text-transform:inherit;white-space:nowrap}
 button.ord:hover{color:var(--fg)}
 .direita{display:flex;flex-wrap:wrap;gap:10px;align-items:center;justify-content:flex-end}
@@ -325,6 +326,7 @@ button.mini{font-size:12px;color:var(--muted)}
         <div class="video" id="au-video"></div>
         <h2 id="au-titulo" style="margin-top:14px"></h2>
         <p class="sub" id="au-desc"></p>
+        <div id="av-box" style="margin-top:12px;display:flex;flex-wrap:wrap;gap:10px;align-items:center"><span id="av-estrelas" role="group" aria-label="Avaliar esta aula"></span><span class="sub" id="av-txt"></span></div>
         <p style="margin-top:12px"><button type="button" id="au-feito" class="sec">Marcar como assistida</button> <button type="button" id="au-prox">Próxima aula</button></p>
         <h2 style="margin-top:24px;font-size:17px">Comentários</h2>
         <p class="sub" id="com-aviso"></p>
@@ -1200,7 +1202,13 @@ $("adm-aula-form").addEventListener("submit",function(ev){ ev.preventDefault(); 
 $("am-cancelar").addEventListener("click",limpaMod); $("aa-cancelar").addEventListener("click",limpaAula);
 $("adm-nome-form").addEventListener("submit",function(ev){ ev.preventDefault(); var n=$("adm-nome").value.trim(); if(!n) return;
   SB.from("config_site").upsert({chave:"nome",valor:n}).then(function(r){ if(r.error) admErro("Não consegui salvar o nome."); else nomeSite(n); }); });
-function comCarrega(){
+function avCarrega(){ var a=AULAS[AU], box=$("av-estrelas"), txt=$("av-txt"); if(!box) return; var pode=!!(SB&&USUARIO&&a&&a.id);
+  var des=function(minha,media,n){ box.textContent=""; for(var i=1;i<=5;i++){ (function(i){ var ref=minha||Math.round(media||0), b=el("button",i<=ref?"on":"","★"); b.type="button"; b.disabled=!pode; b.setAttribute("aria-label","Dar "+i+(i>1?" estrelas":" estrela")); b.setAttribute("aria-pressed",minha===i?"true":"false");
+      b.addEventListener("click",function(){ SB.from("avaliacoes").upsert({aula_id:a.id,nota:i},{onConflict:"aula_id,user_id"}).then(function(r){ if(r.error){ txt.textContent="Não consegui salvar a sua avaliação."; return; } avCarrega(); }); }); box.appendChild(b); })(i); }
+    txt.textContent=!pode?(!SB?"":!USUARIO?"Entre com a sua conta para avaliar esta aula.":""):n?("Média "+usd(media,1)+" em "+n+(n>1?" avaliações":" avaliação")+(minha?". Sua nota: "+minha+".":". Clique para dar a sua nota.")):"Ninguém avaliou ainda. Clique nas estrelas para avaliar."; };
+  des(0,0,0); if(!pode) return;
+  SB.from("avaliacoes").select("user_id,nota").eq("aula_id",a.id).then(function(r){ if(r.error){ txt.textContent="As avaliações ainda não estão disponíveis."; return; } var l=r.data||[], s=0, m=0; l.forEach(function(x){ s+=x.nota; if(x.user_id===USUARIO.id) m=x.nota; }); des(m,l.length?s/l.length:0,l.length); }); }
+function comCarrega(){ avCarrega();
   var a=AULAS[AU], box=$("com-lista"); if(!box) return; box.textContent="";
   var pode=!!(SB&&USUARIO&&a&&a.id); $("com-form").hidden=!pode;
   $("com-aviso").hidden=pode; $("com-aviso").textContent=!SB?"Os comentários ficam disponíveis quando o login do site estiver ligado.":!USUARIO?"Entre com a sua conta para ler e escrever comentários.":"Esta aula ainda não aceita comentários.";

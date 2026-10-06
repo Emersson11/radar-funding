@@ -127,3 +127,19 @@ alter table public.precos_manuais enable row level security;
 drop policy if exists "dono dos precos" on public.precos_manuais;
 create policy "dono dos precos" on public.precos_manuais
   for all using (auth.uid() = user_id) with check (auth.uid() = user_id);
+
+-- ===== Avaliação das aulas (1 a 5 estrelas) =====
+create table if not exists public.avaliacoes (
+  aula_id bigint not null references public.aulas on delete cascade,
+  user_id uuid not null default auth.uid() references auth.users on delete cascade,
+  nota smallint not null check (nota between 1 and 5),
+  criado_em timestamptz not null default now(),
+  primary key (aula_id, user_id)
+);
+alter table public.avaliacoes enable row level security;
+drop policy if exists "logados leem avaliacoes" on public.avaliacoes;
+create policy "logados leem avaliacoes" on public.avaliacoes for select using (auth.uid() is not null);
+drop policy if exists "avalia em seu nome" on public.avaliacoes;
+create policy "avalia em seu nome" on public.avaliacoes for insert with check (auth.uid() = user_id);
+drop policy if exists "muda a propria nota" on public.avaliacoes;
+create policy "muda a propria nota" on public.avaliacoes for update using (auth.uid() = user_id) with check (auth.uid() = user_id);
