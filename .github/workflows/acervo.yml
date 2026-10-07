@@ -11,6 +11,8 @@ concurrency:
 jobs:
   acervo:
     runs-on: ubuntu-latest
+    env:
+      SB_KEY: ${{ secrets.SUPABASE_SERVICE_KEY }}
     timeout-minutes: 20
     steps:
       - uses: actions/checkout@v4
@@ -20,8 +22,8 @@ jobs:
       - run: pip install requests pyyaml
       - name: Recuperar o acervo anterior
         run: |
-          curl -sfL "https://raw.githubusercontent.com/${GITHUB_REPOSITORY}/acervo/acervo.json" -o acervo.json || true
-          curl -sfL "https://raw.githubusercontent.com/${GITHUB_REPOSITORY}/acervo/acervo_estado.json" -o acervo_estado.json || true
+          curl -sfL "https://ogpwdonofbcubnwykiae.supabase.co/storage/v1/object/public/dados/acervo.json" -o acervo.json || curl -sfL "https://raw.githubusercontent.com/${GITHUB_REPOSITORY}/acervo/acervo.json" -o acervo.json || true
+          curl -sfL "https://ogpwdonofbcubnwykiae.supabase.co/storage/v1/object/public/dados/acervo_estado.json" -o acervo_estado.json || curl -sfL "https://raw.githubusercontent.com/${GITHUB_REPOSITORY}/acervo/acervo_estado.json" -o acervo_estado.json || true
       - run: python acervo.py
       - name: Publicar no ramo acervo (um unico commit, sem reconstruir o site)
         env:
@@ -33,3 +35,8 @@ jobs:
           git config user.email "radar-bot@users.noreply.github.com"
           git add . && git commit -qm "Acervo de fontes"
           git push -qf "https://x-access-token:${GH_TOKEN}@github.com/${GITHUB_REPOSITORY}.git" acervo
+      - name: Enviar ao Supabase (para o site ler quando o repositorio for privado)
+        if: ${{ env.SB_KEY != '' }}
+        run: |
+          curl -sf -X POST "https://ogpwdonofbcubnwykiae.supabase.co/storage/v1/object/dados/acervo.json" -H "Authorization: Bearer ${SB_KEY}" -H "apikey: ${SB_KEY}" -H "x-upsert: true" -H "Content-Type: application/json" -H "cache-control: max-age=60" --data-binary @acervo.json
+          curl -sf -X POST "https://ogpwdonofbcubnwykiae.supabase.co/storage/v1/object/dados/acervo_estado.json" -H "Authorization: Bearer ${SB_KEY}" -H "apikey: ${SB_KEY}" -H "x-upsert: true" -H "Content-Type: application/json" -H "cache-control: max-age=60" --data-binary @acervo_estado.json
