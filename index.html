@@ -878,7 +878,6 @@ button.mini{font-size:12px;color:var(--muted)}
     <button type="button" role="tab" data-aba="cruz" aria-selected="true">Entre corretoras</button>
     <button type="button" role="tab" data-aba="spot" aria-selected="false">À vista + futuro</button>
     <button type="button" role="tab" data-aba="matriz" aria-selected="false">Todas as taxas</button>
-    <button type="button" role="tab" data-aba="sim" aria-selected="false">Simulador de estratégias</button>
     <button type="button" role="tab" data-aba="rent" aria-selected="false">Rentabilidade</button>
   </div>
 
@@ -905,9 +904,6 @@ button.mini{font-size:12px;color:var(--muted)}
     <div class="scroll"><table><thead id="th-matriz"></thead><tbody id="tb-matriz"></tbody></table></div>
   </section>
 
-  <section id="aba-sim" hidden aria-label="Simulador de estratégias">
-    <iframe id="simulador-estrategias" title="Simulador de estratégias: carteira e cenários" style="display:block;width:100%;height:1000px;border:0;border-radius:8px;" scrolling="no"></iframe>
-  </section>
 
   <section id="aba-rent" hidden>
     <h2>Rentabilidade da carteira simulada contra referências</h2>
@@ -945,12 +941,7 @@ button.mini{font-size:12px;color:var(--muted)}
   <p class="rodape">Gráficos desenhados com TradingView Lightweight Charts. Dados públicos de Binance, Bybit, OKX, Bitget, Gate, Hyperliquid e dYdX. Taxas anualizadas a partir do funding de cada período. Esta página não envia ordens nem acessa contas. Não é recomendação de investimento.</p>
   </div>
   <div id="est-sim" class="area" hidden>
-    <div class="box"><h2>Simulador de estratégias</h2><p class="sub">Escolha a estratégia, ajuste os números e veja o resultado já descontando taxas de negociação, deslizamento de preço, transferências e gás. Os campos de taxa começam com valores típicos de mercado e podem ser editados.</p>
-      <div class="pers" id="sim-tipo" style="margin-top:12px"><button type="button" data-t="funding" aria-pressed="true">Arbitragem de funding</button><button type="button" data-t="pool">Pool de liquidez</button><button type="button" data-t="vault">Vault ou empréstimo</button><button type="button" data-t="trade">Trade</button><button type="button" data-t="opcao">Opção</button></div>
-      <form class="controles" id="sim-form" style="margin-top:14px" onsubmit="return false"></form></div>
-    <div class="tiles" id="sim-tiles" style="margin-top:20px"></div>
-    <div class="box" style="margin-top:20px"><h2 id="sim-tit">Resultado</h2><div class="scroll"><table><tbody id="sim-tab"></tbody></table></div><ul id="sim-avisos" style="margin:12px 0 0;padding-left:20px;display:flex;flex-direction:column;gap:6px;font-size:14.5px;color:var(--muted)"></ul>
-      <p class="note">Simulação com fins educacionais. As taxas e rendimentos reais mudam a todo momento e dependem da corretora, do protocolo e do tamanho da ordem. Não é recomendação de investimento.</p></div>
+    <iframe id="simulador-estrategias" title="Simulador de estratégias: carteira e cenários" style="display:block;width:100%;height:1000px;border:0;border-radius:8px;" scrolling="no"></iframe>
   </div>
   <div id="est-pools" class="area" hidden>
     <section class="box">
@@ -1712,7 +1703,7 @@ function simOpcoes(k){ var o=[]; if(k==="ativos"){ var m={}; Object.keys(DATA).f
   else if(k==="venues") o=VENUES.map(function(v){return [v[0],v[1]];}); else if(k==="venuesSpot") o=[["spot","Mercado à vista (sem funding)"]].concat(VENUES.map(function(v){return [v[0],v[1]];}));
   else if(k==="pools"||k==="vaults"){ var mu=k==="pools"; o=[["","Digitar a taxa manualmente"]].concat(((typeof EST!=="undefined"&&EST.pools)||[]).filter(function(p){return (p.exposure==="multi")===mu&&p.tvlUsd>=2e7;}).sort(function(a,b){return b.tvlUsd-a.tvlUsd;}).slice(0,80).map(function(p){ return [p.pool,p.symbol+" · "+String(p.project).replace(/-/g," ")+" · "+p.chain+" ("+usd(p.apy,1)+"%)"]; })); }
   else if(k==="dir") o=[["1","Comprado (long)"],["-1","Vendido (short)"]]; else if(k==="tipoOp") o=[["call","Compra de call (aposta na alta)"],["put","Compra de put (aposta na queda)"]]; return o; }
-function simMonta(){ var f=$("sim-form"); f.textContent=""; SIMC[SIM.t].forEach(function(c){ var lb=el("label",null,c[1]), ch=SIM.t+"."+c[0], inp; if(typeof c[2]==="string"){ inp=el("select"); simOpcoes(c[2].slice(4)).forEach(function(o){ var op=el("option",null,o[1]); op.value=o[0]; inp.appendChild(op); }); if(SIM.v[ch]!=null) inp.value=SIM.v[ch]; inp.style.maxWidth="300px"; } else { inp=el("input"); inp.type="number"; inp.step="any"; inp.value=SIM.v[ch]!=null?SIM.v[ch]:c[2]; inp.style.width="130px"; }
+function simMonta(){ var f=$("sim-form"); if(!f) return; f.textContent=""; SIMC[SIM.t].forEach(function(c){ var lb=el("label",null,c[1]), ch=SIM.t+"."+c[0], inp; if(typeof c[2]==="string"){ inp=el("select"); simOpcoes(c[2].slice(4)).forEach(function(o){ var op=el("option",null,o[1]); op.value=o[0]; inp.appendChild(op); }); if(SIM.v[ch]!=null) inp.value=SIM.v[ch]; inp.style.maxWidth="300px"; } else { inp=el("input"); inp.type="number"; inp.step="any"; inp.value=SIM.v[ch]!=null?SIM.v[ch]:c[2]; inp.style.width="130px"; }
     inp.id="sim-"+c[0]; inp.addEventListener("input",function(){ SIM.v[ch]=inp.value; simAuto(c[0]); simCalc(); }); lb.appendChild(inp); f.appendChild(lb); }); simAuto("*"); simCalc(); }
 function simN(k){ var e=$("sim-"+k); return e?(+e.value||0):0; }
 function simPoe(k,v){ var e=$("sim-"+k); if(e){ e.value=v; SIM.v[SIM.t+"."+k]=e.value; } }
@@ -1742,8 +1733,6 @@ function simCalc(){ var T=$("sim-tiles"), tb=$("sim-tab"), av=$("sim-avisos"); T
     tile(T,"Resultado no preço informado",D(r1),usd(cu?r1/cu*100:0,0)+"% sobre o que pagou",cl(r1)); tile(T,"Custo total",D(-cu),"prêmio mais taxa","neg"); tile(T,"Preço de equilíbrio",usd(be4,K<10?4:0),S0?usd((be4/S0-1)*100,1)+"% em relação ao preço atual":""); tile(T,"Perda máxima",D(-cu),"se a opção vencer sem valor","neg");
     L("Prêmio pago",D(-P*Q),"neg"); L("Taxa da corretora",D(-tx2),"neg"); [0.8,0.9,1,1.1,1.2,1.3].forEach(function(m){ var S=S0*m, v=pay(S)-cu; L("Vencimento com o ativo a "+usd(S,S0<10?4:0)+" ("+pct(m-1,0)+")",D(v),cl(v)); });
     A("A simulação é de compra de opção mantida até o vencimento. Antes do vencimento o preço da opção também depende do tempo restante e da volatilidade."); A("Na compra de opção a perda máxima é o que você pagou."); } }
-document.addEventListener("DOMContentLoaded",function(){ [].forEach.call(document.querySelectorAll("#sim-tipo button"),function(b){ b.addEventListener("click",function(){ SIM.t=b.dataset.t; [].forEach.call(document.querySelectorAll("#sim-tipo button"),function(o){ o.setAttribute("aria-pressed",o===b?"true":"false"); }); if((SIM.t==="pool"||SIM.t==="vault")&&typeof EST!=="undefined"&&!EST.pools&&typeof estPools==="function"){ estPools(); setTimeout(simMonta,4000); } simMonta(); }); });
-  [].forEach.call(document.querySelectorAll('#eabas button[data-est="sim"]'),function(b){ b.addEventListener("click",function(){ setTimeout(simMonta,50); }); }); });
 /* ---------- TradFi on-chain ---------- */
 var TF={plat:[
  ["xStocks","https://xstocks.com","Ações e ETFs americanos em token (SPYx, QQQx, NVDAx, TSLAx, AAPLx e outros)","Token lastreado no ativo","Solana, Ethereum e outras","Emitido pela Backed; negociado na Kraken, na Bybit e em DeFi. Não atende residentes nos EUA."],
@@ -2513,7 +2502,7 @@ document.addEventListener("DOMContentLoaded",function(){ pers("in-per","per","d"
 /* Documento isolado: evita conflitos de CSS, IDs e funções com o painel. */
 (function(){
   var frame=document.getElementById('simulador-estrategias');
-  var panel=document.getElementById('aba-sim');
+  var panel=document.getElementById('est-sim');
   var loaded=false, resize=null;
   function fit(){
     if(!loaded||!frame.contentDocument||!panel.getClientRects().length) return;
