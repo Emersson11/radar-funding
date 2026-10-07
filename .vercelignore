@@ -1,0 +1,10 @@
+# Arquivos que ficam no repositório mas não vão para o site publicado
+.github
+*.py
+*.yaml
+*.yml
+*.sql
+*.ts
+*.md
+supabase_fn
+index_pre_*.html
