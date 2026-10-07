@@ -170,6 +170,35 @@ table.varia{width:100%;border-collapse:collapse;font-size:14px;margin:4px 0 14px
 @media (max-width:640px){ .pcards{grid-template-columns:1fr} .completa .corpo,.completa header{padding-inline:16px} .capa h2{font-size:25px} .rlin{grid-template-columns:1fr 64px auto} .spk{width:64px} }
 @media print{ .capa,.btn-capa{box-shadow:none} }
 .fig{margin:16px 0 20px;break-inside:avoid;max-width:980px} .fig figcaption{font:600 14.5px var(--sans);margin-bottom:2px} .fig figcaption small{display:block;font-weight:400;font-size:12.5px;color:var(--muted);margin:2px 0 8px} .fig svg{width:100%;height:auto;display:block;border:1px solid var(--line);border-top:3px solid #3ebed6;border-radius:4px;background:var(--surface);color:var(--fg)} .fig svg text{font-family:var(--sans)}
+body.aguarda>*{visibility:hidden} body.aguarda{background:#071a33}
+body.fora{padding:0!important;background:#050f1f} body.fora>#lado,body.fora>header,body.fora>main,body.fora>footer{display:none!important} body:not(.fora) #capa-site{display:none}
+body:not(.adm) #cart-status,body:not(.adm) #atualizado,body:not(.adm) #g-quando,body:not(.adm) #in-quando,body:not(.adm) #pf-status,body:not(.adm) #df-status,body:not(.adm) #oc-status,body:not(.adm) #ef-status,body:not(.adm) #rel-status,body:not(.adm) #an-status,body:not(.adm) #pl-status,body:not(.adm) #vt-status,body:not(.adm) #tr-status,body:not(.adm) #op-status,body:not(.adm) #recarregar,body:not(.adm) #rel-gerar,body:not(.adm) #in-comp-sub,body:not(.adm) .so-adm{display:none!important}
+#areas button.tranca::after{content:"🔒";font-size:11px;margin-left:8px;opacity:.8}
+.area.bloq{position:relative;min-height:72vh;overflow:hidden} .area.bloq>*:not(.paywall){filter:blur(7px);opacity:.7;pointer-events:none;user-select:none}
+.paywall{position:absolute;inset:0;z-index:6;display:flex;justify-content:center;align-items:flex-start;padding:14vh 16px 0;background:linear-gradient(180deg,transparent,color-mix(in srgb,var(--bg) 55%,transparent))}
+.paywall>div{position:sticky;top:120px;max-width:470px;text-align:center;padding:30px 30px 26px;border-radius:12px;color:#e9eff7;background:linear-gradient(135deg,#071a33,#123a63);border:1px solid rgba(62,190,214,.45);box-shadow:0 24px 60px rgba(4,14,30,.45)}
+.paywall .cad{font-size:30px} .paywall h2{font:600 24px/1.2 var(--serif);color:#fff;margin:8px 0} .paywall p{color:#c9d6e6;font-size:15px;line-height:1.55;margin:0 0 16px;max-width:none} .paywall .pre{font:600 30px var(--serif);color:#fff;display:block;margin-bottom:14px} .paywall .pre small{font:400 14px var(--sans);color:#9fb3c9} .paywall .aviso{font-size:13px;color:#9fd9e6;margin:12px 0 0}
+/* capa */
+#capa-site{color:#e9eff7;font-family:var(--sans);min-height:100vh;background:#050f1f;position:relative;overflow-x:hidden}
+#capa-site a{color:inherit;text-decoration:none} .cs-in{max-width:1180px;margin:0 auto;padding:0 24px;position:relative}
+.cs-nav{position:sticky;top:0;z-index:20;backdrop-filter:blur(10px);background:rgba(5,15,31,.72);border-bottom:1px solid rgba(255,255,255,.07)} .cs-nav .cs-in{display:flex;align-items:center;justify-content:space-between;gap:20px;height:72px} .cs-nav img{height:40px;width:auto;display:block} .cs-nav nav{display:flex;gap:28px;font-size:14.5px;color:#b9c8da} .cs-nav nav a:hover{color:#fff}
+.cs-bt{display:inline-block;border:1px solid rgba(62,190,214,.7);border-radius:8px;padding:11px 20px;font:600 14.5px var(--sans);color:#e9eff7;background:transparent;cursor:pointer;transition:all .15s} .cs-bt:hover{background:rgba(62,190,214,.14)} .cs-bt.cheio{background:#3ebed6;color:#06203a;border-color:#3ebed6;box-shadow:0 8px 26px rgba(62,190,214,.35)} .cs-bt.cheio:hover{transform:translateY(-1px);background:#5fd0e4} .cs-bt.gr{padding:15px 28px;font-size:16px}
+.cs-hero{position:relative;min-height:calc(100vh - 72px);display:flex;align-items:center;justify-content:center;text-align:center;overflow:hidden} #cs-canvas{position:absolute;inset:0;width:100%;height:100%;display:block} .cs-hero::after{content:"";position:absolute;inset:0;background:radial-gradient(60% 55% at 50% 50%,transparent 30%,rgba(5,15,31,.85) 100%);pointer-events:none}
+.cs-hero .cs-in{z-index:2;padding-top:40px;padding-bottom:60px} .cs-tag{display:inline-block;font:600 12px var(--sans);letter-spacing:.22em;text-transform:uppercase;color:#7fd6e6;border:1px solid rgba(62,190,214,.35);border-radius:999px;padding:7px 16px;margin-bottom:26px;background:rgba(62,190,214,.07)}
+.cs-hero h1{font:300 clamp(38px,6.2vw,78px)/1.05 var(--sans);letter-spacing:-.02em;margin:0 0 22px;color:#fff} .cs-hero h1 b{font-weight:500;color:#3ebed6} .cs-hero p{font-size:clamp(16px,1.5vw,20px);line-height:1.6;color:#c2d0e0;max-width:720px;margin:0 auto 34px} .cs-ctas{display:flex;gap:14px;justify-content:center;flex-wrap:wrap}
+.cs-num{display:flex;justify-content:center;gap:clamp(24px,5vw,70px);margin-top:54px;flex-wrap:wrap} .cs-num div{text-align:center} .cs-num b{display:block;font:500 30px var(--mono);color:#fff} .cs-num span{font-size:12.5px;letter-spacing:.12em;text-transform:uppercase;color:#8fa3bb}
+.cs-sec{padding:96px 0;border-top:1px solid rgba(255,255,255,.06);position:relative} .cs-sec h2{font:300 clamp(28px,3.6vw,46px)/1.12 var(--sans);letter-spacing:-.015em;margin:0 0 14px;color:#fff} .cs-sec h2 b{font-weight:500;color:#3ebed6} .cs-sec .cs-sub{font-size:17px;color:#b0c0d3;max-width:680px;line-height:1.6;margin:0 0 44px} .cs-rot{font:600 12px var(--sans);letter-spacing:.2em;text-transform:uppercase;color:#7fd6e6;display:block;margin-bottom:14px}
+.cs-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:18px} .cs-card{background:linear-gradient(160deg,rgba(255,255,255,.055),rgba(255,255,255,.015));border:1px solid rgba(255,255,255,.09);border-radius:14px;padding:26px 22px;transition:transform .2s,border-color .2s} .cs-card:hover{transform:translateY(-4px);border-color:rgba(62,190,214,.6)} .cs-card i{display:block;font:500 13px var(--mono);font-style:normal;color:#3ebed6;margin-bottom:16px} .cs-card h3{font:500 19px var(--sans);margin:0 0 8px;color:#fff} .cs-card p{font-size:14.5px;line-height:1.55;color:#a9b9cc;margin:0;max-width:none}
+.cs-passos{display:grid;grid-template-columns:repeat(3,1fr);gap:22px;counter-reset:p} .cs-passos div{border-left:1px solid rgba(62,190,214,.4);padding:4px 0 4px 22px} .cs-passos div::before{counter-increment:p;content:"0" counter(p);font:500 34px var(--mono);color:#3ebed6;display:block;margin-bottom:10px} .cs-passos h3{font:500 19px var(--sans);margin:0 0 6px;color:#fff} .cs-passos p{font-size:15px;color:#a9b9cc;line-height:1.55;margin:0;max-width:none}
+.cs-planos{display:grid;grid-template-columns:1fr 1.15fr;gap:22px;max-width:880px} .cs-plano{border:1px solid rgba(255,255,255,.1);border-radius:16px;padding:32px 30px;background:rgba(255,255,255,.03)} .cs-plano.dest{border-color:#3ebed6;background:linear-gradient(160deg,rgba(62,190,214,.14),rgba(18,58,99,.35));box-shadow:0 20px 60px rgba(62,190,214,.12)} .cs-plano h3{font:600 13px var(--sans);letter-spacing:.16em;text-transform:uppercase;color:#7fd6e6;margin:0 0 14px} .cs-preco{font:300 52px/1 var(--sans);color:#fff;margin-bottom:6px} .cs-preco small{font-size:16px;color:#9fb3c9} .cs-plano ul{list-style:none;padding:0;margin:22px 0 26px;display:flex;flex-direction:column;gap:11px} .cs-plano li{font-size:15px;color:#c9d6e6;padding-left:26px;position:relative;max-width:none} .cs-plano li::before{content:"✓";position:absolute;left:0;color:#3ebed6;font-weight:700}
+.cs-pol{display:grid;grid-template-columns:repeat(2,1fr);gap:18px 40px;max-width:980px} .cs-pol h3{font:500 17px var(--sans);color:#fff;margin:0 0 6px} .cs-pol p{font-size:15px;line-height:1.6;color:#a9b9cc;margin:0;max-width:none}
+.cs-login{display:grid;grid-template-columns:1fr minmax(320px,430px);gap:60px;align-items:center} .cs-cx{background:rgba(255,255,255,.045);border:1px solid rgba(62,190,214,.35);border-radius:16px;padding:30px} .cs-cx h3{font:500 22px var(--sans);margin:0 0 6px;color:#fff} .cs-cx>p{font-size:14.5px;color:#a9b9cc;margin:0 0 18px}
+#capa-site #conta-form{display:flex;flex-direction:column;gap:12px;align-items:stretch} #capa-site #conta-form input{width:100%;box-sizing:border-box;padding:13px 14px;border-radius:8px;border:1px solid rgba(255,255,255,.18);background:rgba(5,15,31,.6);color:#fff;font:400 15px var(--sans)} #capa-site #conta-form button{padding:13px;border-radius:8px;font:600 15px var(--sans);cursor:pointer;border:1px solid rgba(62,190,214,.6);background:transparent;color:#e9eff7} #capa-site #conta-form button[type=submit]{background:#3ebed6;color:#06203a;border-color:#3ebed6} #capa-site #conta-form .lnkb{border:0;background:none;color:#7fd6e6;text-decoration:underline;padding:4px}
+#capa-msg{font-size:14px;margin:12px 0 0;color:#9fd9e6} #capa-msg.neg{color:#ff9c8e}
+.cs-pe{padding:40px 0 60px;border-top:1px solid rgba(255,255,255,.06);font-size:13px;color:#7f93ab;line-height:1.6} .cs-pe img{height:30px;opacity:.85;margin-bottom:14px;display:block}
+@media (max-width:980px){ .cs-grid{grid-template-columns:repeat(2,1fr)} .cs-passos,.cs-planos,.cs-pol,.cs-login{grid-template-columns:1fr} .cs-nav nav{display:none} .cs-sec{padding:64px 0} }
+@media (max-width:560px){ .cs-grid{grid-template-columns:1fr} .cs-nav img{height:32px} }
+.nlista{display:flex;flex-direction:column;gap:14px} .nled{background:var(--surface);border:1px solid var(--line);border-left:4px solid #3ebed6;border-radius:6px;padding:20px 24px} .nled header{display:flex;justify-content:space-between;gap:14px;align-items:baseline;flex-wrap:wrap;cursor:pointer} .nled h3{font:600 20px/1.25 var(--serif);margin:0} .nled time{font-size:13px;color:var(--muted)} .nled .corpo{margin-top:12px} .nled .corpo p{font-size:15.5px;line-height:1.65;margin:0 0 10px;max-width:78ch} .nled .corpo h4{font:600 16px var(--sans);margin:16px 0 6px}
 .temas{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:16px} .tema{background:var(--surface);border:1px solid var(--line);border-left:3px solid var(--accent);border-radius:4px;padding:16px 18px;display:flex;flex-direction:column;gap:6px}
 .tema h3{font:600 18px/1.25 var(--serif);margin:0} .tema p{font-size:14px;line-height:1.55;color:var(--muted);max-width:none;flex:1} .tema button{align-self:flex-start;font-size:13px}
 .g21{display:grid;grid-template-columns:minmax(0,2fr) minmax(0,1fr);gap:20px;align-items:stretch} @media (max-width:1000px){.g21{grid-template-columns:1fr}}
@@ -268,8 +297,48 @@ button.mini{font-size:12px;color:var(--muted)}
 .rodape{font-size:12px;color:var(--muted);border-top:1px solid var(--line);padding-top:14px}
 </style>
 </head>
-<body>
+<body class="aguarda">
 <script>try{var _t=localStorage.getItem("tema");if(_t==="dark"||_t==="light")document.documentElement.setAttribute("data-theme",_t);}catch(e){}</script>
+<div id="capa-site">
+  <div class="cs-nav"><div class="cs-in"><img src="logo_escuro.png" alt="Alpha Radar - Mercado Global"><nav><a href="#cs-oque">O que você recebe</a><a href="#cs-como">Como funciona</a><a href="#cs-plano">Assinatura</a><a href="#cs-politica">Cancelamento e reembolso</a></nav><a class="cs-bt" href="#cs-entrar">Entrar</a></div></div>
+  <section class="cs-hero"><canvas id="cs-canvas" aria-hidden="true"></canvas><div class="cs-in">
+    <span class="cs-tag">Inteligência de mercado global</span>
+    <h1>O mercado inteiro<br>em <b>um só radar.</b></h1>
+    <p>Cripto, juros, bolsas, ETFs e dados on-chain reunidos em um painel institucional, com análise diária em linguagem simples para você decidir com informação.</p>
+    <div class="cs-ctas"><a class="cs-bt cheio gr" href="#cs-plano">Assinar por R$ <span class="cs-preco-txt">39,99</span> por mês</a><a class="cs-bt gr" href="#cs-entrar">Já tenho conta</a></div>
+    <div class="cs-num"><div><b>190+</b><span>fontes monitoradas</span></div><div><b>24h</b><span>preços de cripto ao vivo</span></div><div><b>8</b><span>painéis integrados</span></div></div>
+  </div></section>
+  <section class="cs-sec" id="cs-oque"><div class="cs-in"><span class="cs-rot">O que você recebe</span><h2>Tudo o que move o preço, <b>em um lugar.</b></h2><p class="cs-sub">Você não precisa abrir dez sites para entender o dia. O Alpha Radar junta os dados, organiza e explica.</p>
+    <div class="cs-grid">
+      <div class="cs-card"><i>01</i><h3>Análise do dia</h3><p>Resumo executivo e análise completa do cenário macro, dos mercados tradicionais e de cripto, com gráficos.</p></div>
+      <div class="cs-card"><i>02</i><h3>Mercado ao vivo</h3><p>Preços, notícias em português, calendário econômico, DeFi, ETFs de Bitcoin e dados on-chain.</p></div>
+      <div class="cs-card"><i>03</i><h3>Indicadores on-chain</h3><p>Preço realizado, MVRV, lucro não realizado, SOPR e fluxo de Bitcoin nas corretoras, explicados em uma frase.</p></div>
+      <div class="cs-card"><i>04</i><h3>Estratégias</h3><p>Arbitragem de funding, pools de liquidez, vaults, trades e opções, com link direto para cada mercado.</p></div>
+      <div class="cs-card"><i>05</i><h3>Carteira</h3><p>Registre suas operações e compare o seu desempenho com CDI, Bitcoin, Ibovespa, S&amp;P 500 e dólar.</p></div>
+      <div class="cs-card"><i>06</i><h3>Relatório em PDF</h3><p>Relatório de mercado com introdução, desenvolvimento e conclusão, pronto para baixar.</p></div>
+      <div class="cs-card"><i>07</i><h3>Aulas</h3><p>Módulos em vídeo para aprender a usar cada indicador e cada estratégia do painel.</p></div>
+      <div class="cs-card"><i>08</i><h3>Newsletter</h3><p>Análises e atualizações publicadas pela equipe, reunidas em uma aba só sua.</p></div>
+    </div></div></section>
+  <section class="cs-sec" id="cs-como"><div class="cs-in"><span class="cs-rot">Como funciona</span><h2>Do cadastro à leitura em <b>três passos.</b></h2><p class="cs-sub">O acesso ao painel é feito somente com login.</p>
+    <div class="cs-passos"><div><h3>Crie a sua conta</h3><p>Cadastre e-mail e senha. Leva menos de um minuto.</p></div><div><h3>Ative a assinatura</h3><p>Por R$ <span class="cs-preco-txt">39,99</span> por mês você libera as áreas exclusivas de assinantes.</p></div><div><h3>Acompanhe todos os dias</h3><p>Abra o painel, leia a análise do dia e aprofunde no que interessa.</p></div></div></div></section>
+  <section class="cs-sec" id="cs-plano"><div class="cs-in"><span class="cs-rot">Assinatura</span><h2>Um plano. <b>Preço simples.</b></h2><p class="cs-sub">Sem fidelidade. Você cancela quando quiser.</p>
+    <div class="cs-planos">
+      <div class="cs-plano"><h3>Conta gratuita</h3><div class="cs-preco">R$ 0</div><ul><li>Acesso ao painel com login</li><li>Áreas abertas definidas pela equipe</li><li>Prévia das áreas de assinantes</li></ul><a class="cs-bt" href="#cs-entrar">Criar conta</a></div>
+      <div class="cs-plano dest"><h3>Assinante</h3><div class="cs-preco">R$ <span class="cs-preco-txt">39,99</span> <small>por mês</small></div><ul><li>Todas as áreas do painel liberadas</li><li>Análise completa do cenário, todos os dias</li><li>Estratégias, on-chain, ETFs e relatório em PDF</li><li>Aulas e newsletter</li><li>Garantia de 7 dias</li></ul><button type="button" class="cs-bt cheio" data-assinar>Assinar agora</button><p id="cs-assina-msg" style="font-size:13.5px;color:#9fd9e6;margin:14px 0 0" hidden></p></div>
+    </div></div></section>
+  <section class="cs-sec" id="cs-politica"><div class="cs-in"><span class="cs-rot">Política de cancelamento e reembolso</span><h2>Transparente, <b>sem letras miúdas.</b></h2><p class="cs-sub">Resumo das regras da assinatura.</p>
+    <div class="cs-pol">
+      <div><h3>Garantia de 7 dias</h3><p>Se você se arrepender em até 7 dias corridos depois da primeira assinatura, devolvemos 100% do valor pago, como prevê o artigo 49 do Código de Defesa do Consumidor.</p></div>
+      <div><h3>Cancelamento a qualquer momento</h3><p>Não há fidelidade nem multa. Ao cancelar, você continua com acesso até o fim do período já pago e não é cobrado de novo.</p></div>
+      <div><h3>Depois dos 7 dias</h3><p>Passado o prazo de garantia, os valores de períodos já iniciados não são devolvidos nem trocados por crédito.</p></div>
+      <div><h3>Como pedir</h3><p>Envie o pedido <span id="cs-contato">pelo canal de suporte do site</span>, informando o e-mail da conta. O reembolso é feito pelo mesmo meio de pagamento, em até 10 dias úteis.</p></div>
+      <div><h3>Conteúdo informativo</h3><p>O Alpha Radar oferece dados e análises com fim informativo e educacional. Não é recomendação de investimento, e resultados passados não garantem resultados futuros.</p></div>
+      <div><h3>Seus dados</h3><p>Usamos o seu e-mail apenas para o login e para as comunicações do serviço. Você pode pedir a exclusão da conta quando quiser.</p></div>
+    </div></div></section>
+  <section class="cs-sec" id="cs-entrar"><div class="cs-in cs-login"><div><span class="cs-rot">Acesso</span><h2>Entre no <b>seu radar.</b></h2><p class="cs-sub" style="margin:0">Use o seu e-mail e senha. Se ainda não tem conta, preencha os campos e clique em "Criar conta".</p></div>
+    <div class="cs-cx"><h3>Entrar ou criar conta</h3><p>O painel só abre para quem está com login feito.</p><div id="cs-form"></div><p id="capa-msg" hidden></p></div></div></section>
+  <div class="cs-pe"><div class="cs-in"><img src="logo_escuro.png" alt=""><p>Alpha Radar – Mercado Global. Conteúdo informativo e educacional; não constitui recomendação de investimento. Investimentos envolvem risco, inclusive de perda do valor aplicado.</p></div></div>
+</div>
 <aside id="lado">
     <button type="button" id="lado-bt" aria-label="Abrir ou fechar o menu" aria-expanded="false">☰</button>
     <div class="marca" id="marca" hidden></div>
@@ -281,6 +350,7 @@ button.mini{font-size:12px;color:var(--muted)}
       <button type="button" data-area="aulas" aria-current="false">Aulas</button>
       <button type="button" data-area="analises" aria-current="false">Análises</button>
       <button type="button" data-area="relatorio" aria-current="false">Relatório</button>
+      <button type="button" data-area="newsletter" aria-current="false">Newsletter</button>
       <button type="button" data-area="admin" aria-current="false" id="bt-admin" hidden>Administração</button>
     </nav>
 </aside>
@@ -581,6 +651,15 @@ button.mini{font-size:12px;color:var(--muted)}
     </div>
   </div>
 
+  <div id="area-newsletter" class="area" hidden>
+    <div class="box" id="nl-adm" hidden style="margin-bottom:20px"><h2>Nova edição</h2><p class="sub">Escreva a edição e publique. Ela aparece na hora nesta aba para quem tem acesso. Linhas começando com "## " viram subtítulos.</p>
+      <form id="nl-form" style="display:flex;flex-direction:column;gap:10px;margin-top:12px;max-width:900px"><input id="nl-titulo" type="text" maxlength="140" placeholder="Título da edição" required><textarea id="nl-corpo" rows="12" placeholder="Texto da edição" required style="font:inherit;padding:10px;line-height:1.55"></textarea>
+      <p style="display:flex;gap:8px;flex-wrap:wrap;align-items:center"><button type="submit">Publicar edição</button><button type="button" class="sec" id="nl-auto">Preencher com a análise do dia</button><span class="sub" id="nl-msg"></span></p></form>
+      <p class="sub" style="margin-top:14px"><b id="nl-n">0</b> pessoas pediram para receber por e-mail. <button type="button" class="sec" id="nl-copiar">Copiar os e-mails</button> <span id="nl-copiado"></span></p>
+      <p class="note">O site ainda não envia e-mails sozinho. Para mandar a edição por e-mail, copie a lista e use o seu serviço de e-mail em cópia oculta.</p></div>
+    <div class="box" style="margin-bottom:20px;display:flex;justify-content:space-between;align-items:center;gap:16px;flex-wrap:wrap"><div><h2 style="margin:0">Receber por e-mail</h2><p class="sub" style="margin:4px 0 0" id="nl-insc-txt">Avise que você quer receber as edições no seu e-mail.</p></div><button type="button" id="nl-insc">Quero receber</button></div>
+    <div class="nlista" id="nl-lista"></div>
+  </div>
   <div id="area-admin" class="area" hidden>
     <div class="box" id="adm-negado"><h2>Área do administrador</h2><p class="sub">Só a conta de administrador abre esta área.</p></div>
     <div id="adm-painel" hidden>
@@ -601,7 +680,9 @@ button.mini{font-size:12px;color:var(--muted)}
         <h2>Nome do site</h2>
         <form class="controles" id="adm-nome-form" style="margin-top:10px"><label>Nome que aparece no topo e na aba do navegador<input id="adm-nome" type="text" maxlength="40" style="width:260px"></label><button type="submit">Salvar nome</button></form>
         <form class="controles" id="adm-menu-form" style="margin-top:10px"><label>Nome que aparece no menu da esquerda<input id="adm-nome-menu" type="text" maxlength="24" style="width:260px"></label><button type="submit">Salvar nome do menu</button></form>
-        <h2 style="margin-top:22px;font-size:17px">Abas do menu</h2><p class="sub">Mude o nome e a ordem das abas. A primeira da lista é a que abre quando alguém entra no site.</p><div id="adm-abas" style="display:flex;flex-direction:column;gap:8px;margin-top:10px;max-width:460px"></div><p style="margin-top:10px"><button type="button" id="adm-abas-salvar">Salvar abas</button> <button type="button" class="sec" id="adm-abas-padrao">Voltar ao padrão</button> <span class="sub" id="adm-abas-msg"></span></p>
+        <h2 style="margin-top:22px;font-size:17px">Abas do menu</h2><p class="sub">Mude o nome, a ordem e quem pode ver cada aba. A primeira da lista é a que abre quando alguém entra no site.</p><div id="adm-abas" style="display:flex;flex-direction:column;gap:8px;margin-top:10px;max-width:760px"></div><p style="margin-top:10px"><button type="button" id="adm-abas-salvar">Salvar abas</button> <button type="button" class="sec" id="adm-abas-padrao">Voltar ao padrão</button> <span class="sub" id="adm-abas-msg"></span></p><p class="note">"Só assinantes (prévia desfocada)": o usuário gratuito vê a aba borrada e travada, com o convite para assinar. "Escondida para gratuitos": a aba some do menu de quem não assina. "Só administrador": só você vê.</p>
+        <h2 style="margin-top:22px;font-size:17px">Assinatura</h2><p class="sub">Preço mostrado na capa e nas áreas travadas, link de pagamento do botão "Assinar" e contato para cancelamento.</p>
+        <form class="controles" id="adm-assina-form" style="margin-top:10px"><label>Preço por mês (R$)<input id="adm-preco" type="text" maxlength="12" style="width:120px"></label><label>Link de pagamento<input id="adm-linkpg" type="url" maxlength="300" placeholder="https://" style="width:320px"></label><label>Contato de suporte<input id="adm-contato" type="text" maxlength="120" placeholder="e-mail ou WhatsApp" style="width:260px"></label><button type="submit">Salvar</button> <span class="sub" id="adm-assina-msg"></span></form>
       </div>
       <div class="box" style="margin-top:20px">
         <h2>Módulos e aulas</h2>
@@ -1161,9 +1242,9 @@ function vnum(i){ var t=String($(i).value).trim().replace(/[^0-9.,]/g,""); if(t.
 function rotPreco(){ var sm=$("f-moeda").value==="BRL"?"R$":"US$", total=$("f-modo").value==="total"; $("f-preco-rot").textContent=(total?"Total pago (":"Preço de 1 unidade (")+sm+")";
   var q=+$("f-qtd").value, v=vnum("f-preco"), a=$("f-ativo").value.trim().toUpperCase()||"unidade"; $("f-conta").textContent=(q>0&&v>0)?(total?"Preço por "+a+": "+sm+" "+prc(v/q)+".":"Total da operação: "+sm+" "+usd(v*q)+"."):""; }
 function limpaForm(){ EDIT=null; var mo=$("f-moeda").value, cl=$("f-classe").value, md=$("f-modo").value; $("c-form").reset(); $("f-moeda").value=mo; $("f-classe").value=cl; $("f-modo").value=md; rotPreco(); if(DOLAR) $("f-cambio").value=DOLAR.toFixed(4); $("f-data").value=new Date().toISOString().slice(0,10); $("f-salvar").textContent="Adicionar"; $("f-cancelar").hidden=true; $("f-erro").hidden=true; }
-var TITULOS={inicio:"Início",carteira:"Minha Carteira",mercado:"Mercado",funding:"Estratégias",aulas:"Aulas",analises:"Análises",relatorio:"Relatório",admin:"Administração"};
+var TITULOS={newsletter:"Newsletter",inicio:"Início",carteira:"Minha Carteira",mercado:"Mercado",funding:"Estratégias",aulas:"Aulas",analises:"Análises",relatorio:"Relatório",admin:"Administração"};
 var AUTHURL=/access_token=|refresh_token=|error_description=|type=(signup|magiclink|recovery)/.test(location.hash)||/[?&](code|token_hash)=/.test(location.search);
-function area(a){ if(!TITULOS[a]) a=(typeof ABAINI!=="undefined"&&ABAINI)||"inicio"; Object.keys(TITULOS).forEach(function(x){ $("area-"+x).hidden=x!==a; }); document.querySelectorAll("#areas button").forEach(function(o){o.setAttribute("aria-current",o.dataset.area===a?"page":"false");});
+function area(a){ if(typeof acessoDe==="function"&&a!=="admin"&&TITULOS[a]){ var _ac=acessoDe(a); if(_ac==="some") a=acessoPrimeira(); } if(!TITULOS[a]) a=(typeof ABAINI!=="undefined"&&ABAINI)||"inicio"; Object.keys(TITULOS).forEach(function(x){ $("area-"+x).hidden=x!==a; }); document.querySelectorAll("#areas button").forEach(function(o){o.setAttribute("aria-current",o.dataset.area===a?"page":"false");});
   $("titulo").textContent=TITULOS[a]; $("atualizado").hidden=a!=="funding"; $("cart-status").hidden=a==="funding"||a==="aulas"||a==="admin"; if(a==="admin"&&typeof admCarrega==="function") admCarrega(); if(!AUTHURL){ try{history.replaceState(null,"","#"+a);}catch(e){} } }
 $("c-form").addEventListener("submit",function(ev){ ev.preventDefault();
   var a=$("f-ativo").value.trim().toUpperCase().replace(/[^A-Z0-9 ]/g,"").replace(/ +/g," "), q=+$("f-qtd").value, pd=($("f-modo").value==="total"&&+$("f-qtd").value>0)?vnum("f-preco")/(+$("f-qtd").value):vnum("f-preco"), mo=$("f-moeda").value, cb=+$("f-cambio").value, p=mo==="BRL"?(cb>0?pd/cb:NaN):pd, d=$("f-data").value, t=$("f-tipo").value, er=$("f-erro");
@@ -1370,10 +1451,11 @@ function perfVivo(){ if($("cj-desempenho").hidden||!PCHART) return; if(Date.now(
 document.querySelectorAll("#pf-per button").forEach(function(b){ b.addEventListener("click",function(){ PPER=+b.dataset.d; document.querySelectorAll("#pf-per button").forEach(function(o){o.setAttribute("aria-pressed",o===b?"true":"false");}); perfDesenha(); }); });
 /* ---------- Conta (Supabase) ---------- */
 var CFG=window.PAINEL_CONFIG||{}, SB=null, USUARIO=null, PLANO=null, PLANOREAL=null;
-function contaMsg(t,erro){ var m=$("conta-msg"); m.textContent=t||""; m.hidden=!t; m.className=erro?"neg":"sub2"; }
+function contaMsg(t,erro){ var m=$("conta-msg"); m.textContent=t||""; m.hidden=!t; m.className=erro?"neg":"sub2"; var c=$("capa-msg"); if(c){ c.textContent=t||""; c.hidden=!t; c.className=erro?"neg":""; } }
 document.addEventListener("DOMContentLoaded",function(){ $("ver-como").addEventListener("change",function(){ if(PLANOREAL!=="admin") return; PLANO=this.value; try{ sessionStorage.setItem("ver_como",PLANO); }catch(e){} contaDesenha(); if(typeof comCarrega==="function") comCarrega(); }); });
 function contaDesenha(){
   if(!SB){ $("conta").hidden=true; return; }
+  document.body.classList.toggle("fora",!USUARIO); document.body.classList.toggle("adm",PLANO==="admin"); if(typeof capaAnima==="function") capaAnima(); if(typeof acessoAplica==="function") acessoAplica(); if(typeof nlDesenha==="function"&&USUARIO) nlDesenha();
   $("conta").hidden=false; $("conta-fora").hidden=!!USUARIO; $("conta-dentro").hidden=!USUARIO;
   if(typeof temaDesenha==="function") $("tema-fora").hidden=!!USUARIO;
   var rc=$("recarregar"); if(USUARIO){ if(rc.parentNode.id!=="perfil-acoes") $("perfil-acoes").insertBefore(rc,$("perfil-acoes").firstChild); rc.textContent="Atualizar dados"; $("perfil-bt").textContent=(USUARIO.email||"?").charAt(0); } else if(rc.parentNode.id==="perfil-acoes"){ document.querySelector(".direita").appendChild(rc); rc.textContent="Atualizar"; $("perfil-menu").hidden=true; }
@@ -1383,7 +1465,7 @@ function contaDesenha(){
   $("funding-bloq-txt").textContent=USUARIO?"Sua conta ainda não tem acesso a esta área. Fale com o administrador para liberar.":"Entre com a sua conta para ver esta área.";
   $("c-nota-local").hidden=!!USUARIO; $("c-nota-nuvem").hidden=!USUARIO;
   $("ver-como-rot").hidden=PLANOREAL!=="admin"; $("ver-como-rot").style.display=PLANOREAL==="admin"?"flex":"none";
-  if(PLANO!=="admin"&&!$("area-admin").hidden) area("mercado");
+  if(PLANO!=="admin"&&!$("area-admin").hidden) area(ABAINI);
   $("bt-admin").hidden=PLANO!=="admin"; if(!$("area-admin").hidden) admCarrega();
 }
 var ADM=[];
@@ -1425,7 +1507,7 @@ function nuvem(op,l){
 }
 function nuvemFalhou(){ $("f-erro").textContent="Não consegui salvar na sua conta. Recarreguei os lançamentos; tente de novo."; $("f-erro").hidden=false; nuvemCarrega().catch(function(){}); }
 function sessao(s){
-  var antes=USUARIO, primeira=!sessao.ja; sessao.ja=true;
+  var antes=USUARIO, primeira=!sessao.ja; sessao.ja=true; document.body.classList.remove("aguarda");
   USUARIO=s?s.user:null; PLANO=null; PLANOREAL=null; if(USUARIO&&!antes&&!primeira) area(ABAINI);
   if(!USUARIO){ cLer(); contaDesenha(); cDesenha(); comCarrega(); return; }
   contaDesenha();
@@ -1436,18 +1518,65 @@ function sessao(s){
 var MODS=[], EDM=null, EDA=null;
 function ytId(v){ v=(v||"").trim(); var m=v.match(/(?:v=|youtu\.be\/|embed\/|shorts\/)([\w-]{6,20})/); return m?m[1]:(/^[\w-]{6,20}$/.test(v)?v:""); }
 function admErro(t){ $("adm-c-erro").textContent=t||""; $("adm-c-erro").hidden=!t; }
-var ABASP=[["inicio","Início"],["mercado","Mercado"],["carteira","Carteira"],["funding","Estratégias"],["aulas","Aulas"],["analises","Análises"],["relatorio","Relatório"]], ABAS=ABASP.map(function(x){return {id:x[0],nome:x[1]};});
-function abasAplica(l){ var ok=[], nav=$("areas"); (Array.isArray(l)?l:[]).forEach(function(x){ if(x&&ABASP.some(function(p){return p[0]===x.id;})&&!ok.some(function(o){return o.id===x.id;})) ok.push({id:x.id,nome:String(x.nome||"").trim().slice(0,24)||ABASP.filter(function(p){return p[0]===x.id;})[0][1]}); });
-  ABASP.forEach(function(p){ if(!ok.some(function(o){return o.id===p[0];})){ if(p[0]==="inicio") ok.unshift({id:p[0],nome:p[1]}); else ok.push({id:p[0],nome:p[1]}); } }); ABAS=ok;
+var ABASP=[["inicio","Início"],["mercado","Mercado"],["carteira","Carteira"],["funding","Estratégias"],["aulas","Aulas"],["analises","Análises"],["relatorio","Relatório"],["newsletter","Newsletter"]], ACS=["todos","assinante","oculta","admin"], ABAS=ABASP.map(function(x){return {id:x[0],nome:x[1],acesso:"todos"};});
+function abasAplica(l){ var ok=[], nav=$("areas"); (Array.isArray(l)?l:[]).forEach(function(x){ if(x&&ABASP.some(function(p){return p[0]===x.id;})&&!ok.some(function(o){return o.id===x.id;})) ok.push({id:x.id,acesso:ACS.indexOf(x.acesso)>=0?x.acesso:"todos",nome:String(x.nome||"").trim().slice(0,24)||ABASP.filter(function(p){return p[0]===x.id;})[0][1]}); });
+  ABASP.forEach(function(p){ if(!ok.some(function(o){return o.id===p[0];})){ if(p[0]==="inicio") ok.unshift({id:p[0],nome:p[1],acesso:"todos"}); else ok.push({id:p[0],nome:p[1],acesso:"todos"}); } }); ABAS=ok;
   ABAS.forEach(function(a){ var b=nav.querySelector('button[data-area="'+a.id+'"]'); if(!b) return; b.textContent=a.nome; nav.insertBefore(b,$("bt-admin")); TITULOS[a.id]=a.id==="carteira"&&a.nome==="Carteira"?"Minha Carteira":a.nome; if(!$("area-"+a.id).hidden) $("titulo").textContent=TITULOS[a.id]; });
-  ABAINI=ABAS[0].id; abasAdm(); }
+  ABAINI=ABAS[0].id; abasAdm(); acessoAplica(); }
+/* ---------- Acesso por plano, assinatura, capa e newsletter ---------- */
+var ASSINA={preco:"39,99",link:"",contato:""};
+function acessoDe(id){ if(typeof ABAS==="undefined"||!ABAS) return "livre"; var a=null; ABAS.forEach(function(x){ if(x.id===id) a=x; }); var ac=a?a.acesso||"todos":"todos"; if(PLANO==="admin") return "livre"; var pago=PLANO==="assinante"; if(ac==="admin") return "some"; if(ac==="oculta") return pago?"livre":"some"; if(ac==="assinante") return pago?"livre":"tranca"; return "livre"; }
+function acessoPrimeira(){ for(var i=0;i<ABAS.length;i++){ if(acessoDe(ABAS[i].id)==="livre") return ABAS[i].id; } for(var j=0;j<ABAS.length;j++){ if(acessoDe(ABAS[j].id)!=="some") return ABAS[j].id; } return "inicio"; }
+function assinar(msgEl){ if(/^https:\/\//.test(ASSINA.link)){ window.open(ASSINA.link,"_blank","noopener"); return; } if(msgEl){ msgEl.hidden=false; msgEl.textContent=USUARIO?"O pagamento online ainda está sendo ativado. Fale com o suporte"+(ASSINA.contato?" ("+ASSINA.contato+")":"")+" para liberar a sua assinatura.":"Crie a sua conta abaixo. Depois, a assinatura é liberada pelo suporte"+(ASSINA.contato?" ("+ASSINA.contato+")":"")+"."; } if(!USUARIO){ var e=$("cs-entrar"); if(e) e.scrollIntoView({behavior:"smooth"}); } }
+function acessoAplica(){ if(typeof ABAS==="undefined") return; var nav=$("areas"); ABAS.forEach(function(a){ var st=acessoDe(a.id), b=nav.querySelector('button[data-area="'+a.id+'"]'), ar=$("area-"+a.id); if(b){ b.hidden=st==="some"; b.classList.toggle("tranca",st==="tranca"); } if(!ar) return;
+    var pw=ar.querySelector(":scope>.paywall"); if(st==="tranca"){ ar.classList.add("bloq"); [].forEach.call(ar.children,function(c){ if(!c.classList.contains("paywall")) c.setAttribute("inert",""); });
+      if(!pw){ pw=el("div","paywall"); var d=el("div"); d.appendChild(el("div","cad","🔒")); d.appendChild(el("h2",null,"Área exclusiva para assinantes")); d.appendChild(el("p",null,"Assine o Alpha Radar para liberar esta área e todas as outras do painel.")); var pr=el("span","pre","R$ "); pr.appendChild(el("span","cs-preco-txt",ASSINA.preco)); pr.appendChild(el("small",null," por mês")); d.appendChild(pr); var bt=el("button","btn-capa","Assinar agora"); bt.type="button"; var av=el("p","aviso"); av.hidden=true; bt.addEventListener("click",function(){ assinar(av); }); d.appendChild(bt); d.appendChild(av); pw.appendChild(d); ar.appendChild(pw); } }
+    else { ar.classList.remove("bloq"); [].forEach.call(ar.children,function(c){ c.removeAttribute("inert"); }); if(pw) pw.remove(); }
+    if(st==="some"&&!ar.hidden) area(acessoPrimeira()); }); }
+function assinaCfg(k,v){ if(k==="preco"&&v) ASSINA.preco=v; if(k==="link_pagamento") ASSINA.link=v||""; if(k==="contato") ASSINA.contato=v||""; [].forEach.call(document.querySelectorAll(".cs-preco-txt"),function(e){ e.textContent=ASSINA.preco; }); if(ASSINA.contato&&$("cs-contato")) $("cs-contato").textContent="para "+ASSINA.contato; if($("adm-preco")){ $("adm-preco").value=ASSINA.preco; $("adm-linkpg").value=ASSINA.link; $("adm-contato").value=ASSINA.contato; } }
+/* capa: animação de radar */
+var CAPA={on:false};
+function capaAnima(){ var c=$("cs-canvas"); if(!c) return; var ativo=document.body.classList.contains("fora"); if(!ativo){ CAPA.on=false; return; } if(CAPA.on) return; CAPA.on=true; var g=c.getContext("2d"), pts=[], N=150, t0=performance.now(), red=window.matchMedia&&matchMedia("(prefers-reduced-motion: reduce)").matches;
+  for(var i=0;i<N;i++){ var u=Math.random()*2-1, th=Math.random()*Math.PI*2, r=Math.sqrt(1-u*u); pts.push({x:r*Math.cos(th),y:u,z:r*Math.sin(th),s:Math.random()}); }
+  var orb=[{r:1.35,inc:0.42,v:0.00022,f:0},{r:1.62,inc:-0.3,v:-0.00015,f:2},{r:1.95,inc:0.18,v:0.0001,f:4}];
+  function quadro(agora){ if(!CAPA.on) return; var dpr=Math.min(2,window.devicePixelRatio||1), W=c.clientWidth, H=c.clientHeight; if(c.width!==Math.round(W*dpr)||c.height!==Math.round(H*dpr)){ c.width=Math.round(W*dpr); c.height=Math.round(H*dpr); } g.setTransform(dpr,0,0,dpr,0,0); g.clearRect(0,0,W,H);
+    var t=agora-t0, cx=W/2, cy=H/2, R=Math.min(W,H)*0.36, rot=t*0.00012, sw=t*0.0007;
+    for(var k=1;k<=4;k++){ g.beginPath(); g.arc(cx,cy,R*k/4,0,Math.PI*2); g.strokeStyle="rgba(62,190,214,"+(0.05+0.03*k)+")"; g.lineWidth=1; g.stroke(); }
+    g.strokeStyle="rgba(62,190,214,.08)"; g.beginPath(); g.moveTo(cx-R,cy); g.lineTo(cx+R,cy); g.moveTo(cx,cy-R); g.lineTo(cx,cy+R); g.stroke();
+    for(var m=-3;m<=3;m++){ var ry=R*Math.cos(m*Math.PI/8), yy=cy+R*Math.sin(m*Math.PI/8)*0.98; g.beginPath(); g.ellipse(cx,yy,ry,ry*0.16,0,0,Math.PI*2); g.strokeStyle="rgba(190,215,240,.07)"; g.stroke(); }
+    for(var n=0;n<6;n++){ var a=rot+n*Math.PI/6; g.beginPath(); g.ellipse(cx,cy,Math.abs(R*Math.cos(a)),R,0,0,Math.PI*2); g.strokeStyle="rgba(190,215,240,.06)"; g.stroke(); }
+    var gr=g.createConicGradient?g.createConicGradient(sw,cx,cy):null; if(gr){ gr.addColorStop(0,"rgba(62,190,214,0)"); gr.addColorStop(0.86,"rgba(62,190,214,0)"); gr.addColorStop(1,"rgba(62,190,214,.30)"); g.fillStyle=gr; g.beginPath(); g.arc(cx,cy,R,0,Math.PI*2); g.fill(); }
+    g.beginPath(); g.moveTo(cx,cy); g.lineTo(cx+R*Math.cos(sw),cy+R*Math.sin(sw)); g.strokeStyle="rgba(127,214,230,.75)"; g.lineWidth=1.4; g.stroke();
+    var cr=Math.cos(rot), sr=Math.sin(rot); pts.forEach(function(p){ var x=p.x*cr+p.z*sr, z=-p.x*sr+p.z*cr, px=cx+x*R, py=cy+p.y*R, ang=Math.atan2(py-cy,px-cx), d=((sw-ang)%(Math.PI*2)+Math.PI*2)%(Math.PI*2), bri=Math.max(0,1-d/1.6), al=(z>0?0.55:0.16)+bri*0.45; g.beginPath(); g.arc(px,py,(z>0?1.5:1)+bri*2.2+p.s*0.6,0,Math.PI*2); g.fillStyle=bri>0.25?"rgba(127,230,245,"+Math.min(1,al)+")":"rgba(220,232,245,"+al*0.8+")"; g.fill(); });
+    orb.forEach(function(o){ g.save(); g.translate(cx,cy); g.rotate(o.inc); g.beginPath(); g.ellipse(0,0,R*o.r,R*o.r*0.3,0,0,Math.PI*2); g.strokeStyle="rgba(190,215,240,.10)"; g.lineWidth=1; g.stroke(); var an=o.f+t*o.v*6; var ox=R*o.r*Math.cos(an), oy=R*o.r*0.3*Math.sin(an); g.beginPath(); g.arc(ox,oy,3,0,Math.PI*2); g.fillStyle="#fff"; g.shadowColor="#3ebed6"; g.shadowBlur=14; g.fill(); g.restore(); });
+    if(!red) requestAnimationFrame(quadro); }
+  requestAnimationFrame(quadro); }
+/* newsletter */
+var NL={l:[],insc:false,aberta:null};
+function nlCorpo(box,txt){ String(txt||"").split(/\n\s*\n/).forEach(function(b){ b=b.trim(); if(!b) return; if(/^##\s+/.test(b)){ var ls=b.split("\n"); box.appendChild(el("h4",null,ls[0].replace(/^##\s+/,""))); if(ls.length>1) box.appendChild(el("p",null,ls.slice(1).join(" "))); } else box.appendChild(el("p",null,b.replace(/\n/g," "))); }); }
+function nlMostra(){ var bx=$("nl-lista"); if(!bx) return; bx.textContent=""; NL.l.forEach(function(e,i){ var a=el("article","nled"), h=el("header"), tt=el("h3",null,e.titulo), tm=el("time",null,new Date(e.criado_em).toLocaleDateString("pt-BR",{day:"2-digit",month:"long",year:"numeric"})); h.appendChild(tt); h.appendChild(tm); a.appendChild(h); var c=el("div","corpo"); nlCorpo(c,e.corpo); var ab=NL.aberta===e.id||(NL.aberta==null&&i===0); c.hidden=!ab; a.appendChild(c); h.addEventListener("click",function(){ c.hidden=!c.hidden; NL.aberta=c.hidden?-1:e.id; });
+    if(PLANO==="admin") a.appendChild(botaoRemover("Apagar edição",function(){ SB.from("newsletters").delete().eq("id",e.id).then(nlDesenha); })); bx.appendChild(a); });
+  if(!NL.l.length) bx.appendChild(el("p","sub",NL.erro?"A newsletter ainda não foi ativada no banco de dados.":"Nenhuma edição publicada ainda.")); $("nl-insc").textContent=NL.insc?"Parar de receber":"Quero receber"; $("nl-insc-txt").textContent=NL.insc?"Você pediu para receber as edições em "+(USUARIO?USUARIO.email:"seu e-mail")+".":"Avise que você quer receber as edições no seu e-mail."; $("nl-adm").hidden=PLANO!=="admin"; }
+function nlDesenha(){ if(!SB||!USUARIO) return; SB.from("newsletters").select("*").order("criado_em",{ascending:false}).limit(60).then(function(r){ NL.erro=!!r.error; NL.l=r.data||[]; nlMostra(); });
+  SB.from("news_inscritos").select("user_id,email").then(function(r){ var l=r.data||[]; NL.insc=l.some(function(x){return x.user_id===USUARIO.id;}); NL.emails=l.map(function(x){return x.email;}); $("nl-n").textContent=l.length; nlMostra(); }); }
+document.addEventListener("DOMContentLoaded",function(){
+  var cf=$("conta-fora"), dst=$("cs-form"); if(cf&&dst) dst.appendChild(cf);
+  [].forEach.call(document.querySelectorAll("[data-assinar]"),function(b){ b.addEventListener("click",function(){ assinar($("cs-assina-msg")); }); });
+  [].forEach.call(document.querySelectorAll('#areas button[data-area="newsletter"]'),function(b){ b.addEventListener("click",nlDesenha); });
+  $("nl-insc").addEventListener("click",function(){ if(!SB||!USUARIO) return; (NL.insc?SB.from("news_inscritos").delete().eq("user_id",USUARIO.id):SB.from("news_inscritos").insert({user_id:USUARIO.id,email:USUARIO.email})).then(function(r){ if(r.error) $("nl-insc-txt").textContent="Não consegui salvar agora."; else nlDesenha(); }); });
+  $("nl-form").addEventListener("submit",function(ev){ ev.preventDefault(); var t=$("nl-titulo").value.trim(), c=$("nl-corpo").value.trim(); if(!t||!c) return; $("nl-msg").textContent="Publicando…"; SB.from("newsletters").insert({titulo:t.slice(0,140),corpo:c.slice(0,60000)}).then(function(r){ if(r.error){ $("nl-msg").textContent="Não consegui publicar. Confira se a newsletter foi ativada no banco."; return; } $("nl-msg").textContent="Edição publicada."; $("nl-titulo").value=""; $("nl-corpo").value=""; NL.aberta=null; nlDesenha(); }); });
+  $("nl-auto").addEventListener("click",function(){ $("nl-msg").textContent="Montando a análise…"; var pend=[ocCarrega(),defiCarrega(),etfCarrega()].map(function(p){return p.catch(function(){});}); Promise.all(pend).then(function(){ var tmp=$("in-comp-corpo"); completaDes(); var o=[]; [].forEach.call(tmp.querySelectorAll(".cap"),function(c){ o.push("## "+c.querySelector("h3").textContent); [].forEach.call(c.querySelectorAll(".txt>p:not(.note), .txt>.chave"),function(p){ o.push(p.classList.contains("chave")?"Ponto-chave: "+p.lastChild.textContent:p.textContent); }); }); $("nl-titulo").value=$("in-titulo").textContent; $("nl-corpo").value=o.join("\n\n"); $("nl-msg").textContent="Preenchido. Revise antes de publicar."; }); });
+  $("nl-copiar").addEventListener("click",function(){ var t=(NL.emails||[]).join(", "); if(navigator.clipboard&&t) navigator.clipboard.writeText(t).then(function(){ $("nl-copiado").textContent="Copiado."; }); else $("nl-copiado").textContent=t||"Ninguém na lista ainda."; });
+  $("adm-assina-form").addEventListener("submit",function(ev){ ev.preventDefault(); var p=$("adm-preco").value.trim()||"39,99", l=$("adm-linkpg").value.trim(), c=$("adm-contato").value.trim(); if(l&&!/^https:\/\//.test(l)){ $("adm-assina-msg").textContent="O link precisa começar com https://"; return; } SB.from("config_site").upsert([{chave:"preco",valor:p},{chave:"link_pagamento",valor:l},{chave:"contato",valor:c}]).then(function(r){ $("adm-assina-msg").textContent=r.error?"Não consegui salvar.":"Salvo."; if(!r.error){ assinaCfg("preco",p); assinaCfg("link_pagamento",l); assinaCfg("contato",c); } }); });
+  assinaCfg(); setTimeout(function(){ document.body.classList.remove("aguarda"); },3500); });
 var ABAINI="inicio";
 function abasAdm(){ var box=$("adm-abas"); if(!box) return; box.textContent=""; ABAS.forEach(function(a,i){ var r=el("div"); r.style.cssText="display:flex;gap:6px;align-items:center";
     [[-1,"▲","Subir "],[1,"▼","Descer "]].forEach(function(c){ var b=el("button","mv",c[1]); b.type="button"; b.disabled=i+c[0]<0||i+c[0]>=ABAS.length; b.setAttribute("aria-label",c[2]+a.nome); b.addEventListener("click",function(){ abasLe(); var x=ABAS[i]; ABAS[i]=ABAS[i+c[0]]; ABAS[i+c[0]]=x; abasAdm(); $("adm-abas-msg").textContent="Ordem alterada. Clique em Salvar abas."; }); r.appendChild(b); });
-    var inp=el("input"); inp.type="text"; inp.maxLength=24; inp.value=a.nome; inp.dataset.id=a.id; inp.style.width="240px"; inp.setAttribute("aria-label","Nome da aba "+a.nome); r.appendChild(inp); box.appendChild(r); }); }
-function abasLe(){ [].forEach.call(document.querySelectorAll("#adm-abas input"),function(inp){ ABAS.forEach(function(a){ if(a.id===inp.dataset.id) a.nome=inp.value.trim()||a.nome; }); }); }
+    var inp=el("input"); inp.type="text"; inp.maxLength=24; inp.value=a.nome; inp.dataset.id=a.id; inp.style.width="220px"; inp.setAttribute("aria-label","Nome da aba "+a.nome); r.appendChild(inp);
+    var se=el("select"); se.dataset.id=a.id; se.setAttribute("aria-label","Quem vê a aba "+a.nome); [["todos","Todos os usuários"],["assinante","Só assinantes (prévia desfocada)"],["oculta","Escondida para gratuitos"],["admin","Só administrador"]].forEach(function(o){ var op=el("option",null,o[1]); op.value=o[0]; se.appendChild(op); }); se.value=a.acesso||"todos"; r.appendChild(se); box.appendChild(r); }); }
+function abasLe(){ [].forEach.call(document.querySelectorAll("#adm-abas input"),function(inp){ ABAS.forEach(function(a){ if(a.id===inp.dataset.id) a.nome=inp.value.trim()||a.nome; }); }); [].forEach.call(document.querySelectorAll("#adm-abas select"),function(se){ ABAS.forEach(function(a){ if(a.id===se.dataset.id) a.acesso=se.value; }); }); }
 function abasSalva(l){ var v=JSON.stringify(l); SB.from("config_site").upsert({chave:"abas",valor:v}).then(function(r){ if(r.error){ $("adm-abas-msg").textContent="Não consegui salvar as abas."; return; } try{ localStorage.setItem("abas_menu",v); }catch(e){} abasAplica(l); $("adm-abas-msg").textContent="Abas salvas."; }); }
-document.addEventListener("DOMContentLoaded",function(){ $("adm-abas-salvar").addEventListener("click",function(){ abasLe(); abasSalva(ABAS); }); $("adm-abas-padrao").addEventListener("click",function(){ abasSalva(ABASP.map(function(x){return {id:x[0],nome:x[1]};})); }); abasAdm(); });
+document.addEventListener("DOMContentLoaded",function(){ $("adm-abas-salvar").addEventListener("click",function(){ abasLe(); abasSalva(ABAS); }); $("adm-abas-padrao").addEventListener("click",function(){ abasSalva(ABASP.map(function(x){return {id:x[0],nome:x[1],acesso:"todos"};})); }); abasAdm(); });
 function nomeMenu(n){ $("marca").textContent=n||"Menu"; $("marca").hidden=false; if($("adm-nome-menu")) $("adm-nome-menu").value=n||""; }
 function nomeSite(n){ if(!n) return; document.title=n;  if($("marca").hidden) nomeMenu(""); if($("adm-nome")) $("adm-nome").value=n; }
 function conteudoCarrega(){
@@ -1456,7 +1585,7 @@ function conteudoCarrega(){
     if(r[0].error||r[1].error) return false;
     var ord=function(a,b){return a.ordem-b.ordem||a.id-b.id;};
     MODS=(r[0].data||[]).slice().sort(ord).map(function(m){ return {id:m.id,titulo:m.titulo,descricao:m.descricao||"",ordem:m.ordem,aulas:(r[1].data||[]).filter(function(a){return a.modulo_id===m.id;}).sort(ord)}; });
-    if(!r[2].error) (r[2].data||[]).forEach(function(c){ if(c.chave==="nome") nomeSite(c.valor); if(c.chave==="nome_menu") nomeMenu(c.valor); if(c.chave==="abas"){ try{ abasAplica(JSON.parse(c.valor)); localStorage.setItem("abas_menu",c.valor); }catch(e){} } });
+    if(!r[2].error) (r[2].data||[]).forEach(function(c){ if(c.chave==="nome") nomeSite(c.valor); if(c.chave==="nome_menu") nomeMenu(c.valor); if(c.chave==="preco"||c.chave==="link_pagamento"||c.chave==="contato") assinaCfg(c.chave,c.valor); if(c.chave==="abas"){ try{ abasAplica(JSON.parse(c.valor)); localStorage.setItem("abas_menu",c.valor); }catch(e){} } });
     admConteudo();
     if(!MODS.length) return false;
     AULAS=[]; MODS.forEach(function(m){ m.aulas.forEach(function(a){ AULAS.push({id:a.id,modulo:m.titulo,titulo:a.titulo,youtube:a.youtube||"",duracao:a.duracao||"",descricao:a.descricao||""}); }); });
@@ -1514,6 +1643,7 @@ function comCarrega(){ avCarrega();
 }
 $("com-form").addEventListener("submit",function(ev){ ev.preventDefault(); var t=$("com-texto").value.trim(), a=AULAS[AU]; if(!t||!a||!a.id) return;
   SB.from("comentarios").insert({aula_id:a.id,texto:t.slice(0,2000)}).then(function(r){ if(r.error){ $("com-aviso").textContent="Não consegui publicar o comentário."; $("com-aviso").hidden=false; return; } $("com-texto").value=""; comCarrega(); }); });
+if(!(CFG.supabaseUrl&&CFG.supabaseAnonKey&&window.supabase)) document.body.classList.remove("aguarda");
 if(CFG.supabaseUrl&&CFG.supabaseAnonKey&&window.supabase){
   SB=window.supabase.createClient(CFG.supabaseUrl,CFG.supabaseAnonKey);
   SB.auth.getSession().then(function(r){ sessao(r.data.session); });
