@@ -1,0 +1,594 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Simulador de estratégias | Alpha Radar</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700&family=Instrument+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#E9EFF2; --surface:#FFFFFF; --surface-2:#F3F6F8; --ink:#0F2733; --muted:#586F7D; --line:#D2DCE2;
+  --accent:#0B6E8A; --accent-ink:#FFFFFF; --gain:#1B8A4B; --loss:#C8372D;
+  --c-funding:#2F6FE4; --c-pools:#0E9F8E; --c-vaults:#7C5CE0; --c-options:#E48A1D; --c-trades:#D13F7A; --c-cash:#B7C4CC;
+  --band1:rgba(11,110,138,.13); --band2:rgba(11,110,138,.27);
+  --font-ui:"Instrument Sans", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  --font-num:"Bricolage Grotesque", "Instrument Sans", system-ui, sans-serif;
+  box-sizing:border-box;
+  padding-top:env(safe-area-inset-top,0px);
+  padding-bottom:env(safe-area-inset-bottom,0px);
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#0B1920; --surface:#12252E; --surface-2:#173039; --ink:#E5EEF2; --muted:#8EA6B4; --line:#25414E;
+    --accent:#4CC3E3; --accent-ink:#06222B; --gain:#4FC783; --loss:#FF7A6E;
+    --c-funding:#6C9CFF; --c-pools:#35C9B6; --c-vaults:#A58CFF; --c-options:#F5A84A; --c-trades:#F0709F; --c-cash:#4A6371;
+    --band1:rgba(76,195,227,.14); --band2:rgba(76,195,227,.28);
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#0B1920; --surface:#12252E; --surface-2:#173039; --ink:#E5EEF2; --muted:#8EA6B4; --line:#25414E;
+  --accent:#4CC3E3; --accent-ink:#06222B; --gain:#4FC783; --loss:#FF7A6E;
+  --c-funding:#6C9CFF; --c-pools:#35C9B6; --c-vaults:#A58CFF; --c-options:#F5A84A; --c-trades:#F0709F; --c-cash:#4A6371;
+  --band1:rgba(76,195,227,.14); --band2:rgba(76,195,227,.28);
+}
+html{scroll-padding-top:env(safe-area-inset-top,0px);}
+*,*::before,*::after{box-sizing:border-box;}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--font-ui);font-size:15px;line-height:1.5;-webkit-text-size-adjust:100%;}
+button,input,select{font:inherit;color:inherit;}
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px;}
+.num{font-variant-numeric:tabular-nums;}
+
+.top{max-width:1320px;margin:0 auto;padding:22px 20px 8px;display:flex;flex-wrap:wrap;gap:14px 24px;align-items:flex-end;justify-content:space-between;}
+.top h1{margin:0;font-family:var(--font-num);font-weight:700;font-size:clamp(24px,3.4vw,34px);letter-spacing:-.02em;line-height:1.1;}
+.top p{margin:6px 0 0;color:var(--muted);max-width:60ch;}
+.top .actions{display:flex;gap:10px;align-items:center;flex-wrap:wrap;}
+.btn{border:1px solid var(--line);background:var(--surface);border-radius:8px;padding:9px 14px;cursor:pointer;font-weight:500;}
+.btn:hover{border-color:var(--accent);}
+.btn.primary{background:var(--accent);border-color:var(--accent);color:var(--accent-ink);font-weight:600;}
+.status{font-size:13px;color:var(--muted);min-height:1.2em;}
+
+.layout{max-width:1320px;margin:0 auto;padding:12px 20px 40px;display:grid;grid-template-columns:minmax(0,1fr);gap:18px;align-items:start;}
+@media (min-width:1020px){
+  .layout{grid-template-columns:350px minmax(0,1fr);}
+  .controls{position:sticky;top:12px;max-height:calc(100vh - 24px);overflow:auto;}
+}
+.panel{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:16px;}
+.panel + .panel{margin-top:14px;}
+.panel h2{margin:0 0 10px;font-size:16px;font-weight:600;}
+.panel .hint{color:var(--muted);font-size:13px;margin:-4px 0 12px;}
+.field{display:block;margin-bottom:12px;}
+.field > span{display:block;font-size:13px;color:var(--muted);margin-bottom:5px;}
+.input-wrap{display:flex;align-items:center;border:1px solid var(--line);border-radius:7px;background:var(--surface-2);}
+.input-wrap:focus-within{border-color:var(--accent);}
+.input-wrap i{font-style:normal;color:var(--muted);padding:0 0 0 11px;font-size:14px;}
+.input-wrap b{font-weight:400;color:var(--muted);padding-right:11px;font-size:14px;}
+.input-wrap input{flex:1;min-width:0;border:0;background:transparent;padding:9px 10px;outline:none;font-variant-numeric:tabular-nums;}
+.seg{display:inline-flex;border:1px solid var(--line);border-radius:7px;overflow:hidden;background:var(--surface-2);width:100%;}
+.seg button{flex:1;border:0;background:transparent;padding:8px 6px;cursor:pointer;font-size:14px;border-right:1px solid var(--line);}
+.seg button:last-child{border-right:0;}
+.seg button[aria-pressed="true"]{background:var(--accent);color:var(--accent-ink);font-weight:600;}
+.note{font-size:12.5px;color:var(--muted);margin:6px 0 0;}
+
+.presets{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px;}
+.presets .btn{padding:6px 11px;font-size:13.5px;}
+.presets .btn[aria-pressed="true"]{border-color:var(--accent);background:var(--surface-2);font-weight:600;}
+.mixbar{display:flex;height:12px;border-radius:6px;overflow:hidden;background:var(--c-cash);margin-bottom:6px;}
+.mixbar span{display:block;height:100%;transition:width .2s ease;}
+.mixmsg{font-size:13px;color:var(--muted);margin-bottom:12px;}
+.mixmsg.warn{color:var(--loss);}
+
+.strat{border-top:1px solid var(--line);padding:11px 0 8px;}
+.strat:first-of-type{border-top:0;}
+.strat-head{display:flex;align-items:center;justify-content:space-between;gap:10px;}
+.check{display:flex;align-items:center;gap:9px;cursor:pointer;font-weight:500;}
+.check input{width:17px;height:17px;margin:0;}
+.swatch{width:10px;height:10px;border-radius:3px;display:inline-block;flex:none;}
+.strat output{font-family:var(--font-num);font-weight:700;font-size:17px;}
+.strat input[type=range]{width:100%;margin:8px 0 2px;}
+.strat.off{opacity:.55;}
+.strat-foot{display:flex;justify-content:space-between;font-size:13px;color:var(--muted);}
+.strat details{margin-top:4px;}
+.strat summary{cursor:pointer;font-size:13px;color:var(--accent);width:max-content;}
+.assump{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:8px;}
+.assump label span{display:block;font-size:11.5px;color:var(--muted);margin-bottom:3px;line-height:1.2;}
+.assump .input-wrap input{padding:7px 4px 7px 8px;}
+.assump .input-wrap b{padding-right:7px;font-size:12px;}
+.sdesc{font-size:12.5px;color:var(--muted);margin:4px 0 0 26px;}
+
+.summary{font-family:var(--font-num);font-size:clamp(19px,2.4vw,25px);line-height:1.3;font-weight:500;letter-spacing:-.01em;margin:2px 0 14px;max-width:62ch;}
+.summary strong{font-weight:700;}
+.metrics{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:1px;background:var(--line);border:1px solid var(--line);border-radius:12px;overflow:hidden;margin-bottom:14px;}
+.metric{background:var(--surface);padding:14px 16px;}
+.metric .l{font-size:13px;color:var(--muted);}
+.metric .v{font-family:var(--font-num);font-weight:700;font-size:26px;letter-spacing:-.02em;line-height:1.2;margin:2px 0;}
+.metric .s{font-size:12.5px;color:var(--muted);}
+.pos{color:var(--gain);} .neg{color:var(--loss);}
+
+.panel-head{display:flex;flex-wrap:wrap;justify-content:space-between;gap:8px 18px;align-items:baseline;margin-bottom:8px;}
+.panel-head h2{margin:0;}
+.legend{display:flex;flex-wrap:wrap;gap:6px 16px;font-size:12.5px;color:var(--muted);}
+.legend span{display:inline-flex;align-items:center;gap:6px;}
+.legend i{display:inline-block;width:18px;height:0;border-top:2.5px solid var(--accent);}
+.legend i.b1{height:10px;border:0;background:var(--band1);border-radius:2px;width:14px;}
+.legend i.b2{height:10px;border:0;background:var(--band2);border-radius:2px;width:14px;}
+.legend i.dash{border-top:2px dashed var(--muted);width:16px;}
+.legend i.dash2{border-top:2px dotted var(--c-options);width:16px;}
+.chart{position:relative;width:100%;}
+.chart svg{display:block;width:100%;height:auto;overflow:visible;}
+.chart text{fill:var(--muted);font-size:11.5px;font-family:var(--font-ui);}
+.tip{position:absolute;top:8px;pointer-events:none;background:var(--ink);color:var(--surface);border-radius:8px;padding:8px 10px;font-size:12.5px;line-height:1.5;white-space:nowrap;z-index:2;}
+.tip b{font-weight:600;}
+.grid2{display:grid;grid-template-columns:minmax(0,1fr);gap:14px;margin-top:14px;}
+@media (min-width:860px){.grid2{grid-template-columns:repeat(2,minmax(0,1fr));}}
+.grid2 > .panel{margin:0;}
+.cap{font-size:12.5px;color:var(--muted);margin:8px 0 0;}
+
+.dbars{display:flex;flex-direction:column;gap:10px;}
+.drow{display:grid;grid-template-columns:minmax(0,150px) minmax(0,1fr) 92px;gap:10px;align-items:center;font-size:13.5px;}
+.drow .lab{display:flex;gap:7px;align-items:center;min-width:0;}
+.drow .lab span:last-child{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.dtrack{position:relative;height:16px;background:var(--surface-2);border-radius:4px;}
+.dtrack .zero{position:absolute;top:-3px;bottom:-3px;width:1px;background:var(--muted);}
+.dtrack .bar{position:absolute;top:2px;bottom:2px;border-radius:3px;}
+.drow .val{text-align:right;font-variant-numeric:tabular-nums;font-weight:500;}
+.drow small{display:block;color:var(--muted);font-weight:400;font-size:11.5px;}
+@media (max-width:520px){.drow{grid-template-columns:minmax(0,1fr) 84px;}.drow .dtrack{grid-column:1 / -1;order:3;}}
+
+.tablewrap{overflow-x:auto;}
+table{width:100%;border-collapse:collapse;font-size:13.5px;min-width:640px;}
+th,td{text-align:left;padding:9px 10px;border-bottom:1px solid var(--line);vertical-align:top;}
+th{font-weight:500;color:var(--muted);font-size:12.5px;white-space:nowrap;}
+td.r,th.r{text-align:right;font-variant-numeric:tabular-nums;}
+tr:last-child td{border-bottom:0;}
+.sname-cell{display:flex;gap:8px;align-items:center;font-weight:500;white-space:nowrap;}
+.mini{display:flex;height:8px;width:120px;border-radius:4px;overflow:hidden;background:var(--c-cash);}
+.mini span{display:block;height:100%;}
+.empty{color:var(--muted);font-size:14px;margin:0;}
+.rowbtn{border:0;background:transparent;color:var(--accent);cursor:pointer;padding:2px 6px;font-size:13px;}
+.rowbtn.del{color:var(--muted);}
+.disclaimer{font-size:12.5px;color:var(--muted);margin:16px 2px 0;max-width:90ch;}
+@media (prefers-reduced-motion: reduce){.mixbar span{transition:none;}}
+</style>
+</head>
+<body>
+
+<header class="top">
+  <div>
+    <h1>Simulador de estratégias</h1>
+    <p>Combine funding, pools, vaults, opções e trades na mesma carteira e veja o resultado em 400 cenários simulados.</p>
+  </div>
+  <div class="actions">
+    <span class="status" id="status" role="status" aria-live="polite"></span>
+    <button class="btn" id="reseed" type="button">Sortear novos cenários</button>
+    <button class="btn primary" id="save" type="button">Salvar simulação</button>
+  </div>
+</header>
+
+<div class="layout">
+  <aside class="controls" aria-label="Parâmetros da simulação">
+    <section class="panel">
+      <h2>Carteira</h2>
+      <label class="field"><span>Capital total</span>
+        <div class="input-wrap"><i>US$</i><input id="capital" type="number" inputmode="decimal" min="100" step="100" value="10000"></div>
+      </label>
+      <div class="field"><span id="lbl-days">Prazo da simulação</span>
+        <div class="seg" id="seg-days" role="group" aria-labelledby="lbl-days">
+          <button type="button" data-v="30">30 dias</button><button type="button" data-v="90">90 dias</button><button type="button" data-v="180">180 dias</button><button type="button" data-v="365">1 ano</button>
+        </div>
+      </div>
+      <div class="field"><span id="lbl-lev">Alavancagem</span>
+        <div class="seg" id="seg-lev" role="group" aria-labelledby="lbl-lev">
+          <button type="button" data-v="1">1x</button><button type="button" data-v="2">2x</button><button type="button" data-v="3">3x</button>
+        </div>
+        <p class="note">Vale para o funding (cada perna usa metade do capital como margem) e para os trades. As outras estratégias não usam alavancagem.</p>
+      </div>
+      <label class="field" style="margin-bottom:0"><span>Referência de comparação</span>
+        <div class="input-wrap"><input id="ref" type="number" inputmode="decimal" min="0" max="100" step="0.5" value="4"><b>% ao ano</b></div>
+      </label>
+      <p class="note">Linha de comparação em dólar, como os títulos do Tesouro americano. Ajuste para o valor atual.</p>
+    </section>
+
+    <section class="panel">
+      <h2>Estratégias</h2>
+      <p class="hint">Escolha quanto do capital vai para cada uma. O que sobrar fica em caixa, sem rendimento.</p>
+      <div class="presets" id="presets" role="group" aria-label="Modelos de carteira"></div>
+      <div class="mixbar" id="mixbar" aria-hidden="true"></div>
+      <div class="mixmsg" id="mixmsg"></div>
+      <div id="strats"></div>
+    </section>
+  </aside>
+
+  <main class="results" id="results">
+    <p class="summary" id="summary" aria-live="polite"></p>
+    <div class="metrics" id="metrics"></div>
+
+    <section class="panel">
+      <div class="panel-head">
+        <h2>Evolução do saldo</h2>
+        <div class="legend">
+          <span><i></i>Cenário mediano</span><span><i class="b2"></i>25% a 75%</span><span><i class="b1"></i>5% a 95%</span>
+          <span><i class="dash"></i>Capital investido</span><span><i class="dash2"></i>Referência</span>
+        </div>
+      </div>
+      <div class="chart" id="fan"></div>
+      <p class="cap">A faixa mostra onde o saldo ficou em 90% das simulações. Passe o mouse ou o dedo sobre o gráfico para ver os valores de cada dia.</p>
+    </section>
+
+    <div class="grid2">
+      <section class="panel">
+        <h2>Onde o saldo termina</h2>
+        <div class="chart" id="hist"></div>
+        <p class="cap">Cada barra conta em quantas das 400 simulações o saldo final caiu naquela faixa. Vermelho é abaixo do capital.</p>
+      </section>
+      <section class="panel">
+        <h2>Quanto cada estratégia rende</h2>
+        <p class="hint">Resultado médio em dólares, no prazo escolhido.</p>
+        <div class="dbars" id="contrib"></div>
+      </section>
+    </div>
+
+    <section class="panel" style="margin-top:14px">
+      <h2>Comparativo por estratégia</h2>
+      <div class="tablewrap"><table id="tbl"></table></div>
+    </section>
+
+    <section class="panel" style="margin-top:14px">
+      <h2>E se o mercado virar?</h2>
+      <p class="hint">Quatro choques aplicados de uma vez na carteira atual, com o impacto em dólares.</p>
+      <div class="dbars" id="stress"></div>
+    </section>
+
+    <section class="panel" style="margin-top:14px">
+      <h2>Simulações salvas</h2>
+      <div class="tablewrap" id="saved"></div>
+    </section>
+
+    <p class="disclaimer">Simulação com fins educacionais, feita com premissas de exemplo que você pode editar em cada estratégia. Os rendimentos reais mudam a todo momento e dependem da corretora, do protocolo e do tamanho da ordem. Resultados simulados não garantem resultados futuros e isto não é recomendação de investimento.</p>
+  </main>
+</div>
+
+<script>
+/*PURE_START*/
+const STRATS = [
+  {id:'funding', name:'Arbitragem de funding', desc:'Vende o futuro numa corretora e compra em outra.', apr:18, vol:6,  cost:1.5, beta:0.05, jp:0.06, jl:0.08, risk:'Taxa virar contra a posição e liquidação de uma das pernas',
+   mult:L=>L/2, sb:0.03},
+  {id:'pools',   name:'Pools de liquidez',    desc:'Fornece liquidez e recebe taxas e recompensas.', apr:28, vol:35, cost:6,   beta:0.60, jp:0.10, jl:0.20, risk:'Perda impermanente e queda do preço do par',
+   mult:L=>1, sb:0.60},
+  {id:'vaults',  name:'Vaults',               desc:'Cofres automatizados com rendimento em stablecoin.', apr:11, vol:4,  cost:0.5, beta:0.15, jp:0.05, jl:0.30, risk:'Falha de contrato ou de oráculo',
+   mult:L=>1, sb:0.10},
+  {id:'options', name:'Venda de opções',      desc:'Recebe prêmios vendendo calls ou puts cobertas.', apr:22, vol:18, cost:1,   beta:0.50, jp:0.12, jl:0.25, risk:'Movimento forte contra a opção vendida',
+   mult:L=>1, sb:0.50},
+  {id:'trades',  name:'Trades direcionais',   desc:'Posições de curto e longo prazo no preço do ativo.', apr:25, vol:65, cost:2,   beta:0.85, jp:0,    jl:0,    risk:'Alavancagem e liquidação da posição',
+   mult:L=>L, sb:1.0}
+];
+const PRESETS = {
+  'Conservador': {funding:40, pools:0,  vaults:40, options:0,  trades:0},
+  'Equilibrado': {funding:30, pools:20, vaults:20, options:15, trades:5},
+  'Agressivo':   {funding:20, pools:25, vaults:5,  options:20, trades:30}
+};
+const N_PATHS = 400;
+
+function mulberry32(a){return function(){a|=0;a=a+0x6D2B79F5|0;let t=Math.imul(a^a>>>15,1|a);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296;};}
+function randn(r){const u=r()||1e-12,v=r();return Math.sqrt(-2*Math.log(u))*Math.cos(2*Math.PI*v);}
+function pctile(a,q){return a[Math.min(a.length-1,Math.floor(q*(a.length-1)))];}
+
+function effective(st){
+  const act = STRATS.map(s=>st.on[s.id]?st.w[s.id]:0);
+  const sum = act.reduce((a,b)=>a+b,0);
+  const k = sum>100 ? 100/sum : 1;
+  const frac = act.map(a=>a*k/100);
+  return {sum, frac, cashFrac:Math.max(0,1-frac.reduce((a,b)=>a+b,0))};
+}
+
+function simulate(st){
+  const N=N_PATHS, D=st.days, cap=st.capital, L=st.lev;
+  const {frac, cashFrac, sum} = effective(st);
+  const alloc = frac.map(f=>f*cap);
+  const cash = cashFrac*cap;
+  const step = Math.max(1, Math.ceil(D/120));
+  const days=[]; for(let d=0; d<D; d+=step) days.push(d); days.push(D);
+  const series = days.map(()=>new Float64Array(N));
+  const finals = STRATS.map(()=>new Float64Array(N));
+  const mdds = new Float64Array(N);
+  const P = STRATS.map(s=>{
+    const pr=st.params[s.id], m=s.mult(L);
+    const sd = pr.vol*m/100/Math.sqrt(365);
+    return {mu:(pr.apr-pr.cost)*m/100/365 - 0.5*sd*sd, sd, rho:s.beta, rr:Math.sqrt(1-s.beta*s.beta),
+            jp:s.jp/365, jl:Math.min(0.95, s.jl*(s.id==='funding'?L:1)), liq:(s.id==='trades' && L>1)};
+  });
+  for(let p=0;p<N;p++){
+    const rng = mulberry32(st.seed*104729 + p*7919 + 13);
+    const v = alloc.slice();
+    let peak=cap, mdd=0, si=1;
+    series[0][p]=cap;
+    for(let d=1; d<=D; d++){
+      const M = randn(rng);
+      let tot = cash;
+      for(let i=0;i<5;i++){
+        const e=randn(rng), u=rng();
+        if(v[i]>0){
+          const q=P[i];
+          v[i]*=Math.exp(q.mu + q.sd*(q.rho*M + q.rr*e));
+          if(u<q.jp) v[i]*=1-q.jl;
+          if(q.liq && v[i]<0.1*alloc[i]) v[i]=0;
+        }
+        tot+=v[i];
+      }
+      if(tot>peak) peak=tot;
+      const dd=(peak-tot)/peak; if(dd>mdd) mdd=dd;
+      if(d===days[si]){series[si][p]=tot; si++;}
+    }
+    for(let i=0;i<5;i++) finals[i][p]=v[i];
+    mdds[p]=mdd;
+  }
+  const last = series[series.length-1];
+  const fin = Float64Array.from(last).sort();
+  const refTarget = cap*(1+st.ref/100*D/365);
+  let loss=0, beat=0, sumF=0;
+  for(const x of last){ if(x<cap) loss++; if(x>refTarget) beat++; sumF+=x; }
+  const bands = series.map(s=>{const a=Float64Array.from(s).sort(); return [pctile(a,.05),pctile(a,.25),pctile(a,.5),pctile(a,.75),pctile(a,.95)];});
+  const md = Float64Array.from(mdds).sort();
+  const p50 = pctile(fin,.5);
+  const per = STRATS.map((s,i)=>{
+    if(alloc[i]<=0) return null;
+    const a=Float64Array.from(finals[i]).sort();
+    let mean=0,l=0; for(const x of finals[i]){mean+=x; if(x<alloc[i]) l++;}
+    mean/=N;
+    return {alloc:alloc[i], mean, ret:mean/alloc[i]-1, p5ret:pctile(a,.05)/alloc[i]-1, probLoss:l/N, contrib:mean-alloc[i]};
+  });
+  return {N, days, cap, bands, fin, refTarget, frac, cashFrac, alloc, per, active:alloc.filter(a=>a>0).length, over:sum>100,
+    stats:{mean:sumF/N, p5:pctile(fin,.05), p25:pctile(fin,.25), p50, p75:pctile(fin,.75), p95:pctile(fin,.95),
+      probLoss:loss/N, probBeat:beat/N, mddMed:pctile(md,.5), mddP95:pctile(md,.95), ann:Math.pow(p50/cap, 365/D)-1}};
+}
+
+function stressTests(st, r){
+  const L=st.lev, ids=STRATS.map(s=>s.id);
+  const cl = x=>Math.max(-1,x);
+  const sc = [
+    {label:'Mercado cai 30%', desc:'Queda forte do preço em poucos dias',
+      f:{funding:-.30*.03, pools:-.30*.60, vaults:-.30*.10, options:-.30*.50, trades:cl(-.30*L)}},
+    {label:'Mercado sobe 30%', desc:'Alta rápida do preço',
+      f:{funding:0, pools:.30*.45, vaults:.30*.05, options:.30*.15, trades:.30*L}},
+    {label:'Funding negativo por 30 dias', desc:'A taxa vira contra a posição',
+      f:{funding:-(st.params.funding.apr*STRATS[0].mult(L)/12)/100, pools:0, vaults:0, options:0, trades:0}},
+    {label:'Falha de contrato em DeFi', desc:'Pools e vaults perdem metade',
+      f:{funding:0, pools:-.5, vaults:-.5, options:0, trades:0}}
+  ];
+  return sc.map(s=>({label:s.label, desc:s.desc, value:ids.reduce((a,id,i)=>a+r.alloc[i]*s.f[id],0)}));
+}
+/*PURE_END*/
+
+/* ---------- Interface ---------- */
+const $ = s=>document.querySelector(s);
+const fmtUSD = n=>new Intl.NumberFormat('pt-BR',{style:'currency',currency:'USD',maximumFractionDigits:0}).format(n);
+const fmtUSDc = n=>new Intl.NumberFormat('pt-BR',{style:'currency',currency:'USD',notation:'compact',maximumFractionDigits:1}).format(n);
+const fmtN = (n,d=1)=>new Intl.NumberFormat('pt-BR',{minimumFractionDigits:d,maximumFractionDigits:d}).format(n);
+const pct = (n,d=1)=>fmtN(n*100,d)+'%';
+const spct = (n,d=1)=>(n>=0?'+':'−')+fmtN(Math.abs(n)*100,d)+'%';
+const sUSD = n=>(n>=0?'+':'−')+fmtUSD(Math.abs(n));
+const clamp=(x,a,b)=>Math.min(b,Math.max(a,x));
+const clr = id=>`var(--c-${id})`;
+
+const defaultState = ()=>({
+  capital:10000, days:180, lev:1, ref:4, seed:1, preset:'Equilibrado',
+  w:{...PRESETS['Equilibrado']},
+  on:Object.fromEntries(STRATS.map(s=>[s.id,PRESETS['Equilibrado'][s.id]>0])),
+  params:Object.fromEntries(STRATS.map(s=>[s.id,{apr:s.apr,vol:s.vol,cost:s.cost}]))
+});
+let st = defaultState();
+let cur = null;
+let saved = [];
+let savedCount = 0;
+
+/* controles */
+function buildControls(){
+  $('#presets').innerHTML = Object.keys(PRESETS).map(n=>`<button type="button" class="btn" data-preset="${n}" aria-pressed="false">${n}</button>`).join('');
+  $('#strats').innerHTML = STRATS.map(s=>`
+    <div class="strat" data-id="${s.id}">
+      <div class="strat-head">
+        <label class="check"><input type="checkbox" data-k="on"><span class="swatch" style="background:${clr(s.id)}"></span>${s.name}</label>
+        <output class="num" data-k="pct"></output>
+      </div>
+      <p class="sdesc">${s.desc}</p>
+      <input type="range" min="0" max="100" step="5" data-k="w" style="accent-color:${clr(s.id)}" aria-label="Percentual do capital em ${s.name}">
+      <div class="strat-foot"><span class="num" data-k="amt"></span><span>${s.id==='funding'?'Margem dividida em duas corretoras':''}</span></div>
+      <details><summary>Premissas</summary>
+        <div class="assump">
+          <label><span>Rendimento bruto</span><div class="input-wrap"><input type="number" step="0.5" min="-50" max="300" data-k="apr"><b>%</b></div></label>
+          <label><span>Volatilidade</span><div class="input-wrap"><input type="number" step="0.5" min="0" max="300" data-k="vol"><b>%</b></div></label>
+          <label><span>Custos e perdas</span><div class="input-wrap"><input type="number" step="0.5" min="0" max="100" data-k="cost"><b>%</b></div></label>
+        </div>
+        <p class="note">Valores em % ao ano. Risco principal: ${s.risk}.</p>
+      </details>
+    </div>`).join('');
+}
+function syncControls(){
+  $('#capital').value = st.capital;
+  $('#ref').value = st.ref;
+  document.querySelectorAll('#seg-days button').forEach(b=>b.setAttribute('aria-pressed', String(+b.dataset.v===st.days)));
+  document.querySelectorAll('#seg-lev button').forEach(b=>b.setAttribute('aria-pressed', String(+b.dataset.v===st.lev)));
+  document.querySelectorAll('#presets button').forEach(b=>b.setAttribute('aria-pressed', String(b.dataset.preset===st.preset)));
+  STRATS.forEach(s=>{
+    const el=document.querySelector(`.strat[data-id="${s.id}"]`);
+    el.classList.toggle('off', !st.on[s.id]);
+    el.querySelector('[data-k=on]').checked = st.on[s.id];
+    const rg=el.querySelector('[data-k=w]'); rg.value=st.w[s.id]; rg.disabled=!st.on[s.id];
+    ['apr','vol','cost'].forEach(k=>{ const i=el.querySelector(`[data-k=${k}]`); if(document.activeElement!==i) i.value=st.params[s.id][k]; });
+  });
+  updateMix();
+}
+function updateMix(){
+  const e=effective(st);
+  STRATS.forEach((s,i)=>{
+    const el=document.querySelector(`.strat[data-id="${s.id}"]`);
+    el.querySelector('[data-k=pct]').textContent = st.on[s.id] ? fmtN(e.frac[i]*100,0)+'%' : '0%';
+    el.querySelector('[data-k=amt]').textContent = fmtUSD(e.frac[i]*st.capital);
+  });
+  $('#mixbar').innerHTML = STRATS.map((s,i)=>`<span style="width:${e.frac[i]*100}%;background:${clr(s.id)}"></span>`).join('');
+  const m=$('#mixmsg');
+  m.classList.toggle('warn', e.sum>100);
+  m.textContent = e.sum>100 ? `A soma chegou a ${fmtN(e.sum,0)}%. O simulador reduz tudo proporcionalmente para caber em 100%.`
+                            : `Alocado: ${fmtN(e.sum,0)}%. Em caixa: ${fmtN(e.cashFrac*100,0)}%.`;
+}
+
+/* gráficos */
+function niceTicks(lo,hi,n){
+  const raw=(hi-lo)/n, mag=Math.pow(10,Math.floor(Math.log10(raw||1)));
+  const f=raw/mag, step=(f<1.5?1:f<3?2:f<7?5:10)*mag;
+  const out=[]; for(let t=Math.ceil(lo/step)*step; t<=hi+1e-9; t+=step) out.push(t);
+  return out;
+}
+function fanChart(r){
+  const wrap=$('#fan'); const W=Math.max(300,wrap.clientWidth||600), H=clamp(Math.round(W*.46),230,340);
+  const pl=W<480?54:64, pr=14, pt=12, pb=28, D=r.days[r.days.length-1], b=r.bands;
+  let lo=Math.min(...b.map(x=>x[0]), r.cap), hi=Math.max(...b.map(x=>x[4]), r.refTarget);
+  const pad=(hi-lo)*.08 || r.cap*.02; lo=Math.max(0,lo-pad); hi+=pad;
+  const x=d=>pl+(W-pl-pr)*d/D, y=v=>pt+(H-pt-pb)*(1-(v-lo)/(hi-lo));
+  const ticks=niceTicks(lo,hi,4);
+  const xs=[0,.25,.5,.75,1].map(t=>Math.round(D*t));
+  const med=r.days.map((d,k)=>`${k?'L':'M'}${x(d).toFixed(1)},${y(b[k][2]).toFixed(1)}`).join('');
+  wrap.innerHTML=`<svg viewBox="0 0 ${W} ${H}" width="${W}" height="${H}" role="img" aria-label="Evolução do saldo da carteira: faixas de 5% a 95%, 25% a 75% e cenário mediano">
+    ${ticks.map(t=>`<line x1="${pl}" x2="${W-pr}" y1="${y(t)}" y2="${y(t)}" stroke="var(--line)"/><text x="${pl-8}" y="${y(t)+4}" text-anchor="end">${fmtUSDc(t)}</text>`).join('')}
+    ${xs.map(d=>`<text x="${x(d)}" y="${H-8}" text-anchor="${d===0?'start':d===D?'end':'middle'}">${d===0?'hoje':d+' d'}</text>`).join('')}
+    <polygon points="${r.days.map((d,k)=>`${x(d).toFixed(1)},${y(b[k][4]).toFixed(1)}`).join(' ')+' '+r.days.map((d,k)=>k).reverse().map(k=>`${x(r.days[k]).toFixed(1)},${y(b[k][0]).toFixed(1)}`).join(' ')}" fill="var(--band1)"/>
+    <polygon points="${r.days.map((d,k)=>`${x(d).toFixed(1)},${y(b[k][3]).toFixed(1)}`).join(' ')+' '+r.days.map((d,k)=>k).reverse().map(k=>`${x(r.days[k]).toFixed(1)},${y(b[k][1]).toFixed(1)}`).join(' ')}" fill="var(--band2)"/>
+    <line x1="${x(0)}" x2="${x(D)}" y1="${y(r.cap)}" y2="${y(r.cap)}" stroke="var(--muted)" stroke-width="1.6" stroke-dasharray="5 4"/>
+    <line x1="${x(0)}" x2="${x(D)}" y1="${y(r.cap)}" y2="${y(r.refTarget)}" stroke="var(--c-options)" stroke-width="1.8" stroke-dasharray="1.5 4" stroke-linecap="round"/>
+    <path d="${med}" fill="none" stroke="var(--accent)" stroke-width="2.6" stroke-linejoin="round"/>
+    <line class="vline" x1="0" x2="0" y1="${pt}" y2="${H-pb}" stroke="var(--ink)" stroke-opacity=".35" visibility="hidden"/>
+    <circle class="dot" r="4.5" fill="var(--accent)" stroke="var(--surface)" stroke-width="2" visibility="hidden"/>
+    <rect class="hit" x="${pl}" y="${pt}" width="${W-pl-pr}" height="${H-pt-pb}" fill="transparent" style="touch-action:pan-y"/>
+  </svg><div class="tip" hidden></div>`;
+  const svg=wrap.querySelector('svg'), tip=wrap.querySelector('.tip'), vl=svg.querySelector('.vline'), dot=svg.querySelector('.dot');
+  const hide=()=>{tip.hidden=true; vl.setAttribute('visibility','hidden'); dot.setAttribute('visibility','hidden');};
+  svg.addEventListener('pointermove',ev=>{
+    const rect=svg.getBoundingClientRect(); const px=(ev.clientX-rect.left)*(W/rect.width);
+    const dv=clamp((px-pl)/(W-pl-pr),0,1)*D; let k=0,best=1e9;
+    r.days.forEach((d,i)=>{const dd=Math.abs(d-dv); if(dd<best){best=dd;k=i;}});
+    const cx=x(r.days[k]); vl.setAttribute('x1',cx); vl.setAttribute('x2',cx); vl.setAttribute('visibility','visible');
+    dot.setAttribute('cx',cx); dot.setAttribute('cy',y(b[k][2])); dot.setAttribute('visibility','visible');
+    tip.hidden=false;
+    tip.innerHTML=`<b>${r.days[k]===0?'Hoje':'Dia '+r.days[k]}</b><br>Bom (95%): ${fmtUSD(b[k][4])}<br>Mediano: <b>${fmtUSD(b[k][2])}</b><br>Ruim (5%): ${fmtUSD(b[k][0])}`;
+    const left=cx/W*wrap.clientWidth; const flip=cx>W*.6;
+    tip.style.left=left+'px'; tip.style.transform=flip?'translateX(calc(-100% - 12px))':'translateX(12px)';
+  });
+  svg.addEventListener('pointerleave',hide);
+}
+function histChart(r){
+  const wrap=$('#hist'); const W=Math.max(260,wrap.clientWidth||400), H=210, pt=10, pb=26, pl=6, pr=6, bins=28;
+  const a=r.fin, n=a.length;
+  let lo=Math.min(pctile(a,.01), r.cap), hi=Math.max(pctile(a,.99), r.cap);
+  if(hi-lo<r.cap*.02){lo=r.cap*.98; hi=r.cap*1.02;}
+  const pad=(hi-lo)*.04; lo-=pad; hi+=pad;
+  const cnt=new Array(bins).fill(0);
+  for(const v of a){ cnt[clamp(Math.floor((v-lo)/(hi-lo)*bins),0,bins-1)]++; }
+  const mx=Math.max(...cnt), bw=(W-pl-pr)/bins;
+  const x=v=>pl+(W-pl-pr)*(v-lo)/(hi-lo);
+  const med=pctile(a,.5);
+  const tk=niceTicks(lo,hi,3);
+  wrap.innerHTML=`<svg viewBox="0 0 ${W} ${H}" width="${W}" height="${H}" role="img" aria-label="Distribuição do saldo final nas 400 simulações">
+    ${cnt.map((c,i)=>{const h=(H-pt-pb)*c/mx, v=lo+(i+.5)*(hi-lo)/bins; return `<rect x="${(pl+i*bw+.5).toFixed(1)}" y="${(H-pb-h).toFixed(1)}" width="${(bw-1).toFixed(1)}" height="${h.toFixed(1)}" rx="1.5" fill="${v<r.cap?'var(--loss)':'var(--gain)'}" fill-opacity=".78"/>`;}).join('')}
+    <line x1="${pl}" x2="${W-pr}" y1="${H-pb}" y2="${H-pb}" stroke="var(--line)"/>
+    <line x1="${x(r.cap)}" x2="${x(r.cap)}" y1="${pt}" y2="${H-pb}" stroke="var(--muted)" stroke-width="1.5" stroke-dasharray="4 3"/>
+    <line x1="${x(med)}" x2="${x(med)}" y1="${pt}" y2="${H-pb}" stroke="var(--accent)" stroke-width="2.2"/>
+    ${tk.map(t=>`<text x="${x(t)}" y="${H-8}" text-anchor="middle">${fmtUSDc(t)}</text>`).join('')}
+  </svg>`;
+}
+function divBars(el, items, fmt, sub){
+  const vals=items.map(i=>i.value); const mn=Math.min(0,...vals), mxv=Math.max(0,...vals), span=(mxv-mn)||1;
+  const z=(-mn/span)*100;
+  el.innerHTML=items.map(it=>{
+    const w=Math.abs(it.value)/span*100, left=it.value>=0?z:z-w;
+    return `<div class="drow"><div class="lab"><span class="swatch" style="background:${it.color}"></span><span title="${it.label}">${it.label}${it.desc?`<small>${it.desc}</small>`:''}</span></div>
+      <div class="dtrack"><span class="zero" style="left:${z}%"></span><span class="bar" style="left:${left}%;width:${w}%;background:${it.value<0?'var(--loss)':it.color}"></span></div>
+      <div class="val ${it.value<0?'neg':''}">${fmt(it.value)}${it.sub?`<small>${it.sub(it.value)}</small>`:''}</div></div>`;
+  }).join('');
+}
+
+/* painel */
+function render(){
+  const r=cur, s=r.stats;
+  if(r.active===0){
+    $('#summary').textContent='Ative ao menos uma estratégia para simular. Sem nenhuma, o capital fica parado em caixa.';
+  } else if(s.p5>=r.cap){
+    $('#summary').innerHTML=`Com <strong>${fmtUSD(r.cap)}</strong> em ${r.active} ${r.active>1?'estratégias':'estratégia'} por ${r.days[r.days.length-1]} dias, o saldo mediano termina em <strong>${fmtUSD(s.p50)}</strong> (${spct(s.ann)} ao ano). Mesmo nos 5% piores cenários, ele fica em ${fmtUSD(s.p5)}.`;
+  } else {
+    $('#summary').innerHTML=`Com <strong>${fmtUSD(r.cap)}</strong> em ${r.active} ${r.active>1?'estratégias':'estratégia'} por ${r.days[r.days.length-1]} dias, o saldo mediano termina em <strong>${fmtUSD(s.p50)}</strong> (${spct(s.ann)} ao ano). Em 1 de cada 20 cenários ele fica abaixo de <strong>${fmtUSD(s.p5)}</strong>.`;
+  }
+  const cls=v=>v>=0?'pos':'neg';
+  $('#metrics').innerHTML=`
+    <div class="metric"><div class="l">Saldo mediano</div><div class="v num ${cls(s.p50-r.cap)}">${fmtUSD(s.p50)}</div><div class="s">${spct(s.p50/r.cap-1)} no prazo, média de ${fmtUSD(s.mean)}</div></div>
+    <div class="metric"><div class="l">Chance de perda</div><div class="v num ${s.probLoss>.25?'neg':''}">${pct(s.probLoss,0)}</div><div class="s">de terminar abaixo do capital</div></div>
+    <div class="metric"><div class="l">Cenário ruim (5%)</div><div class="v num ${cls(s.p5-r.cap)}">${fmtUSD(s.p5)}</div><div class="s">${spct(s.p5/r.cap-1)} sobre o capital</div></div>
+    <div class="metric"><div class="l">Queda máxima típica</div><div class="v num">−${pct(s.mddMed)}</div><div class="s">nos 5% piores: −${pct(s.mddP95)}</div></div>
+    <div class="metric"><div class="l">Supera a referência</div><div class="v num">${pct(s.probBeat,0)}</div><div class="s">dos cenários, contra ${fmtN(st.ref,1)}% ao ano</div></div>`;
+  charts();
+  const items=STRATS.map((x,i)=>r.per[i]?{label:x.name,color:clr(x.id),value:r.per[i].contrib,sub:v=>spct(r.per[i].ret)+' sobre o alocado'}:null).filter(Boolean).sort((a,b)=>b.value-a.value);
+  if(items.length) divBars($('#contrib'),items,sUSD); else $('#contrib').innerHTML='<p class="empty">Nenhuma estratégia ativa.</p>';
+  $('#tbl').innerHTML=`<thead><tr><th>Estratégia</th><th class="r">Alocado</th><th class="r">Retorno médio</th><th class="r">Cenário ruim (5%)</th><th class="r">Chance de perda</th><th>Principal risco</th></tr></thead><tbody>`+
+    STRATS.map((x,i)=>{const p=r.per[i]; return p?`<tr><td><div class="sname-cell"><span class="swatch" style="background:${clr(x.id)}"></span>${x.name}</div></td><td class="r">${fmtUSD(p.alloc)}</td><td class="r ${cls(p.ret)}">${spct(p.ret)}</td><td class="r ${cls(p.p5ret)}">${spct(p.p5ret)}</td><td class="r">${pct(p.probLoss,0)}</td><td>${x.risk}</td></tr>`:'';}).join('')+
+    (r.cashFrac>0?`<tr><td><div class="sname-cell"><span class="swatch" style="background:var(--c-cash)"></span>Caixa</div></td><td class="r">${fmtUSD(r.cashFrac*r.cap)}</td><td class="r">0,0%</td><td class="r">0,0%</td><td class="r">0%</td><td>Sem rendimento</td></tr>`:'')+`</tbody>`;
+  const stress=stressTests(st,r).map(x=>({label:x.label,desc:x.desc,color:'var(--accent)',value:x.value,sub:v=>spct(v/r.cap)+' do capital'}));
+  divBars($('#stress'),stress,sUSD);
+  renderSaved();
+}
+function charts(){ if(!cur) return; fanChart(cur); histChart(cur); }
+
+/* simulações salvas */
+function mini(frac,cashFrac){return `<div class="mini">${STRATS.map((s,i)=>`<span style="width:${frac[i]*100}%;background:${clr(s.id)}"></span>`).join('')}</div>`;}
+function renderSaved(){
+  const el=$('#saved');
+  if(!saved.length){ el.innerHTML='<p class="empty">Salve uma simulação para comparar com outras combinações de estratégias, capital e prazo.</p>'; return; }
+  const best=Math.max(...saved.map(x=>x.m.ann));
+  el.innerHTML=`<table><thead><tr><th>Simulação</th><th>Alocação</th><th class="r">Saldo mediano</th><th class="r">Ao ano</th><th class="r">Chance de perda</th><th class="r">Cenário ruim (5%)</th><th></th></tr></thead><tbody>`+
+    saved.map(x=>`<tr><td style="font-weight:500">${x.name}<br><span style="color:var(--muted);font-weight:400;font-size:12.5px">${fmtUSD(x.st.capital)}, ${x.st.days} dias, ${x.st.lev}x</span></td>
+      <td>${mini(x.frac)}</td><td class="r">${fmtUSD(x.m.p50)}</td><td class="r ${x.m.ann>=0?'pos':'neg'}">${spct(x.m.ann)}${x.m.ann===best&&saved.length>1?' (maior)':''}</td><td class="r">${pct(x.m.probLoss,0)}</td><td class="r">${fmtUSD(x.m.p5)}</td>
+      <td style="white-space:nowrap"><button class="rowbtn" data-open="${x.id}" type="button">Abrir</button><button class="rowbtn del" data-del="${x.id}" type="button">Remover</button></td></tr>`).join('')+`</tbody></table>`;
+}
+function say(t){const e=$('#status'); e.textContent=t; clearTimeout(say.t); say.t=setTimeout(()=>e.textContent='',2600);}
+
+/* execução */
+let timer=null;
+function schedule(){ clearTimeout(timer); timer=setTimeout(run,70); }
+function run(){ updateMix(); cur=simulate(st); render(); }
+
+/* eventos */
+function bind(){
+  $('#capital').addEventListener('input',e=>{const v=parseFloat(e.target.value); if(v>=100){st.capital=Math.min(v,1e8); schedule();}});
+  $('#ref').addEventListener('input',e=>{const v=parseFloat(e.target.value); if(!isNaN(v)){st.ref=clamp(v,0,100); schedule();}});
+  $('#seg-days').addEventListener('click',e=>{const b=e.target.closest('button'); if(!b)return; st.days=+b.dataset.v; syncControls(); schedule();});
+  $('#seg-lev').addEventListener('click',e=>{const b=e.target.closest('button'); if(!b)return; st.lev=+b.dataset.v; syncControls(); schedule();});
+  $('#presets').addEventListener('click',e=>{const b=e.target.closest('button'); if(!b)return; const p=PRESETS[b.dataset.preset];
+    st.preset=b.dataset.preset; STRATS.forEach(s=>{st.w[s.id]=p[s.id]; st.on[s.id]=p[s.id]>0;}); syncControls(); schedule();});
+  $('#strats').addEventListener('input',e=>{
+    const row=e.target.closest('.strat'); if(!row)return; const id=row.dataset.id, k=e.target.dataset.k;
+    if(k==='w'){ st.w[id]=+e.target.value; st.preset='Personalizada'; }
+    else if(k==='on'){ st.on[id]=e.target.checked; if(e.target.checked && st.w[id]===0) st.w[id]=10; st.preset='Personalizada'; }
+    else if(['apr','vol','cost'].includes(k)){ const v=parseFloat(e.target.value); if(isNaN(v))return; st.params[id][k]=v; }
+    document.querySelectorAll('#presets button').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.preset===st.preset)));
+    row.classList.toggle('off',!st.on[id]); row.querySelector('[data-k=w]').disabled=!st.on[id]; row.querySelector('[data-k=w]').value=st.w[id];
+    updateMix(); schedule();
+  });
+  $('#reseed').addEventListener('click',()=>{st.seed++; run(); say('Novos cenários sorteados.');});
+  $('#save').addEventListener('click',()=>{
+    if(!cur) return;
+    if(saved.length>=6){ say('Limite de 6 simulações. Remova uma para salvar outra.'); return; }
+    savedCount++;
+    saved.push({id:'s'+savedCount+'_'+Date.now(), name:`${st.preset||'Personalizada'} ${savedCount}`, st:JSON.parse(JSON.stringify(st)), frac:cur.frac.slice(),
+      m:{p50:cur.stats.p50,p5:cur.stats.p5,probLoss:cur.stats.probLoss,ann:cur.stats.ann}});
+    renderSaved(); say('Simulação salva para comparar.');
+  });
+  $('#saved').addEventListener('click',e=>{
+    const o=e.target.closest('[data-open]'), d=e.target.closest('[data-del]');
+    if(o){ const x=saved.find(s=>s.id===o.dataset.open); if(x){ st=JSON.parse(JSON.stringify(x.st)); syncControls(); run(); window.scrollTo({top:0,behavior:'smooth'}); } }
+    if(d){ saved=saved.filter(s=>s.id!==d.dataset.del); renderSaved(); }
+  });
+  let ro; const obs=new ResizeObserver(()=>{clearTimeout(ro); ro=setTimeout(charts,120);}); obs.observe($('#results'));
+}
+
+buildControls(); syncControls(); bind(); run();
+</script>
+</body>
+</html>
