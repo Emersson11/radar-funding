@@ -8,3 +8,8 @@
 *.md
 supabase_fn
 index_pre_*.html
+requirements*.txt
+pyproject.toml
+*.json.bak
+*.bat
+index_antes_*.html
