@@ -177,7 +177,7 @@ def macro():
         except Exception:
             pass
     try:
-        d = S.get("https://markets.newyorkfed.org/api/rates/unsecured/effr/last/1300.json", timeout=30).json()["refRates"]
+        d = S.get("https://markets.newyorkfed.org/api/rates/unsecured/effr/last/500.json", timeout=30).json()["refRates"]
         pts, ant = [], None
         for x in reversed(d):
             alvo = x.get("targetRateTo")

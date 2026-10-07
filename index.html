@@ -136,8 +136,8 @@ button.lnk.neg{color:var(--bad)}
 td a{color:var(--accent);text-decoration:underline;text-underline-offset:3px}
 #av-estrelas button{border:0;background:none;padding:0 2px;font-size:26px;line-height:1;color:var(--line)} #av-estrelas button.on{color:#d99a00} #av-estrelas button:disabled{cursor:default}
 button.mv{padding:2px 7px;font-size:12px;line-height:1.2;margin-right:3px} button.mv:disabled{opacity:.3}
-.tiles{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:1px;background:var(--line);border:1px solid var(--line);border-radius:3px;overflow:hidden}
-.tiles>div{background:var(--surface);padding:16px 18px;min-width:0} .tiles .rot{display:block;margin-bottom:8px} .tiles strong{font:500 22px/1.2 var(--mono);display:block} .tiles small{font:400 13px var(--mono);color:var(--muted)}
+.tiles{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:1px;background:var(--surface);border:1px solid var(--line);border-radius:3px;overflow:hidden}
+.tiles>div{background:var(--surface);padding:16px 18px;min-width:0;box-shadow:1px 0 0 var(--line),0 1px 0 var(--line)} .tiles .rot{display:block;margin-bottom:8px} .tiles strong{font:500 22px/1.2 var(--mono);display:block} .tiles small{font:400 13px var(--mono);color:var(--muted)}
 .graf{height:300px;margin-top:12px}
 .gmarca{position:relative} .gmarca::after{content:"";position:absolute;inset:0;background:url(logo_claro.png) center 46%/min(52%,380px) no-repeat;opacity:.17;pointer-events:none;z-index:3}
 :root[data-theme="dark"] .gmarca::after{background-image:url(logo_escuro.png)} @media (prefers-color-scheme:dark){ :root:not([data-theme="light"]) .gmarca::after{background-image:url(logo_escuro.png)} }
@@ -156,7 +156,7 @@ button.mv{padding:2px 7px;font-size:12px;line-height:1.2;margin-right:3px} butto
 .barras .bl{display:grid;grid-template-columns:minmax(84px,30%) 1fr auto;gap:10px;align-items:center;font-size:13px} .barras .bl span:first-child{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-weight:500}
 .barras .bl em{display:block;height:10px;border-radius:5px;background:var(--soft);overflow:hidden} .barras .bl em i{display:block;height:100%;border-radius:5px;background:var(--accent)}
 .barras .bl b{font:500 12px var(--mono);white-space:nowrap;text-align:right;min-width:128px} .barras .bl b small{color:var(--muted);font-weight:400;margin-left:6px}
-.tiles strong{font-size:24px} .tiles>div{padding:18px 20px;border-top:3px solid var(--accent)} .tiles>div:last-child{grid-column-end:-1} .tiles small.pos{color:var(--good)} .tiles small.neg{color:var(--bad)}
+.tiles strong{font-size:24px} .tiles>div{padding:18px 20px;border-top:3px solid var(--accent)} .tiles small.pos{color:var(--good)} .tiles small.neg{color:var(--bad)}
 th.txt{text-align:left} table.tprot td,table.tprot th{padding:9px 12px} table.tprot td:first-child{color:var(--muted);width:36px} table.tprot .pn{display:flex;align-items:center;gap:10px;font-weight:500} table.tprot .pn img{width:22px;height:22px;border-radius:50%;background:var(--soft);flex:none}
 table.tprot .peso{display:flex;align-items:center;gap:8px;min-width:150px} table.tprot .peso em{flex:1;height:8px;border-radius:4px;background:var(--soft);overflow:hidden} table.tprot .peso em i{display:block;height:100%;background:var(--accent);border-radius:4px} table.tprot .peso span{font:400 12px var(--mono);color:var(--muted);min-width:42px;text-align:right}
 table.tprot .chip{display:inline-block;font-size:12px;padding:2px 9px;border-radius:10px;background:var(--soft);color:var(--muted)}
@@ -1910,7 +1910,7 @@ function sData(s){ return s&&s.length?s[s.length-1][0].split("-").reverse().join
 function verbo(v,lim){ lim=lim||0.003; return v==null?"ficou sem dado":v>lim*4?"subiu forte":v>lim?"subiu":v<-lim*4?"caiu forte":v<-lim?"caiu":"ficou estável"; }
 function pp(v){ return (v>=0?"+":"−")+usd(Math.abs(v),2)+" p.p."; }
 function fedBusca(){ if(!MERC||!MERC.macro||(MERC.macro.series&&MERC.macro.series.fed)) return; if(INI.fedD){ MERC.macro.series=MERC.macro.series||{}; MERC.macro.series.fed=INI.fedD.s; MERC.macro.fed=INI.fedD.f; return; } if(INI.fedPed) return; INI.fedPed=1;
-  fetch("https://markets.newyorkfed.org/api/rates/unsecured/effr/last/1300.json").then(function(r){return r.json();}).then(function(j){ var d=j.refRates||[]; if(!d.length||!MERC.macro) return; var pts=[], ant=null;
+  fetch("https://markets.newyorkfed.org/api/rates/unsecured/effr/last/500.json").then(function(r){return r.json();}).then(function(j){ var d=j.refRates||[]; if(!d.length||!MERC.macro) return; var pts=[], ant=null;
     d.slice().reverse().forEach(function(x){ var a=x.targetRateTo; if(a!=null&&a!==ant){ pts.push([x.effectiveDate,a]); ant=a; } }); pts.push([d[0].effectiveDate,d[0].targetRateTo]);
     INI.fedD={s:pts,f:{de:d[0].targetRateFrom,ate:d[0].targetRateTo,efetiva:d[0].percentRate,data:d[0].effectiveDate}}; MERC.macro.series=MERC.macro.series||{}; MERC.macro.series.fed=INI.fedD.s; MERC.macro.fed=INI.fedD.f; INI.feito=0; inicioDes(); }).catch(function(){ INI.fedPed=0; }); }
 function inicioDes(){ fedBusca(); if($("area-inicio").hidden&&INI.feito) return; var M=(MERC&&MERC.macro)||{}, S=M.series||{}, btc=PRECOS.BTC, eth=PRECOS.ETH, g=MERC&&MERC.panorama, fng=MERC&&MERC.fng, agora=new Date();
@@ -1958,6 +1958,7 @@ function inicioGraf(){ if($("area-inicio").hidden) return; var S=(MERC&&MERC.mac
   var corS=escuro()?"#5fcf95":"#1a7f4b", corF=escuro()?"#7fb0ea":"#1f4e8c";
   if(S.selic||S.fed) grafFaz("in-g-juros",[{cor:corS,titulo:"Selic",dados:degrau(S.selic),degrau:true},{cor:corF,titulo:"Fed",dados:degrau(S.fed),degrau:true}],function(v){return usd(v,2)+"%";});
   if(S.us10y) grafFaz("in-g-t10",[{tipo:"area",cor:corF,dados:pt(S.us10y)}],function(v){return usd(v,2)+"%";}); }
+document.addEventListener("visibilitychange",function(){ if(document.hidden) return; setTimeout(function(){ Object.keys(M2.g).forEach(function(k){ try{ M2.g[k].timeScale().fitContent(); }catch(e){} }); },150); });
 document.addEventListener("DOMContentLoaded",function(){ pers("in-per","per","d",function(){}); [].forEach.call(document.querySelectorAll("#in-per button"),function(b){ b.addEventListener("click",function(){ INI.per=+b.dataset.d; inicioGraf(); }); });
   [].forEach.call(document.querySelectorAll('#areas button[data-area="inicio"]'),function(b){ b.addEventListener("click",function(){ setTimeout(inicioDes,30); }); }); ORD["in-etfs"]={c:4,d:-1}; setTimeout(inicioDes,1500); setInterval(function(){ if(!$("area-inicio").hidden) inicioDes(); },60000); });
 </script>
