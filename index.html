@@ -68,6 +68,7 @@ button:focus-visible,input:focus-visible,select:focus-visible,a:focus-visible{ou
 .fres b{display:block;font:500 15px var(--mono);font-variant-numeric:tabular-nums}
 .pos{color:var(--good)} .neg{color:var(--bad)} .vazio{color:var(--muted)}
 .scroll{overflow-x:auto;margin-top:12px}
+#in-agenda td{white-space:normal;font-size:13px;padding:8px 6px}#in-agenda td:first-child{white-space:nowrap}
 table{border-collapse:collapse;width:100%;font-size:14px}
 th,td{padding:7px 10px;border-bottom:1px solid var(--line);text-align:right;white-space:nowrap;font-variant-numeric:tabular-nums}
 th{font-weight:600;color:var(--muted);font-size:11px;letter-spacing:.06em;text-transform:uppercase}
@@ -155,7 +156,7 @@ button.mv{padding:2px 7px;font-size:12px;line-height:1.2;margin-right:3px} butto
 .barras .bl{display:grid;grid-template-columns:minmax(84px,30%) 1fr auto;gap:10px;align-items:center;font-size:13px} .barras .bl span:first-child{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-weight:500}
 .barras .bl em{display:block;height:10px;border-radius:5px;background:var(--soft);overflow:hidden} .barras .bl em i{display:block;height:100%;border-radius:5px;background:var(--accent)}
 .barras .bl b{font:500 12px var(--mono);white-space:nowrap;text-align:right;min-width:128px} .barras .bl b small{color:var(--muted);font-weight:400;margin-left:6px}
-.tiles strong{font-size:24px} .tiles>div{padding:18px 20px;border-top:3px solid var(--accent)} .tiles small.pos{color:var(--good)} .tiles small.neg{color:var(--bad)}
+.tiles strong{font-size:24px} .tiles>div{padding:18px 20px;border-top:3px solid var(--accent)} .tiles>div:last-child{grid-column-end:-1} .tiles small.pos{color:var(--good)} .tiles small.neg{color:var(--bad)}
 th.txt{text-align:left} table.tprot td,table.tprot th{padding:9px 12px} table.tprot td:first-child{color:var(--muted);width:36px} table.tprot .pn{display:flex;align-items:center;gap:10px;font-weight:500} table.tprot .pn img{width:22px;height:22px;border-radius:50%;background:var(--soft);flex:none}
 table.tprot .peso{display:flex;align-items:center;gap:8px;min-width:150px} table.tprot .peso em{flex:1;height:8px;border-radius:4px;background:var(--soft);overflow:hidden} table.tprot .peso em i{display:block;height:100%;background:var(--accent);border-radius:4px} table.tprot .peso span{font:400 12px var(--mono);color:var(--muted);min-width:42px;text-align:right}
 table.tprot .chip{display:inline-block;font-size:12px;padding:2px 9px;border-radius:10px;background:var(--soft);color:var(--muted)}
@@ -1592,7 +1593,7 @@ function grafFaz(id,series,fmt){ var alvo=$(id); if(!alvo||!window.LightweightCh
   var ch=LightweightCharts.createChart(alvo,grafOpc(fmt));
   series.forEach(function(s){ if(!s.dados||!s.dados.length) return; var o={color:s.cor,priceLineVisible:false,lastValueVisible:true,title:s.titulo||""}, sr;
     if(s.tipo==="barras") sr=ch.addHistogramSeries(o); else if(s.tipo==="area") sr=ch.addAreaSeries({lineColor:s.cor,topColor:s.cor+"55",bottomColor:s.cor+"05",lineWidth:2,priceLineVisible:false,title:s.titulo||""}); else { o.lineWidth=2; if(s.degrau) o.lineType=1; sr=ch.addLineSeries(o); }
-    sr.setData(s.dados); }); ch.timeScale().fitContent(); M2.g[id]=ch; grafExtras(id,ch,fmt); }
+    sr.setData(s.dados); }); ch.timeScale().fitContent(); [80,500,1500].forEach(function(t){ setTimeout(function(){ try{ if(M2.g[id]===ch) ch.timeScale().fitContent(); }catch(e){} },t); }); M2.g[id]=ch; grafExtras(id,ch,fmt); }
 function grafOpc(fmt){ var e=escuro(); return {autoSize:true,layout:{background:{color:"transparent"},textColor:e?"#9fb0c6":"#4a586b",fontFamily:"IBM Plex Sans, sans-serif",fontSize:12,attributionLogo:false},
   grid:{vertLines:{visible:false},horzLines:{color:e?"rgba(159,176,198,.10)":"rgba(14,26,43,.07)",style:0}},rightPriceScale:{borderVisible:false,scaleMargins:{top:.12,bottom:.08}},timeScale:{borderColor:e?"rgba(159,176,198,.22)":"rgba(14,26,43,.16)",fixLeftEdge:true,fixRightEdge:true},
   crosshair:{mode:1,vertLine:{color:e?"rgba(159,176,198,.45)":"rgba(14,26,43,.35)",width:1,style:3,labelBackgroundColor:"#0b2545"},horzLine:{color:e?"rgba(159,176,198,.45)":"rgba(14,26,43,.35)",width:1,style:3,labelBackgroundColor:"#0b2545"}},
@@ -1803,7 +1804,8 @@ $("rel-pdf").addEventListener("click",function(){ var go=function(){ var th=docu
 ORD["df-prot"]={c:null,d:-1};
 pers("df-per","dfPer","d",defiDes); pers("ef-per","efPer","d",etfDes); pers("ef-un","efUn","u",etfDes);
 function mercPaineis(){ var bx=$("g-paineis"); if(!bx||$("area-mercado").hidden||$("mj-resumo").hidden) return;
-  Promise.all([defiCarrega().catch(function(){return null;}),ocCarrega().catch(function(){return null;}),etfCarrega().catch(function(){return null;})]).then(function(r){ var d=r[0], o=r[1], e=r[2]; bx.textContent="";
+  var R=mercPaineis.R||(mercPaineis.R=[null,null,null]); [defiCarrega,ocCarrega,etfCarrega].forEach(function(f,i){ try{ f().then(function(x){ if(x&&R[i]!==x){ R[i]=x; des(R); } }).catch(function(){}); }catch(x){} }); des(R);
+  function des(r){ var d=r[0], o=r[1], e=r[2]; bx.textContent="";
     var C=function(aba,tema,titulo,linhas){ var c=el("article","tema"); c.appendChild(el("span","rot",tema)); var h=el("h3"), b=el("button","lnk",titulo); b.type="button"; b.style.font="inherit"; b.addEventListener("click",function(){ mjanela(aba); window.scrollTo({top:0,behavior:"smooth"}); }); h.appendChild(b); c.appendChild(h); var u=el("ul"); u.style.cssText="margin:0;padding-left:18px;display:flex;flex-direction:column;gap:4px;font-size:14px;color:var(--muted)"; linhas.forEach(function(x){ if(x) u.appendChild(el("li",null,x)); }); c.appendChild(u); bx.appendChild(c); };
     var liq=Object.keys(PRECOS).filter(function(k){return PRECOS[k].vol>=2e7;}).sort(function(a,b){return PRECOS[b].v-PRECOS[a].v;}), pr=PRINCIPAIS.filter(function(a){return PRECOS[a];});
     if(pr.length) C("ativos","Ativos",pr.filter(function(a){return PRECOS[a].v>0;}).length+" de "+pr.length+" principais em alta",[PRECOS.BTC?"Bitcoin: US$ "+usd(PRECOS.BTC.p,0)+" ("+pct(PRECOS.BTC.v)+")":"",PRECOS.ETH?"Ethereum: US$ "+usd(PRECOS.ETH.p,0)+" ("+pct(PRECOS.ETH.v)+")":"",liq.length>1?"Maior alta: "+liq[0]+" ("+pct(PRECOS[liq[0]].v)+")":"",liq.length>1?"Maior queda: "+liq[liq.length-1]+" ("+pct(PRECOS[liq[liq.length-1]].v)+")":""]);
@@ -1812,7 +1814,7 @@ function mercPaineis(){ var bx=$("g-paineis"); if(!bx||$("area-mercado").hidden|
     if(d){ var u=d.tvl[d.tvl.length-1].value, v7=varP(u,atras(d.tvl,7)), v30=varP(u,atras(d.tvl,30)), su=d.stb.length?d.stb[d.stb.length-1].value:null, sr=0; d.redes.forEach(function(c){sr+=c.tvl;}); C("defi","DeFi","Valor travado: "+dinG(u),["Variação: "+(v7==null?"–":pct(v7))+" em 7 dias, "+(v30==null?"–":pct(v30))+" em 30 dias",su!=null?"Stablecoins em circulação: "+dinG(su):"",d.dex?"Volume em corretoras descentralizadas: "+dinG(d.dex.v)+" em 24h":"",d.redes.length?"Maior rede: "+d.redes[0].name+" ("+usd(d.redes[0].tvl/(sr||u)*100,1)+"%)":"",d.prot.length?"Maior protocolo: "+d.prot[0].name+" ("+dinG(d.prot[0].tvl)+")":""]); }
     if(o){ var ab=serie(o.btc,"AdrActCnt"), mv=serie(o.btc,"CapMVRVCur"); C("onchain","On-chain",o.hash&&o.hash.currentHashrate?"Hashrate do Bitcoin: "+usd(o.hash.currentHashrate/1e18,0)+" EH/s":"Dados das redes",[o.dif?"Próximo ajuste de dificuldade: "+pct(o.dif.difficultyChange/100):"",o.taxa?"Taxa para confirmar rápido: "+o.taxa.fastestFee+" sat/vB":"",o.fila?"Transações na fila: "+usd(o.fila.count,0):"",ab.length?"Endereços ativos do Bitcoin: "+usd(ab[ab.length-1].value,0):"",mv.length?"MVRV do Bitcoin: "+usd(mv[mv.length-1].value,2)+(mv[mv.length-1].value>=3.5?" (euforia)":mv[mv.length-1].value<1?" (capitulação)":" (zona neutra)"):""]); }
     if(e&&e.fl&&e.fl.length){ var q=function(n){ var x=0; e.fl.slice(-n).forEach(function(y){x+=y.usd;}); return x; }, ul=e.fl[e.fl.length-1]; C("etfs","ETFs de Bitcoin","Saldo do mês: "+dinG(q(21)),["Último dia ("+ul.time.split("-").reverse().slice(0,2).join("/")+"): "+dinG(ul.usd),"Última semana: "+dinG(q(5)),e.tot.length?"Bitcoin guardado pelos fundos: "+usd(e.tot[e.tot.length-1].value,0)+" BTC":"","Notícias sobre ETFs no feed: "+etfNots().length]); }
-  }); }
+  if(!d||!o||!e){ var av=el("p","sub","Carregando os demais painéis…"); av.style.gridColumn="1/-1"; bx.appendChild(av); } } }
 function m2Abre(j){ if(j==="resumo") mercPaineis(); if(j==="defi") defiDes(); else if(j==="onchain") ocDes(); else if(j==="etfs") etfDes(); }
 [].forEach.call(document.querySelectorAll('#areas button[data-area="relatorio"]'),function(b){ b.addEventListener("click",function(){ setTimeout(relGera,50); }); }); if(location.hash==="#relatorio") setTimeout(relGera,2500);
 setTimeout(mercPaineis,4000); [].forEach.call(document.querySelectorAll('#areas button[data-area="mercado"]'),function(b){ b.addEventListener("click",function(){ setTimeout(mercPaineis,200); }); });
@@ -1907,7 +1909,11 @@ function sDif(s,n){ if(!s||s.length<2) return null; return s[s.length-1][1]-s[Ma
 function sData(s){ return s&&s.length?s[s.length-1][0].split("-").reverse().join("/"):""; }
 function verbo(v,lim){ lim=lim||0.003; return v==null?"ficou sem dado":v>lim*4?"subiu forte":v>lim?"subiu":v<-lim*4?"caiu forte":v<-lim?"caiu":"ficou estável"; }
 function pp(v){ return (v>=0?"+":"−")+usd(Math.abs(v),2)+" p.p."; }
-function inicioDes(){ if($("area-inicio").hidden&&INI.feito) return; var M=(MERC&&MERC.macro)||{}, S=M.series||{}, btc=PRECOS.BTC, eth=PRECOS.ETH, g=MERC&&MERC.panorama, fng=MERC&&MERC.fng, agora=new Date();
+function fedBusca(){ if(!MERC||!MERC.macro||(MERC.macro.series&&MERC.macro.series.fed)) return; if(INI.fedD){ MERC.macro.series=MERC.macro.series||{}; MERC.macro.series.fed=INI.fedD.s; MERC.macro.fed=INI.fedD.f; return; } if(INI.fedPed) return; INI.fedPed=1;
+  fetch("https://markets.newyorkfed.org/api/rates/unsecured/effr/last/1300.json").then(function(r){return r.json();}).then(function(j){ var d=j.refRates||[]; if(!d.length||!MERC.macro) return; var pts=[], ant=null;
+    d.slice().reverse().forEach(function(x){ var a=x.targetRateTo; if(a!=null&&a!==ant){ pts.push([x.effectiveDate,a]); ant=a; } }); pts.push([d[0].effectiveDate,d[0].targetRateTo]);
+    INI.fedD={s:pts,f:{de:d[0].targetRateFrom,ate:d[0].targetRateTo,efetiva:d[0].percentRate,data:d[0].effectiveDate}}; MERC.macro.series=MERC.macro.series||{}; MERC.macro.series.fed=INI.fedD.s; MERC.macro.fed=INI.fedD.f; INI.feito=0; inicioDes(); }).catch(function(){ INI.fedPed=0; }); }
+function inicioDes(){ fedBusca(); if($("area-inicio").hidden&&INI.feito) return; var M=(MERC&&MERC.macro)||{}, S=M.series||{}, btc=PRECOS.BTC, eth=PRECOS.ETH, g=MERC&&MERC.panorama, fng=MERC&&MERC.fng, agora=new Date();
   $("in-data").textContent=agora.toLocaleDateString("pt-BR",{weekday:"long",day:"2-digit",month:"long",year:"numeric"});
   var sp=sVar(S.sp500,1), ib=sVar(S.ibov,1), ou=sVar(S.ouro,1), br=sVar(S.brent,1), dol=sVar(S.usdbrl,1), t10=sUlt(S.us10y), t10d=sDif(S.us10y,1), selic=sUlt(S.selic), fed=M.fed, e=typeof M2!=="undefined"?M2.etf:null;
   /* título */
