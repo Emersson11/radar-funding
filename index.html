@@ -469,15 +469,23 @@ button.mini{font-size:12px;color:var(--muted)}
     <section id="mj-onchain" hidden>
       <div class="tiles" id="oc-tiles"></div>
       <p class="sub" id="oc-status" style="margin:10px 0">Carregando…</p>
-      <div class="duas">
-        <div class="box"><h2>Endereços ativos por dia</h2><p class="sub">Quantos endereços diferentes movimentaram a rede. Mostra o uso real.</p><div class="graf" id="oc-adr"></div></div>
-        <div class="box"><h2>MVRV do Bitcoin</h2><p class="sub">Preço de mercado dividido pelo preço médio em que as moedas foram movidas pela última vez. Acima de 3,5 costuma indicar euforia; abaixo de 1, capitulação.</p><div class="graf" id="oc-mvrv"></div></div>
+      <div class="box heroi" style="margin-bottom:20px"><span class="rot">Leitura dos dados on-chain</span><h2 id="oc-titulo" style="font-size:clamp(20px,1.8vw,26px)">Carregando…</h2><ul id="oc-leitura" style="margin:0;padding-left:20px;display:flex;flex-direction:column;gap:7px;font-size:15.5px;line-height:1.55"></ul>
+        <p class="note">Estes indicadores mostram como o mercado se comportou em situações parecidas no passado. Eles ajudam a ler o momento, mas não garantem o que o preço vai fazer e não são recomendação de investimento.</p></div>
+      <div class="box"><h2>Preço do Bitcoin e preço realizado</h2><p class="sub">Preço realizado é o preço médio que os donos atuais pagaram pelas moedas. O de curto prazo considera só quem comprou nos últimos 5 meses. Preço acima das linhas: a maioria está no lucro. Abaixo: no prejuízo.</p><div class="graf" id="oc-preco" style="height:360px"></div></div>
+      <div class="duas" style="margin-top:20px">
+        <div class="box"><h2>MVRV do Bitcoin</h2><p class="sub">Preço de mercado dividido pelo preço realizado. Acima de 3,5 costuma marcar euforia (topos); abaixo de 1, capitulação (fundos).</p><div class="graf" id="oc-mvrv"></div></div>
+        <div class="box"><h2>Lucro ou prejuízo não realizado (NUPL)</h2><p class="sub">Parte do valor de mercado que é lucro ainda não vendido. Acima de 75% é euforia; abaixo de zero, o mercado inteiro está no prejuízo.</p><div class="graf" id="oc-nupl"></div></div>
       </div>
       <div class="duas" style="margin-top:20px">
-        <div class="box"><h2>Poder de mineração do Bitcoin (hashrate)</h2><p class="sub">Em EH/s. Quanto maior, mais segura a rede.</p><div class="graf" id="oc-hash"></div></div>
-        <div class="box"><h2>Transações por dia</h2><p class="sub">Bitcoin e Ethereum.</p><div class="graf" id="oc-tx"></div></div>
+        <div class="box"><h2>Vendas no lucro ou no prejuízo (SOPR)</h2><p class="sub">Média de 7 dias. Acima de 1, quem vende está realizando lucro; abaixo de 1, está aceitando prejuízo.</p><div class="graf" id="oc-sopr"></div></div>
+        <div class="box"><h2>Bitcoin guardado em corretoras</h2><p class="sub">Em BTC. Queda indica moedas sendo retiradas para guardar (menos oferta à venda); alta indica moedas chegando para vender.</p><div class="graf" id="oc-exs"></div></div>
       </div>
-      <p class="note">Fontes: mempool.space (taxas, fila e mineração, ao vivo) e Coin Metrics (endereços, transações e MVRV, com fechamento diário). Atualiza sozinho a cada 5 minutos.</p>
+      <div class="duas" style="margin-top:20px">
+        <div class="box"><h2>Entradas e saídas de Bitcoin nas corretoras</h2><p class="sub">Saldo diário em dólares. Barra para cima: entrou mais do que saiu. Barra para baixo: saiu mais do que entrou.</p><div class="graf" id="oc-flux"></div></div>
+        <div class="box"><h2>Stablecoins em circulação</h2><p class="sub">Dólares digitais disponíveis para comprar cripto. Crescimento indica dinheiro novo entrando no mercado.</p><div class="graf" id="oc-stb"></div></div>
+      </div>
+      <div class="box" style="margin-top:20px"><h2>Endereços ativos por dia</h2><p class="sub">Quantos endereços diferentes movimentaram a rede. Mostra o uso real.</p><div class="graf" id="oc-adr"></div></div>
+      <p class="note">Fontes: Coin Metrics (preço, MVRV, saldo e fluxo das corretoras, endereços), BGeometrics (preço realizado de curto prazo, NUPL e SOPR, com alguns dias de atraso) e DeFiLlama (stablecoins). São métricas de fechamento diário. O fluxo de stablecoins por corretora não tem fonte pública gratuita; por isso o painel mostra o total em circulação.</p>
     </section>
     <section id="mj-etfs" hidden>
       <div class="tiles" id="ef-tiles"></div>
@@ -1645,27 +1653,52 @@ function defiDes(){ defiCarrega().then(function(d){ if(!d){ $("df-status").textC
 
 /* On-chain */
 function cm(ativos,met,n){ return gj("https://community-api.coinmetrics.io/v4/timeseries/asset-metrics?assets="+ativos+"&metrics="+met+"&frequency=1d&page_size="+n+"&paging_from=end").then(function(j){ return j&&j.data?j.data.slice().sort(function(a,b){return a.time<b.time?-1:1;}):null; }); }
-function ocCarrega(){ if(M2.oc&&Date.now()-M2.ocT<300000) return Promise.resolve(M2.oc); if(M2.ocP) return M2.ocP;
-  M2.ocP=Promise.all([gj("https://mempool.space/api/v1/fees/recommended"),gj("https://mempool.space/api/mempool"),gj("https://mempool.space/api/v1/mining/hashrate/3m"),gj("https://mempool.space/api/v1/difficulty-adjustment"),gj("https://mempool.space/api/blocks/tip/height"),
-    M2.oc&&M2.oc.cmT&&Date.now()-M2.oc.cmT<3600000?Promise.resolve(M2.oc.btc):cm("btc","AdrActCnt,TxCnt,CapMVRVCur",400), M2.oc&&M2.oc.cmT&&Date.now()-M2.oc.cmT<3600000?Promise.resolve(M2.oc.eth):cm("eth","AdrActCnt,TxCnt",400)]).then(function(r){ M2.ocP=null;
-    var o={taxa:r[0],fila:r[1],hash:r[2],dif:r[3],bloco:r[4],btc:r[5]||(M2.oc&&M2.oc.btc)||null,eth:r[6]||(M2.oc&&M2.oc.eth)||null,cmT:(r[5]?Date.now():(M2.oc&&M2.oc.cmT)||0)}; M2.oc=o; M2.ocT=Date.now(); return o; }); return M2.ocP; }
+function bgBusca(){ var c=null; try{ c=JSON.parse(localStorage.getItem("oc_bg_v1")); }catch(e){} if(c&&Date.now()-c.t<21600000) return Promise.resolve(c);
+  var um=function(n,k){ return gj("https://bitcoin-data.com/v1/"+n).then(function(l){ return Array.isArray(l)?l.slice(-730).map(function(x){return [x.d,+x[k]];}).filter(function(x){return isFinite(x[1]);}):null; }); };
+  return Promise.all([um("sth-realized-price","sthRealizedPrice"),um("sopr","sopr"),um("nupl","nupl")]).then(function(r){ var n={t:Date.now(),sth:r[0]||(c&&c.sth)||null,sopr:r[1]||(c&&c.sopr)||null,nupl:r[2]||(c&&c.nupl)||null}; if(r[0]&&r[1]&&r[2]){ try{ localStorage.setItem("oc_bg_v1",JSON.stringify(n)); }catch(e){} } return n; }); }
+function ocCarrega(){ if(M2.oc&&Date.now()-M2.ocT<1800000) return Promise.resolve(M2.oc); if(M2.ocP) return M2.ocP;
+  M2.ocP=Promise.all([cm("btc","AdrActCnt,TxCnt,CapMVRVCur,PriceUSD,SplyExNtv,FlowInExUSD,FlowOutExUSD",730),cm("eth","AdrActCnt,TxCnt",400),bgBusca().catch(function(){return null;}),defiCarrega().catch(function(){return null;})]).then(function(r){ M2.ocP=null;
+    var o={taxa:null,fila:null,hash:null,dif:null,bloco:null,btc:r[0]||(M2.oc&&M2.oc.btc)||null,eth:r[1]||(M2.oc&&M2.oc.eth)||null,bg:r[2]||(M2.oc&&M2.oc.bg)||null,stb:(r[3]&&r[3].stb)||[],cmT:Date.now()}; M2.oc=o; M2.ocT=Date.now(); return o; }); return M2.ocP; }
 function serie(l,k){ return (l||[]).filter(function(x){return x[k]!=null;}).map(function(x){return {time:x.time.slice(0,10),value:+x[k]};}); }
-function ocDes(){ ocCarrega().then(function(o){ var t=$("oc-tiles"); t.textContent="";
-    if(o.bloco!=null) tile(t,"Bloco atual do Bitcoin",usd(+o.bloco,0),"");
-    if(o.taxa) tile(t,"Taxa para confirmar rápido",o.taxa.fastestFee+" sat/vB","em 1 hora: "+o.taxa.hourFee+" sat/vB");
-    if(o.fila) tile(t,"Transações na fila",usd(o.fila.count,0),usd(o.fila.vsize/1e6,1)+" MB esperando");
-    if(o.hash&&o.hash.currentHashrate) tile(t,"Hashrate",usd(o.hash.currentHashrate/1e18,0)+" EH/s","");
-    if(o.dif) tile(t,"Próximo ajuste de dificuldade",pct(o.dif.difficultyChange/100),"em "+new Date(o.dif.estimatedRetargetDate).toLocaleDateString("pt-BR"),cls(o.dif.difficultyChange));
-    var ab=serie(o.btc,"AdrActCnt"), ae=serie(o.eth,"AdrActCnt"), mv=serie(o.btc,"CapMVRVCur"), tb=serie(o.btc,"TxCnt"), te=serie(o.eth,"TxCnt");
-    if(ab.length){ var a7=varP(ab[ab.length-1].value,atras(ab,7)); tile(t,"Endereços ativos (BTC)",usd(ab[ab.length-1].value,0),a7==null?"":pct(a7)+" em 7 dias",cls(a7)); }
-    if(ae.length) tile(t,"Endereços ativos (ETH)",usd(ae[ae.length-1].value,0),"");
-    if(mv.length){ var m=mv[mv.length-1].value; tile(t,"MVRV do Bitcoin",usd(m,2),m>=3.5?"zona de euforia":m<1?"zona de capitulação":"zona neutra"); }
-    $("oc-status").textContent=(t.children.length?"Atualizado às "+new Date(M2.ocT).toLocaleTimeString("pt-BR")+".":"Não consegui buscar os dados on-chain agora.")+(ab.length?" Métricas diárias até "+ab[ab.length-1].time.split("-").reverse().join("/")+".":" As métricas diárias (endereços, MVRV) não responderam agora.");
-    var mil=function(v){return v>=1e6?usd(v/1e6,2)+" mi":usd(v/1e3,0)+" mil";};
-    grafFaz("oc-adr",[{cor:cor("--s2"),titulo:"BTC",dados:corte(ab,180)},{cor:cor("--s3"),titulo:"ETH",dados:corte(ae,180)}],mil);
-    grafFaz("oc-mvrv",[{cor:cor("--accent"),dados:mv}],function(v){return usd(v,2);});
-    grafFaz("oc-hash",[{tipo:"area",cor:cor("--s2"),dados:o.hash&&o.hash.hashrates?o.hash.hashrates.map(function(x){return {time:dsec(x.timestamp),value:x.avgHashrate/1e18};}):[]}],function(v){return usd(v,0);});
-    grafFaz("oc-tx",[{cor:cor("--s2"),titulo:"BTC",dados:corte(tb,180)},{cor:cor("--s3"),titulo:"ETH",dados:corte(te,180)}],mil); }); }
+function ocLeitura(o){ var R={f:[],pos:0,neg:0,k:{}}, bg=o.bg||{}, par=function(l){ return (l||[]).map(function(x){return {time:x[0],value:x[1]};}); }, ult=function(l){ return l.length?l[l.length-1].value:null; };
+  var px=serie(o.btc,"PriceUSD"), mv=serie(o.btc,"CapMVRVCur"), exs=serie(o.btc,"SplyExNtv"), fi=serie(o.btc,"FlowInExUSD"), fo=serie(o.btc,"FlowOutExUSD"), sth=par(bg.sth), sopr=par(bg.sopr), nupl=par(bg.nupl);
+  var mp={}; px.forEach(function(x){mp[x.time]=x.value;}); var real=mv.filter(function(x){return mp[x.time]&&x.value>0;}).map(function(x){return {time:x.time,value:mp[x.time]/x.value};});
+  var mo={}; fo.forEach(function(x){mo[x.time]=x.value;}); var liq=fi.filter(function(x){return mo[x.time]!=null;}).map(function(x){return {time:x.time,value:x.value-mo[x.time]};});
+  var s7=sopr.map(function(x,i){ var a=0,n=0; for(var j=Math.max(0,i-6);j<=i;j++){a+=sopr[j].value;n++;} return {time:x.time,value:a/n}; });
+  var p=(typeof PRECOS!=="undefined"&&PRECOS.BTC)?PRECOS.BTC.p:ult(px), S=function(v,frase){ if(v>0) R.pos++; else if(v<0) R.neg++; R.f.push({v:v,t:frase}); };
+  R.s={px:px,mv:mv,real:real,sth:sth,s7:s7,nupl:nupl,exs:exs,liq:liq}; R.k.p=p;
+  var rp=ult(real), m=ult(mv); R.k.real=rp; R.k.mvrv=m;
+  if(rp&&p){ var d=p/rp-1; S(m<1?1:m>=3.5?-1:m>=2.4?-1:0,"O preço realizado do Bitcoin está em US$ "+usd(rp,0)+". O preço de mercado está "+usd(Math.abs(d)*100,0)+"% "+(d>=0?"acima":"abaixo")+" dele (MVRV de "+usd(m,2)+"): "+(m<1?"o detentor médio está no prejuízo, região que no passado coincidiu com fundos de ciclo.":m>=3.5?"zona de euforia, que no passado coincidiu com topos de ciclo.":m>=2.4?"lucro alto acumulado, o que aumenta o incentivo para vender.":"o detentor médio está no lucro, sem exagero.")); }
+  var st=ult(sth); R.k.sth=st; if(st&&p){ var ds=p/st-1; S(ds>=0?1:-1,"Quem comprou nos últimos 5 meses pagou em média US$ "+usd(st,0)+". O preço está "+usd(Math.abs(ds)*100,0)+"% "+(ds>=0?"acima: os compradores recentes estão no lucro, e esse nível costuma funcionar como suporte.":"abaixo: os compradores recentes estão no prejuízo, e esse nível costuma funcionar como resistência.")); }
+  var nu=ult(nupl); R.k.nupl=nu; if(nu!=null){ var fz=nu<0?"capitulação":nu<0.25?"esperança":nu<0.5?"otimismo":nu<0.75?"crença":"euforia"; R.k.nuplF=fz; S(nu<0?1:nu>=0.75?-1:0,"O lucro não realizado equivale a "+usd(nu*100,0)+"% do valor de mercado (NUPL), fase de "+fz+". "+(nu<0?"O mercado inteiro está no prejuízo, o que historicamente marcou boas regiões de compra de longo prazo.":nu>=0.75?"Tanto lucro acumulado costuma anteceder realizações fortes.":"Há lucro acumulado, mas longe dos extremos.")); }
+  var so=ult(s7); R.k.sopr=so; if(so!=null) S(so>=1.03?-1:so<1?0:0,"O SOPR médio de 7 dias está em "+usd(so,3)+": "+(so>=1?"quem vende está realizando lucro"+(so>=1.03?", em ritmo forte.":", em ritmo moderado."):"quem vende está aceitando prejuízo. Quando isso se esgota, costuma marcar fundos locais."));
+  if(exs.length>30){ var e0=ult(exs), e30=atras(exs,30), de=e0/e30-1; R.k.exs=e0; R.k.exs30=de; S(de<-0.005?1:de>0.005?-1:0,"As corretoras guardam "+usd(e0/1e6,2)+" milhões de BTC ("+pct(de)+" em 30 dias): "+(de<-0.005?"moedas estão sendo retiradas, o que reduz a oferta pronta para venda.":de>0.005?"moedas estão chegando às corretoras, o que aumenta a oferta pronta para venda.":"saldo estável.")); }
+  if(liq.length>7){ var l7=0; liq.slice(-7).forEach(function(x){l7+=x.value;}); R.k.liq7=l7; S(l7<-1e8?1:l7>1e8?-1:0,"Em 7 dias, "+(l7<0?"saiu das corretoras":"entrou nas corretoras")+" o equivalente a "+dinG(Math.abs(l7))+" em Bitcoin a mais do que "+(l7<0?"entrou":"saiu")+"."); }
+  var sb=o.stb||[]; if(sb.length>30){ var b0=ult(sb), b30=atras(sb,30), db=b0/b30-1; R.k.stb=b0; R.k.stb30=db; S(db>0.01?1:db<-0.01?-1:0,"Há "+dinG(b0)+" em stablecoins em circulação ("+pct(db)+" em 30 dias): "+(db>0.01?"o poder de compra do mercado está crescendo.":db<-0.01?"o poder de compra do mercado está encolhendo.":"o poder de compra está estável.")); }
+  R.titulo=!R.f.length?"Dados on-chain indisponíveis agora":R.pos>R.neg+1?"Os dados on-chain estão mais favoráveis do que desfavoráveis":R.neg>R.pos+1?"Os dados on-chain pedem cautela":"Os dados on-chain estão equilibrados";
+  R.saldo=R.pos+" sinais favoráveis, "+R.neg+" de atenção e "+(R.f.length-R.pos-R.neg)+" neutros"; return R; }
+function ocDes(){ ocCarrega().then(function(o){ var t=$("oc-tiles"); t.textContent=""; var L=ocLeitura(o), k=L.k, s=L.s;
+    if(k.real) tile(t,"Preço realizado",usd(k.real,0)==="–"?"–":"US$ "+usd(k.real,0),k.p?"mercado "+pct(k.p/k.real-1)+" em relação a ele":"",k.p>=k.real?"pos":"neg");
+    if(k.sth) tile(t,"Preço realizado de curto prazo","US$ "+usd(k.sth,0),k.p?(k.p>=k.sth?"preço acima: suporte":"preço abaixo: resistência"):"",k.p>=k.sth?"pos":"neg");
+    if(k.mvrv) tile(t,"MVRV",usd(k.mvrv,2),k.mvrv>=3.5?"zona de euforia":k.mvrv<1?"zona de capitulação":k.mvrv>=2.4?"lucro alto":"zona neutra");
+    if(k.nupl!=null) tile(t,"Lucro não realizado (NUPL)",usd(k.nupl*100,0)+"%","fase de "+k.nuplF);
+    if(k.sopr!=null) tile(t,"SOPR (7 dias)",usd(k.sopr,3),k.sopr>=1?"vendas no lucro":"vendas no prejuízo",k.sopr>=1?"pos":"neg");
+    if(k.exs) tile(t,"Bitcoin em corretoras",usd(k.exs/1e6,2)+" mi",pct(k.exs30)+" em 30 dias",k.exs30<0?"pos":"neg");
+    if(k.liq7!=null) tile(t,"Fluxo nas corretoras (7 dias)",dinG(k.liq7),k.liq7<0?"saída líquida":"entrada líquida",k.liq7<0?"pos":"neg");
+    if(k.stb) tile(t,"Stablecoins em circulação",dinG(k.stb),pct(k.stb30)+" em 30 dias",cls(k.stb30));
+    var dt=s.mv.length?s.mv[s.mv.length-1].time:null, db=s.nupl.length?s.nupl[s.nupl.length-1].time:null, br=function(d){return d.split("-").reverse().join("/");};
+    $("oc-status").textContent=!t.children.length?"Não consegui buscar os dados on-chain agora.":"Métricas de fechamento diário"+(dt?": Coin Metrics até "+br(dt):"")+(db?", BGeometrics até "+br(db):"")+"."+(o.bg&&o.bg.nupl?"":" NUPL, SOPR e preço de curto prazo não responderam agora.");
+    $("oc-titulo").textContent=L.titulo+(L.f.length?" ("+L.saldo+")":""); var ul=$("oc-leitura"); ul.textContent=""; L.f.forEach(function(x){ var li=el("li",null,x.t); li.style.listStyle=x.v>0?"'▲  '":x.v<0?"'▼  '":"'●  '"; ul.appendChild(li); });
+    var d0=function(v){return usd(v,0);}, d2=function(v){return usd(v,2);};
+    grafFaz("oc-preco",[{cor:"#d98a00",titulo:"Preço",dados:s.px},{cor:cor("--accent"),titulo:"Realizado",dados:s.real},{cor:cor("--s3"),titulo:"Curto prazo",dados:s.sth}],d0);
+    grafFaz("oc-mvrv",[{cor:cor("--accent"),dados:s.mv}],d2);
+    grafFaz("oc-nupl",[{tipo:"area",cor:cor("--s2"),dados:s.nupl.map(function(x){return {time:x.time,value:x.value*100};})}],function(v){return usd(v,0)+"%";});
+    grafFaz("oc-sopr",[{cor:cor("--s3"),dados:corte(s.s7,365)}],function(v){return usd(v,3);});
+    grafFaz("oc-exs",[{tipo:"area",cor:cor("--accent"),dados:s.exs}],function(v){return usd(v/1e6,2)+" mi";});
+    grafFaz("oc-flux",[{tipo:"barras",cor:cor("--s2"),dados:corte(s.liq,120).map(function(x){return {time:x.time,value:x.value,color:x.value>=0?"#c0392b":"#1a7f4b"};})}],function(v){return dinG(v);});
+    grafFaz("oc-stb",[{tipo:"area",cor:cor("--s2"),dados:corte(o.stb||[],730)}],function(v){return dinG(v);});
+    var mil=function(v){return v>=1e6?usd(v/1e6,2)+" mi":usd(v/1e3,0)+" mil";}, ab=serie(o.btc,"AdrActCnt"), ae=serie(o.eth,"AdrActCnt");
+    grafFaz("oc-adr",[{cor:cor("--s2"),titulo:"BTC",dados:corte(ab,180)},{cor:cor("--s3"),titulo:"ETH",dados:corte(ae,180)}],mil); }); }
 
 /* ETFs */
 function etfCarrega(){ if(M2.etf&&Date.now()-M2.etfT<7200000) return Promise.resolve(M2.etf); if(M2.etfP) return M2.etfP;
@@ -1758,7 +1791,7 @@ function relGera(){ var doc=$("rel-doc"); $("rel-status").textContent="Montando 
     else P("Os dados de DeFi não estavam disponíveis na hora em que este relatório foi montado.");
 
     H3("2.4 Dados on-chain");
-    if(o){ var ab=serie(o.btc,"AdrActCnt"), mv=serie(o.btc,"CapMVRVCur"), txb=serie(o.btc,"TxCnt"), ae=serie(o.eth,"AdrActCnt"), k=[]; t="";
+    if(o){ var ab=serie(o.btc,"AdrActCnt"), mv=serie(o.btc,"CapMVRVCur"), txb=serie(o.btc,"TxCnt"), ae=serie(o.eth,"AdrActCnt"), k=[]; t=""; try{ var LO=ocLeitura(o); if(LO.f.length){ t+=LO.titulo+": "+LO.saldo+". "+LO.f.map(function(x){return x.t;}).join(" ")+" "; } }catch(e){}
       if(o.hash&&o.hash.currentHashrate){ t+="A rede do Bitcoin opera com "+usd(o.hash.currentHashrate/1e18,0)+" EH/s de poder de mineração"; if(o.dif){ t+=", e o próximo ajuste de dificuldade está estimado em "+pct(o.dif.difficultyChange/100)+": "+(o.dif.difficultyChange>0?"os mineradores seguem ampliando a capacidade, sinal de confiança de quem tem custos fixos altos":"parte dos mineradores desligou máquinas, o que costuma acontecer quando a margem aperta"); } t+=". "; k.push(["Hashrate",usd(o.hash.currentHashrate/1e18,0)+" EH/s"]); }
       if(o.taxa&&o.fila){ t+="As taxas estão em "+o.taxa.fastestFee+" sat/vB para confirmação rápida, com "+usd(o.fila.count,0)+" transações na fila: "+(o.taxa.fastestFee<=5?"a rede está folgada, sem disputa por espaço nos blocos":o.taxa.fastestFee<=30?"há uso moderado":"há congestionamento, típico de momentos de muita movimentação")+". "; k.push(["Taxa rápida",o.taxa.fastestFee+" sat/vB"]); }
       if(ab.length){ var a7=varP(ab[ab.length-1].value,atras(ab,7)), a30=varP(ab[ab.length-1].value,atras(ab,30)); t+="O Bitcoin teve "+usd(ab[ab.length-1].value,0)+" endereços ativos no último dia fechado ("+(a7==null?"–":pct(a7))+" em 7 dias"+(a30==null?"":", "+pct(a30)+" em 30 dias")+")"+(ae.length?"; o Ethereum, "+usd(ae[ae.length-1].value,0):"")+". "+(a30>0.05?"O uso da rede cresce, o que dá sustentação ao movimento de preço. ":a30<-0.05?"O uso da rede recua, sinal de menor participação. ":"O uso da rede está estável. "); S("endereços ativos do Bitcoin em 30 dias",a30>0.05?1:a30<-0.05?-1:0,a30==null?"–":pct(a30)); k.push(["Endereços ativos (BTC)",usd(ab[ab.length-1].value,0)]); }
@@ -1813,7 +1846,7 @@ function mercPaineis(){ var bx=$("g-paineis"); if(!bx||$("area-mercado").hidden|
     var nt=((MERC&&MERC.noticias)||[]), n24=nt.filter(function(n){return n.t*1000>Date.now()-864e5;}), fs={}; n24.forEach(function(n){fs[n.fonte]=1;}); if(nt.length) C("noticias","Notícias",n24.length+" publicações em 24 horas",["De "+Object.keys(fs).length+" fontes diferentes"].concat(n24.slice(0,3).map(function(n){return n.titulo;})));
     var ev=((MERC&&MERC.calendario)||[]).filter(function(x){return (x.impacto==="High"||x.impacto==="Medium")&&x.moeda==="USD"&&Date.parse(x.data)>Date.now();}).sort(function(a,b){return Date.parse(a.data)-Date.parse(b.data);}); C("calendario","Calendário",ev.length?ev.length+" eventos importantes à frente":"Semana sem eventos importantes",ev.slice(0,4).map(function(x){return (x.impacto==="High"?"★★★ ":"★★ ")+x.titulo+", "+new Date(x.data).toLocaleString("pt-BR",{weekday:"short",day:"2-digit",month:"2-digit",hour:"2-digit",minute:"2-digit"});}));
     if(d){ var u=d.tvl[d.tvl.length-1].value, v7=varP(u,atras(d.tvl,7)), v30=varP(u,atras(d.tvl,30)), su=d.stb.length?d.stb[d.stb.length-1].value:null, sr=0; d.redes.forEach(function(c){sr+=c.tvl;}); C("defi","DeFi","Valor travado: "+dinG(u),["Variação: "+(v7==null?"–":pct(v7))+" em 7 dias, "+(v30==null?"–":pct(v30))+" em 30 dias",su!=null?"Stablecoins em circulação: "+dinG(su):"",d.dex?"Volume em corretoras descentralizadas: "+dinG(d.dex.v)+" em 24h":"",d.redes.length?"Maior rede: "+d.redes[0].name+" ("+usd(d.redes[0].tvl/(sr||u)*100,1)+"%)":"",d.prot.length?"Maior protocolo: "+d.prot[0].name+" ("+dinG(d.prot[0].tvl)+")":""]); }
-    if(o){ var ab=serie(o.btc,"AdrActCnt"), mv=serie(o.btc,"CapMVRVCur"); C("onchain","On-chain",o.hash&&o.hash.currentHashrate?"Hashrate do Bitcoin: "+usd(o.hash.currentHashrate/1e18,0)+" EH/s":"Dados das redes",[o.dif?"Próximo ajuste de dificuldade: "+pct(o.dif.difficultyChange/100):"",o.taxa?"Taxa para confirmar rápido: "+o.taxa.fastestFee+" sat/vB":"",o.fila?"Transações na fila: "+usd(o.fila.count,0):"",ab.length?"Endereços ativos do Bitcoin: "+usd(ab[ab.length-1].value,0):"",mv.length?"MVRV do Bitcoin: "+usd(mv[mv.length-1].value,2)+(mv[mv.length-1].value>=3.5?" (euforia)":mv[mv.length-1].value<1?" (capitulação)":" (zona neutra)"):""]); }
+    if(o){ var L=ocLeitura(o); if(L.f.length) C("onchain","On-chain",L.titulo,[L.saldo].concat(L.f.slice(0,4).map(function(x){return x.t.split(": ")[0].split(". ")[0]+".";}))); }
     if(e&&e.fl&&e.fl.length){ var q=function(n){ var x=0; e.fl.slice(-n).forEach(function(y){x+=y.usd;}); return x; }, ul=e.fl[e.fl.length-1]; C("etfs","ETFs de Bitcoin","Saldo do mês: "+dinG(q(21)),["Último dia ("+ul.time.split("-").reverse().slice(0,2).join("/")+"): "+dinG(ul.usd),"Última semana: "+dinG(q(5)),e.tot.length?"Bitcoin guardado pelos fundos: "+usd(e.tot[e.tot.length-1].value,0)+" BTC":"","Notícias sobre ETFs no feed: "+etfNots().length]); }
   if(!d||!o||!e){ var av=el("p","sub","Carregando os demais painéis…"); av.style.gridColumn="1/-1"; bx.appendChild(av); } } }
 function m2Abre(j){ if(j==="resumo") mercPaineis(); if(j==="defi") defiDes(); else if(j==="onchain") ocDes(); else if(j==="etfs") etfDes(); }
