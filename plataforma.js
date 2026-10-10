@@ -710,7 +710,8 @@
     var gf = G("grafFaz"), cor = G("cor"), c = function (v, f) { try { return (typeof cor === "function" && cor(v)) || f; } catch (e) { return f; } };
     var ser = function (s, n) { var m = {}; (s || []).forEach(function (x) { if (x && x[0] && isFinite(x[1])) m[String(x[0]).slice(0, 10)] = +x[1]; }); return Object.keys(m).sort().slice(-(n || 800)).map(function (d) { return { time: d, value: m[d] }; }); };
     if (typeof gf === "function") {
-      gf("mc-g-juros", [{ tipo: "linha", cor: c("--s1", "#1f4e8c"), titulo: "Selic", dados: ser(S.selic), degrau: 1 }, { tipo: "linha", cor: c("--s2", "#b8690a"), titulo: "EUA 3m", dados: ser(S.us3m) }, { tipo: "linha", cor: c("--s3", "#6a4fb3"), titulo: "EUA 10a", dados: ser(S.us10y) }], function (v) { return nf(v, 2) + "%"; });
+      var us = ser(S.us10y), sel = ser(S.selic), selD = []; if (us.length && sel.length) { var j = 0, v = null; us.forEach(function (x) { while (j < sel.length && sel[j].time <= x.time) { v = sel[j].value; j++; } if (v != null) selD.push({ time: x.time, value: v }); }); } else selD = sel;
+      gf("mc-g-juros", [{ tipo: "linha", cor: c("--s1", "#1f4e8c"), titulo: "Selic", dados: selD, degrau: 1 }, { tipo: "linha", cor: c("--s2", "#b8690a"), titulo: "EUA 3m", dados: ser(S.us3m) }, { tipo: "linha", cor: c("--s3", "#6a4fb3"), titulo: "EUA 10a", dados: ser(S.us10y) }], function (v) { return nf(v, 2) + "%"; });
       gf("mc-g-ipca", [{ tipo: "linha", cor: c("--bad", "#b23a30"), titulo: "IPCA 12m", dados: ser(S.ipca12) }], function (v) { return nf(v, 2) + "%"; });
       gf("mc-g-dol", [{ tipo: "linha", cor: c("--s4", "#1a7a4c"), titulo: "USD/BRL", dados: ser(S.usdbrl, 520) }], function (v) { return nf(v, 2); });
       gf("mc-g-dxy", [{ tipo: "linha", cor: c("--s1", "#1f4e8c"), titulo: "DXY", dados: ser(S.dxy, 520) }], function (v) { return nf(v, 1); });
