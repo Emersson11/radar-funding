@@ -142,7 +142,8 @@
       { k: "acad", ic: "◭", t: "Academy", a: "aulas" },
       { k: "prem", ic: "★", t: "Premium", a: "premium" },
       { k: "conf", ic: "⚙", t: "Configurações", a: "config" },
-      { k: "sup", ic: "?", t: "Suporte", a: "suporte" },
+      { k: "ajuda", ic: "?", t: "Central de ajuda", a: "ajuda" },
+      { k: "sup", ic: "✉", t: "Suporte", a: "suporte" },
       { k: "adm", ic: "⛭", t: "Administração", a: "admin", adm: 1 }] }
   ];
   var ITENS = {}; NAV.forEach(function (g) { g.it.forEach(function (i) { ITENS[i.k] = i; }); });
@@ -191,8 +192,9 @@
     if (i.a === "config") confDes();
     if (i.a === "aulas") acDes();
     if (i.a === "admin") setTimeout(admAcesso, 300);
+    if (i.a === "ajuda") ajudaDes(extra);
     try { history.replaceState(null, "", "#" + (i.s ? i.a + "/" + i.s : i.a)); } catch (e) {}
-    window.scrollTo(0, 0);
+    if (!(i.a === "ajuda" && extra)) window.scrollTo(0, 0);
   }
   window.alphaIr = ir;
   function abreMj(s) {
@@ -1013,6 +1015,7 @@
       '<section class="box"><h2>Sessão</h2><p class="sub">Sair desta conta neste aparelho.</p><p style="margin-top:10px"><button type="button" class="bt-sec" id="pc-sair">Sair</button></p></section></div>' +
       '';
     $("pc-ir-prem").addEventListener("click", function () { ir("prem"); });
+    olho($("pc-nova"));
     var tema = document.documentElement.getAttribute("data-theme") || "";
     [].forEach.call(ar.querySelectorAll("#pc-tema button"), function (b) { b.setAttribute("aria-pressed", b.dataset.t === tema ? "true" : "false"); b.addEventListener("click", function () { if (typeof window.temaPoe === "function") window.temaPoe(b.dataset.t || null); confDes(); }); });
     $("pc-perfil").addEventListener("submit", function (e) { e.preventDefault(); var SB = G("SB"), n = $("pc-nome").value.trim().slice(0, 40), msg = $("pc-perfil-msg"); if (!SB) return; msg.textContent = "Salvando…"; SB.auth.updateUser({ data: { nome: n } }).then(function (r) { if (r.error) { msg.textContent = "Não consegui salvar agora."; return; } if (r.data && r.data.user) window.USUARIO = r.data.user; msg.textContent = "Salvo."; }); });
@@ -1041,10 +1044,134 @@
     ativa();
   }
 
+  /* ================= Central de ajuda ================= */
+  var AJ = [
+    { id: "aj-inicio", g: "Primeiros passos", t: "Como o Alpha Radar está organizado", k: null, x: ["O menu à esquerda (no celular, no botão ☰ no topo) reúne tudo: Dashboard, Mercado, Ferramentas, Minha Carteira, Insights, Academy, Premium e Configurações.", "Cada página começa com uma faixa que explica o que você está vendo, por que isso importa e o que dá para fazer ali.", "Um caminho simples para o dia a dia: abra o Dashboard, leia o Radar do Dia, aprofunde no Mercado, teste ideias nas Ferramentas e acompanhe a sua carteira."] },
+    { id: "aj-planos", g: "Primeiros passos", t: "Plano gratuito e Alpha Pro", k: "prem", x: ["O plano gratuito dá acesso ao Dashboard, aos preços, notícias, calendário, macro, calculadoras e ao nível Básico da Academy.", "Itens com o selo PRO ou com cadeado fazem parte do Alpha Pro: dados avançados, histórico completo, simuladores profissionais, relatórios e a Academy inteira.", "O Alpha Pro custa R$ 39,90 por mês ou R$ 399 por ano. Dá para cancelar quando quiser e pedir reembolso integral nos primeiros 7 dias pelo Suporte."] },
+    { id: "aj-celular", g: "Primeiros passos", t: "Usar no celular e no tablet", k: null, x: ["O painel se adapta à tela. No celular, o menu fica no botão ☰ no canto superior esquerdo.", "Os gráficos aceitam toque: arraste o dedo para ver o valor de cada dia e use dois dedos para aproximar.", "Dica: adicione o site à tela inicial pelo menu do navegador para abrir como um aplicativo."] },
+    { id: "aj-dash", g: "Dashboard", t: "Dashboard e Radar do Dia", k: "dash", x: ["Os seis cartões do topo mostram Bitcoin, Ethereum, valor total do mercado cripto, dominância do Bitcoin, índice de medo e ganância e volume negociado. A seta verde indica alta e a vermelha, queda em 24 horas. Clique em um cartão para ver o detalhe.", "O Radar do Dia resume cinco frentes: Bitcoin (preço, tendência, médias e níveis), Macro (juros, inflação, dólar e o próximo evento), On-chain (fluxo das corretoras, MVRV, NUPL, posição das grandes contas), DeFi (dinheiro depositado, volume e stablecoins) e Sentimento.", "\"O que está acontecendo?\" traduz os números em frases curtas. Abaixo ficam os eventos importantes, os alertas, o resumo da sua carteira, as notícias e os relatórios.", "Nada disso é previsão nem recomendação: é a leitura dos dados de agora."] },
+    { id: "aj-alertas", g: "Dashboard", t: "Alertas do Radar", k: "dash", x: ["São regras fixas aplicadas aos dados de agora: medo ou ganância extremos, Bitcoin com movimento de 5% ou mais no dia, preço perto da média de 200 dias, RSI em extremo, fluxo forte nas corretoras ou nos ETFs, variação forte das stablecoins e eventos de alto impacto nas próximas 48 horas.", "Servem para chamar a sua atenção para algo fora do comum. Não indicam compra nem venda."] },
+    { id: "aj-mresumo", g: "Mercado", t: "Visão geral", k: "m-resumo", x: ["Resumo do mercado cripto: valor total, volume, dominância do Bitcoin e sentimento, com o que está acontecendo, os próximos eventos e as últimas notícias.", "No fim há um cartão para cada painel de Mercado. Clique para abrir o painel completo."] },
+    { id: "aj-cripto", g: "Mercado", t: "Cripto: tabela e detalhe de cada ativo", k: "m-cripto", x: ["A tabela lista as 100 maiores criptomoedas por valor de mercado, com preço, variação em 24 horas e 7 dias, valor de mercado, volume e um minigráfico da semana.", "Use a busca para achar um ativo e os filtros para ver só os maiores, só os que sobem ou caem, ou esconder as stablecoins. Clique no título de uma coluna para ordenar.", "Clique em um ativo para abrir o detalhe: gráfico de 30 dias, 90 dias ou 1 ano, desempenho, médias de 50 e 200 dias, RSI, volatilidade, oferta em circulação, dados on-chain (Bitcoin e Ethereum) e notícias que citam o ativo."] },
+    { id: "aj-etfs", g: "Mercado", t: "ETFs", k: "m-etfs", x: ["ETFs são fundos negociados em bolsa. Os ETFs de Bitcoin e Ethereum nos Estados Unidos compram a moeda de verdade para cada cota emitida.", "O painel mostra o dinheiro que entrou ou saiu desses fundos por dia, o patrimônio total e o preço do Bitcoin no mesmo período. Você pode filtrar por dia, semana, mês ou tudo e ligar a média móvel.", "Entradas fortes e seguidas costumam indicar demanda de grandes investidores; saídas, o contrário."] },
+    { id: "aj-macro", g: "Mercado", t: "Macro", k: "m-macro", x: ["Reúne os números da economia que mexem com todos os mercados: juros do Fed e Selic, títulos do Tesouro americano de 3 meses e 10 anos, inflação (IPCA), dólar em reais, índice do dólar (DXY), bolsas, ouro e a oferta de stablecoins.", "Regra geral: juros altos e dólar forte tiram dinheiro de investimentos de risco, como ações e cripto; juros e dólar em queda costumam ajudar.", "No fim aparecem os próximos eventos dos Estados Unidos e do Brasil."] },
+    { id: "aj-onchain", g: "Mercado", t: "On-chain", k: "m-onchain", x: ["Indicadores tirados direto da blockchain do Bitcoin: preço realizado (custo médio da rede), custo de quem comprou nos últimos 5 meses, MVRV, SOPR, NUPL, saldo de Bitcoin nas corretoras, fluxo de entrada e saída e oferta de stablecoins.", "Eles ajudam a entender em que fase do ciclo o mercado está. Veja o significado de cada um no Glossário abaixo.", "Os dados chegam com cerca de um dia de atraso."] },
+    { id: "aj-defi", g: "Mercado", t: "DeFi", k: "m-defi", x: ["Mostra o dinheiro depositado em finanças descentralizadas (TVL), dividido por rede e por categoria, os maiores protocolos, o volume em corretoras descentralizadas e a oferta de stablecoins.", "Clique no nome de um protocolo para abrir a página dele na DefiLlama."] },
+    { id: "aj-tradfi", g: "Mercado", t: "TradFi on-chain", k: "m-tradfi", x: ["Ações, índices, ouro e títulos do Tesouro que já existem em versão de token. O painel mostra o valor total, as redes, os maiores protocolos e as plataformas onde ter exposição a cada mercado.", "Use os filtros por rede, valor mínimo e máximo e variação em 7 dias, e troque entre tabela e gráfico de barras.", "Antes de usar qualquer plataforma, confira se ela atende o seu país e quais são os riscos."] },
+    { id: "aj-cal", g: "Mercado", t: "Calendário econômico", k: "m-cal", x: ["Os dados e decisões da semana nos Estados Unidos e no Brasil: Fed, Copom, inflação, emprego, PIB, Boletim Focus e divulgações do IBGE.", "Filtre por país, importância e período. Os eventos de alto impacto costumam aumentar a volatilidade no horário em que saem."] },
+    { id: "aj-cart-est", g: "Ferramentas", t: "Carteira de estratégias", k: "f-cart", x: ["É onde você monta uma carteira com vaults, pools de stablecoins, arbitragem de funding e venda de opções.", "Informe o capital e o prazo e divida o dinheiro entre as estratégias (ou use os modelos Conservador, Equilibrado e Arrojado). O simulador escolhe o melhor mercado de cada uma com os dados de agora; você pode trocar por outro.", "Para cada estratégia aparecem: onde aplicar (com link), o passo a passo, a taxa bruta, cada custo, o resultado líquido e a rentabilidade líquida ao ano, além dos riscos.", "\"Testar com o histórico\" mostra como aquele mercado teria rendido no passado. \"Acompanhar na carteira de simulação\" começa a contar a partir de hoje para você acompanhar dia a dia."] },
+    { id: "aj-renda", g: "Ferramentas", t: "Renda e arbitragem", k: "f-renda", x: ["Arbitragem de funding: compra e venda do mesmo ativo ao mesmo tempo para receber a taxa de funding, sem apostar na direção do preço.", "Pools e vaults: onde depositar para receber juros ou taxas, com o rendimento, o tamanho e o risco de cada um.", "Trades e opções: mercados direcionais, com simulador de entrada, alvo, stop e liquidação.", "A aba Simulador reúne o ranking do que rende agora, o backtest com histórico real e a carteira de simulação."] },
+    { id: "aj-sim", g: "Ferramentas", t: "Simuladores, estratégias e calculadoras", k: "f-sim", x: ["Simuladores: a página com todas as ferramentas e uma explicação curta de cada uma.", "Estratégias: compara aportes mensais (DCA), aporte único, compra nas quedas, rebalanceamento e uma estratégia personalizada com o preço real de cada dia. Todas recebem o mesmo dinheiro, então a comparação é justa.", "Calculadoras: juros compostos, quanto aportar por mês para chegar a uma meta e preço médio de várias compras (com quanto comprar para levar o preço médio a um alvo).", "Simulações históricas não garantem resultados futuros."] },
+    { id: "aj-cart", g: "Minha Carteira", t: "Minha Carteira", k: "cart", x: ["Cadastre cada compra em \"+ Adicionar ativo\": ativo, quantidade, preço e data. O painel calcula sozinho o valor atual, o preço médio, o lucro ou prejuízo e a variação do dia.", "As abas mostram o resumo, as posições, o desempenho ao longo do tempo comparado com CDI, Ibovespa e S&P 500, e a lista de lançamentos. Dá para ver tudo em dólar ou em reais.", "A conexão automática com corretoras e carteiras ainda está em preparação."] },
+    { id: "aj-nots", g: "Insights", t: "Notícias, Alpha Reports, Análises e Newsletter", k: "i-nots", x: ["Notícias: as manchetes das principais fontes, em português.", "Alpha Reports: o relatório completo de mercado do dia, com gráficos e opção de baixar em PDF.", "Análises: digite um ativo ou protocolo para ver o que as fontes acompanhadas publicaram e os números atuais.", "Newsletter: as edições publicadas pelo Alpha Radar, com opção de receber por e-mail."] },
+    { id: "aj-acad", g: "Academy", t: "Alpha Academy", k: "acad", x: ["Aulas organizadas em Básico, Intermediário e Avançado. Cada aula tem um botão que leva para a parte do painel onde o assunto aparece na prática.", "Marque cada aula como concluída para acompanhar o progresso. As aulas em vídeo do curso ficam logo abaixo."] },
+    { id: "aj-conta", g: "Conta e acesso", t: "Entrar, criar conta e redefinir a senha", k: null, x: ["Para entrar, use o seu e-mail e a senha. O ícone de olho no campo da senha mostra o que você digitou.", "Esqueceu a senha? Digite o e-mail e clique em \"Esqueci minha senha\". Você recebe um link por e-mail; ao abrir, o site pede a nova senha.", "Também é possível entrar sem senha, pelo link enviado ao e-mail.", "Logado, você troca a senha em Configurações → Segurança."] },
+    { id: "aj-config", g: "Conta e acesso", t: "Configurações, assinatura e suporte", k: "conf", x: ["Em Configurações você muda o nome exibido, o tema (claro, escuro ou do sistema), a senha e vê o seu plano.", "Para assinar, abra Premium. Para cancelar ou pedir reembolso, fale pelo Suporte: a resposta aparece na própria aba."] }
+  ];
+  var GLOSS = [
+    ["APY e APR", "Rendimento ao ano. O APY já considera os juros sobre juros; o APR, não."],
+    ["Alavancagem", "Operar com mais dinheiro do que você depositou. Multiplica ganhos e perdas."],
+    ["Aporte único", "Investir todo o valor de uma vez, no início."],
+    ["Copom e Fed", "Comitês que definem os juros básicos do Brasil (Selic) e dos Estados Unidos."],
+    ["DCA", "Aportes de valor fixo em intervalos regulares, sem tentar acertar o melhor momento."],
+    ["Dominância do Bitcoin", "Fatia do Bitcoin no valor total do mercado cripto."],
+    ["DXY", "Índice que mede o dólar contra uma cesta de moedas fortes."],
+    ["ETF", "Fundo negociado em bolsa que acompanha um ativo ou um índice."],
+    ["Fear & Greed", "Índice de medo e ganância de 0 a 100. Abaixo de 25 é medo extremo; acima de 75, ganância extrema."],
+    ["Fluxo nas corretoras", "Bitcoin que entra ou sai das corretoras. Saída reduz a oferta pronta para venda; entrada aumenta."],
+    ["Funding", "Taxa paga periodicamente entre compradores e vendedores de contratos perpétuos para manter o preço perto do mercado à vista."],
+    ["Gás", "Taxa paga à rede para registrar uma transação na blockchain."],
+    ["IPCA", "Índice oficial de inflação do Brasil."],
+    ["Liquidação", "Fechamento forçado de uma posição alavancada quando a margem acaba."],
+    ["Long e short", "Long ganha com a alta do preço; short ganha com a queda."],
+    ["Média de 200 dias", "Preço médio dos últimos 200 dias. Muito usada para separar tendência de alta e de baixa."],
+    ["MVRV", "Valor de mercado dividido pelo valor realizado. Abaixo de 1 já marcou fundos; acima de 3,5, euforia."],
+    ["NUPL", "Lucro ou prejuízo não realizado do mercado inteiro, em fases: capitulação, esperança, otimismo, crença e euforia."],
+    ["Opção, put e call", "Contrato que dá o direito de vender (put) ou comprar (call) um ativo a um preço definido até uma data. Quem vende recebe o prêmio."],
+    ["Perda impermanente", "Perda de quem fornece liquidez em um pool quando os preços dos dois ativos se afastam."],
+    ["Perpétuo", "Contrato futuro sem data de vencimento, negociado com alavancagem."],
+    ["Pool de liquidez", "Reserva de dois ativos usada para trocas. Quem deposita recebe parte das taxas."],
+    ["Preço realizado", "Preço médio pelo qual cada Bitcoin se moveu pela última vez: o custo médio da rede."],
+    ["Rebalanceamento", "Voltar periodicamente a carteira aos pesos escolhidos."],
+    ["RSI", "Indicador de força de 0 a 100. Acima de 70 é sobrecomprado; abaixo de 30, sobrevendido."],
+    ["Selic", "Taxa básica de juros do Brasil."],
+    ["Slippage (deslizamento)", "Diferença entre o preço esperado e o preço executado de uma ordem."],
+    ["SOPR", "Mostra se quem vende está no lucro (acima de 1) ou no prejuízo (abaixo de 1)."],
+    ["Stablecoin", "Token que acompanha o valor de uma moeda, quase sempre o dólar (USDT, USDC)."],
+    ["Strike", "Preço de exercício de uma opção."],
+    ["Treasury", "Título do Tesouro dos Estados Unidos. O de 10 anos é a referência de juros para o mundo."],
+    ["TVL", "Valor total depositado em um protocolo ou rede DeFi."],
+    ["Vault", "Cofre automático que aplica o depósito em uma estratégia de rendimento."],
+    ["Volatilidade", "Quanto o preço costuma oscilar. Mais volatilidade, mais risco."]
+  ];
+  var AJ_AREA = { inicio: "aj-dash", mercado: "aj-mresumo", ferramentas: "aj-sim", funding: "aj-renda", carteira: "aj-cart", relatorio: "aj-nots", analises: "aj-nots", newsletter: "aj-nots", aulas: "aj-acad", tradfi: "aj-tradfi" };
+  function ajudaDes(alvo) {
+    var ar = novaArea("ajuda", "Central de ajuda"); if (!ar) return;
+    if (!ar.dataset.ok) {
+      ar.dataset.ok = 1;
+      var top = h("section", "box"); top.innerHTML = '<h2>Central de ajuda</h2><p class="sub">Tudo o que existe no Alpha Radar, explicado em linguagem simples. Pesquise uma palavra ou abra um tema. Se ainda ficar em dúvida, fale com o Suporte.</p><div class="pf-bar" style="margin-top:12px"><label style="flex:1;min-width:220px">Pesquisar na ajuda<input id="aj-q" type="search" placeholder="Ex.: funding, senha, MVRV, carteira" autocomplete="off"></label></div><p class="sub" id="aj-n"></p>';
+      ar.appendChild(top);
+      var lista = h("div"); lista.id = "aj-lista"; lista.style.cssText = "display:flex;flex-direction:column;gap:20px"; ar.appendChild(lista);
+      var grupos = {}; AJ.forEach(function (a) { if (!grupos[a.g]) { var s = h("section", "box"); s.appendChild(h("h2", null, a.g)); s.dataset.g = a.g; lista.appendChild(s); grupos[a.g] = s; }
+        var d = h("details", "aj-it"); d.id = a.id; d.style.cssText = "border-top:1px solid var(--line);padding:10px 0"; var sm = h("summary", null, a.t); sm.style.cssText = "cursor:pointer;font:600 15.5px var(--sans)"; d.appendChild(sm);
+        var c = h("div", "prosa"); c.style.cssText = "margin-top:8px;max-width:80ch"; a.x.forEach(function (t) { var p = h("p", null, t); p.style.cssText = "margin:0 0 8px;line-height:1.6"; c.appendChild(p); }); d.appendChild(c);
+        if (a.k) { var b = h("button", "bt-sec", "Abrir esta página →"); b.type = "button"; b.addEventListener("click", function () { ir(a.k); }); c.appendChild(b); }
+        d.dataset.txt = (a.t + " " + a.x.join(" ")).toLowerCase(); grupos[a.g].appendChild(d); });
+      var gl = h("section", "box"); gl.dataset.g = "Glossário"; gl.appendChild(h("h2", null, "Glossário")); var gp = h("p", "sub", "Os termos que aparecem no painel, em uma frase."); gl.appendChild(gp);
+      var dl = h("dl"); dl.style.cssText = "display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:12px 24px;margin:14px 0 0";
+      GLOSS.forEach(function (g) { var w = h("div", "aj-it"); w.dataset.txt = (g[0] + " " + g[1]).toLowerCase(); var dt = h("dt", null, g[0]); dt.style.cssText = "font:600 14.5px var(--sans)"; var dd = h("dd", null, g[1]); dd.style.cssText = "margin:2px 0 0;color:var(--muted);font-size:14px;line-height:1.5"; w.appendChild(dt); w.appendChild(dd); dl.appendChild(w); });
+      gl.appendChild(dl); lista.appendChild(gl);
+      var sup = h("section", "box"); sup.innerHTML = '<h2>Não encontrou o que procurava?</h2><p class="sub">Mande a sua dúvida pelo Suporte. A resposta aparece na própria aba.</p>'; var bs = h("button", "bt-pro", "Falar com o Suporte"); bs.type = "button"; bs.style.marginTop = "10px"; bs.addEventListener("click", function () { ir("sup"); }); sup.appendChild(bs); lista.appendChild(sup);
+      $("aj-q").addEventListener("input", function () { var q = this.value.trim().toLowerCase(), n = 0;
+        [].forEach.call(ar.querySelectorAll(".aj-it"), function (it) { var ok = !q || it.dataset.txt.indexOf(q) >= 0; it.hidden = !ok; if (ok) n++; if (it.tagName === "DETAILS") it.open = !!q && ok; });
+        [].forEach.call(ar.querySelectorAll("#aj-lista>section[data-g]"), function (s) { s.hidden = !!q && !s.querySelector(".aj-it:not([hidden])"); });
+        $("aj-n").textContent = q ? n + " resultado(s) para \"" + q + "\"." : ""; });
+    }
+    if (alvo) { var e = $(alvo); if (e) { e.open = true; setTimeout(function () { e.scrollIntoView({ behavior: "smooth", block: "start" }); }, 120); } }
+  }
+  function guiaLinks() {
+    Object.keys(AJ_AREA).forEach(function (a) { var g = document.querySelector("#area-" + a + ">.pd-guia"); if (!g || g.querySelector(".aj-lk")) return; var c = g.lastElementChild; var b = h("button", "aj-lk", "Entender esta página na Central de ajuda →"); b.type = "button"; b.style.cssText = "display:block;margin-top:6px;border:0;background:none;padding:0;color:var(--accent);font:500 13px var(--sans);cursor:pointer;text-align:left"; b.addEventListener("click", function () { ir("ajuda", AJ_AREA[a]); }); c.appendChild(b); });
+  }
+
+  /* ================= Login: ver senha e redefinir ================= */
+  var RECUP = /type=recovery/.test(window.HASH0 || location.hash || "");
+  function olho(inp) {
+    if (!inp || inp.dataset.olho) return; inp.dataset.olho = 1;
+    var w = h("span"); w.style.cssText = "position:relative;display:inline-flex;align-items:center;flex:1;min-width:0";
+    inp.parentNode.insertBefore(w, inp); w.appendChild(inp); inp.style.paddingRight = "40px"; inp.style.width = "100%";
+    var b = h("button"); b.type = "button"; b.setAttribute("aria-label", "Mostrar a senha"); b.title = "Mostrar a senha";
+    b.style.cssText = "position:absolute;right:6px;top:50%;transform:translateY(-50%);border:0;background:none;padding:4px;cursor:pointer;color:inherit;opacity:.7;line-height:0";
+    var ic = function (v) { b.innerHTML = v ? '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M17.94 17.94A10.94 10.94 0 0 1 12 20c-7 0-11-8-11-8a19.8 19.8 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a19.86 19.86 0 0 1-2.16 3.19M14.12 14.12a3 3 0 1 1-4.24-4.24"/><line x1="1" y1="1" x2="23" y2="23"/></svg>' : '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>'; };
+    ic(false); b.addEventListener("click", function () { var v = inp.type === "password"; inp.type = v ? "text" : "password"; ic(v); b.setAttribute("aria-label", v ? "Esconder a senha" : "Mostrar a senha"); b.title = b.getAttribute("aria-label"); inp.focus(); });
+    w.appendChild(b);
+  }
+  function loginExtras() {
+    olho($("conta-senha")); olho($("conta-nova"));
+    var f = $("conta-form"); if (f && !$("conta-esqueci")) {
+      var b = h("button", "lnkb", "Esqueci minha senha"); b.type = "button"; b.id = "conta-esqueci";
+      b.addEventListener("click", function () { var e = ($("conta-campo").value || "").trim(), SB = G("SB"), msg = G("contaMsg"); var diz = function (t, er) { if (typeof msg === "function") msg(t, er); else alert(t); };
+        if (!e || !/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(e)) { diz("Digite o seu e-mail no campo acima e clique de novo em \"Esqueci minha senha\".", true); $("conta-campo").focus(); return; }
+        if (!SB) { diz("Ainda conectando. Tente de novo em alguns segundos.", true); return; }
+        diz("Enviando o link…"); SB.auth.resetPasswordForEmail(e, { redirectTo: location.origin + "/app.html" }).then(function (r) { if (r.error) diz("Não consegui enviar agora: " + (r.error.message || "tente de novo em alguns minutos."), true); else diz("Se existir uma conta com " + e + ", enviamos um link para criar uma nova senha. Abra o e-mail neste aparelho (confira também o spam)."); }); });
+      f.appendChild(b);
+    }
+    var SB = G("SB"); if (SB && !D.recupLig) { D.recupLig = 1; SB.auth.onAuthStateChange(function (ev) { if (ev === "PASSWORD_RECOVERY") { RECUP = true; setTimeout(novaSenha, 300); } }); }
+  }
+  function novaSenha() {
+    if (!RECUP || $("pd-recup")) return; RECUP = false;
+    var m = h("div"); m.id = "pd-recup"; m.style.cssText = "position:fixed;inset:0;z-index:80;background:rgba(5,12,22,.6);display:flex;align-items:center;justify-content:center;padding:16px";
+    var c = h("div", "box"); c.style.cssText = "max-width:420px;width:100%;background:var(--surface);color:var(--fg)";
+    c.innerHTML = '<h2>Crie a sua nova senha</h2><p class="sub">Digite a nova senha duas vezes. Use 6 caracteres ou mais.</p><form class="pc-form" id="rc-form" style="margin-top:12px;max-width:none"><label class="sub">Nova senha<input id="rc-1" type="password" minlength="6" autocomplete="new-password" required></label><label class="sub">Repita a nova senha<input id="rc-2" type="password" minlength="6" autocomplete="new-password" required></label><p><button type="submit" class="bt-pro">Salvar a nova senha</button></p><p class="pc-msg" id="rc-msg"></p></form>';
+    m.appendChild(c); document.body.appendChild(m); olho($("rc-1")); olho($("rc-2")); $("rc-1").focus();
+    $("rc-form").addEventListener("submit", function (e) { e.preventDefault(); var a = $("rc-1").value, b = $("rc-2").value, msg = $("rc-msg"), SB = G("SB");
+      if (a.length < 6) { msg.textContent = "A senha precisa de 6 caracteres ou mais."; return; } if (a !== b) { msg.textContent = "As duas senhas não são iguais."; return; }
+      msg.textContent = "Salvando…"; SB.auth.updateUser({ password: a }).then(function (r) { if (r.error) { msg.textContent = "Não consegui salvar: " + (r.error.message || "peça um novo link."); return; } msg.textContent = "Senha alterada. Você já está dentro do painel."; setTimeout(function () { m.remove(); try { history.replaceState(null, "", "#inicio"); } catch (x) {} }, 1500); }); });
+  }
+
   /* ================= Inicialização ================= */
   function rodape() { var m = document.querySelector("main"); if (!m || $("pd-rodape")) return; var p = h("p", "pd-risco", AVISO); p.id = "pd-rodape"; m.appendChild(p); }
   function rotaInicial() {
-    var hs = (window.HASH0 || location.hash || "").replace("#", ""); window.HASH0 = ""; if (!hs || /access_token|refresh_token|error/.test(hs)) return;
+    var hs = (window.HASH0 || location.hash || "").replace("#", ""); window.HASH0 = ""; if (/type=recovery/.test(hs)) return; if (!hs || /access_token|refresh_token|error/.test(hs)) return;
     var a = hs.split("/")[0], s = hs.split("/")[1], k = null;
     NAV.some(function (g) { return g.it.some(function (i) { if (i.a === a && (i.s || "") === (s || (i.s || ""))) { k = i.k; return true; } }); });
     if (!k) NAV.some(function (g) { return g.it.some(function (i) { if (i.a === a) { k = i.k; return true; } }); });
@@ -1054,14 +1181,14 @@
     if (!$("areas") || !document.querySelector("main")) return;
     var st = h("style"); st.id = "plataforma-css"; st.textContent = css; document.head.appendChild(st);
     var T = G("TITULOS"); if (T) T.inicio = "Dashboard";
-    novaArea("ferramentas", "Ferramentas"); novaArea("premium", "Alpha Pro"); novaArea("config", "Configurações");
-    montaNav(); guias(); montaDash(); montaCripto(); montaCart(); montaAc(); rodape(); simReal();
+    novaArea("ferramentas", "Ferramentas"); novaArea("premium", "Alpha Pro"); novaArea("config", "Configurações"); novaArea("ajuda", "Central de ajuda");
+    montaNav(); guias(); guiaLinks(); loginExtras(); setTimeout(loginExtras, 1500); setTimeout(loginExtras, 4000); montaDash(); montaCripto(); montaCart(); montaAc(); rodape(); simReal();
     embrulha("acessoAplica", function () { aplicaPro(); estLibera(); });
-    embrulha("contaDesenha", function () { aplicaPro(); if (!$("area-inicio").hidden) dashDes(); if (logado() && !D.rota) { D.rota = 1; setTimeout(rotaInicial, 400); cfgPremium(); } });
+    embrulha("contaDesenha", function () { aplicaPro(); if (!$("area-inicio").hidden) dashDes(); if (logado() && !D.rota) { D.rota = 1; setTimeout(rotaInicial, 400); cfgPremium(); } if (logado() && RECUP) setTimeout(novaSenha, 500); loginExtras(); });
     embrulha("mercDesenha", function () { if (!$("area-inicio").hidden) dashDes(); if ($("mj-macro") && !$("mj-macro").hidden) macroDes(); });
     embrulha("cDesenha", function () { carteiraDes(); });
     embrulha("admCarrega", function () { setTimeout(admAcesso, 200); });
-    embrulha("abasAplica", function () { var T2 = G("TITULOS"); if (T2) { T2.inicio = "Dashboard"; T2.ferramentas = "Ferramentas"; T2.premium = "Alpha Pro"; T2.config = "Configurações"; } espelhaOriginais(); });
+    embrulha("abasAplica", function () { var T2 = G("TITULOS"); if (T2) { T2.inicio = "Dashboard"; T2.ferramentas = "Ferramentas"; T2.premium = "Alpha Pro"; T2.config = "Configurações"; T2.ajuda = "Central de ajuda"; } espelhaOriginais(); });
     embrulha("mjanela", function (j) { if (j === "ativos") criptoDes(); var mk = { resumo: "m-resumo", ativos: "m-cripto", etfs: "m-etfs", macro: "m-macro", onchain: "m-onchain", defi: "m-defi", calendario: "m-cal", noticias: "i-nots" }[j]; if (mk && areaVisivel() === "mercado") marca(mk); });
     [].forEach.call(document.querySelectorAll("#mabas button"), function (b) { b.addEventListener("click", function () { var mx = $("mj-macro"); if (mx && b.dataset.mj !== "macro") mx.hidden = true; var bm = document.querySelector('#mabas button[data-mj="macro"]'); if (bm && b.dataset.mj !== "macro") bm.setAttribute("aria-selected", "false"); }); });
     mjMacroBotao();
