@@ -68,7 +68,7 @@
     ".pd-vazio{color:var(--muted);font-size:13.5px;margin:4px 0}",
     ".pd-sec-tit{font:600 13px/1 var(--sans);letter-spacing:.1em;text-transform:uppercase;color:var(--muted);margin:10px 0 -6px}",
     /* bloqueio Pro */
-    ".pro-alvo{position:relative}.pro-alvo.pro-on>*:not(.pro-lock){filter:blur(5px);pointer-events:none;user-select:none;opacity:.55}",
+    ".pro-some{display:none!important}.pro-alvo{position:relative}.pro-alvo.pro-on>*:not(.pro-lock){filter:blur(5px);pointer-events:none;user-select:none;opacity:.55}",
     ".pro-lock{position:absolute;inset:0;z-index:7;display:flex;justify-content:center;align-items:flex-start;padding:min(12vh,90px) 16px 16px}",
     ".pro-lock>div{background:var(--surface);border:1px solid var(--line);border-radius:6px;box-shadow:0 18px 40px rgba(0,0,0,.18);padding:22px 24px;max-width:430px;text-align:center}",
     ".pro-lock h3{margin:0 0 6px;font:600 18px var(--sans)}.pro-lock p{margin:0 0 14px;color:var(--muted);font-size:14px;line-height:1.5}",
@@ -77,7 +77,7 @@
     /* tabelas e formulários próprios */
     ".pf-bar{display:flex;flex-wrap:wrap;gap:10px;align-items:flex-end;margin-bottom:12px}.pf-bar label{display:flex;flex-direction:column;gap:4px;font-size:12.5px;color:var(--muted)}",
     ".pf-bar input,.pf-bar select{font:inherit;font-size:14px;padding:7px 9px;border:1px solid var(--line);border-radius:4px;background:var(--surface);color:var(--fg);min-width:0}",
-    ".pt{width:100%;border-collapse:collapse;font-size:14px}.pt th{font:500 12.5px var(--sans);color:var(--muted);text-align:right;padding:8px 10px;border-bottom:1px solid var(--line);white-space:nowrap;cursor:pointer;user-select:none}.pt th.t,.pt td.t{text-align:left}",
+    ".pt{width:100%;border-collapse:collapse;font-size:14px}.pt td,.pt th,.pt select{font-family:var(--sans)!important}.pt th{font:500 12.5px var(--sans);color:var(--muted);text-align:right;padding:8px 10px;border-bottom:1px solid var(--line);white-space:nowrap;cursor:pointer;user-select:none}.pt th.t,.pt td.t{text-align:left}",
     ".pt td{padding:8px 10px;border-bottom:1px solid var(--line);text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap}.pt tbody tr{cursor:pointer}.pt tbody tr:hover td{background:var(--soft)}",
     ".pt td.pos{color:var(--good)}.pt td.neg{color:var(--bad)}.pt .nm{display:flex;align-items:center;gap:9px}.pt .nm img{width:20px;height:20px;border-radius:50%}.pt .nm small{color:var(--muted);text-transform:uppercase}",
     ".pt th[aria-sort]::after{content:' ↕';opacity:.35}.pt th[aria-sort=ascending]::after{content:' ↑';opacity:1}.pt th[aria-sort=descending]::after{content:' ↓';opacity:1}",
@@ -156,7 +156,7 @@
         var b = h("button"); b.type = "button"; b.dataset.k = i.k; b.setAttribute("aria-current", "false");
         if (g.g && g.g !== "Conta") b.className = "sub";
         b.appendChild(h("span", "ic", i.ic)); b.appendChild(h("span", null, i.t));
-        if (i.pro) { var p = h("span", "pro", "PRO"); p.title = "Recurso Alpha Pro"; b.appendChild(p); }
+        var p = h("span", "pro ok", "PRO"); p.title = "Recurso Alpha Pro"; b.appendChild(p);
         b.addEventListener("click", function () { ir(i.k); var l = $("lado"); if (l) l.classList.remove("aberto"); b.blur(); });
         box.appendChild(b); i.el = b;
       });
@@ -169,8 +169,8 @@
   function espelhaOriginais() {
     NAV.forEach(function (g) { g.it.forEach(function (i) {
       if (!i.el) return; var o = original(i.a);
-      var esc_ = i.adm ? (!o || o.hidden) : (o ? o.hidden : false); if (i.el.hidden !== esc_) i.el.hidden = esc_;
-      var p = i.el.querySelector(".pro"); if (p && p.classList.contains("ok") !== ehPro()) p.classList.toggle("ok", ehPro());
+      var esc_ = i.adm ? (!o || o.hidden) : (o ? o.hidden : false); if (ACX[i.k] && logado() && estado(i.k) === "some") esc_ = true; if (i.el.hidden !== esc_) i.el.hidden = esc_;
+      var ok = !(ACX[i.k] && logado() && estado(i.k) === "tranca"); var p = i.el.querySelector(".pro"); if (p && p.classList.contains("ok") !== ok) p.classList.toggle("ok", ok);
     }); });
     var vis = areaVisivel();
     if (vis && (!ATUAL || ITENS[ATUAL].a !== vis)) { var k = null; NAV.some(function (g) { return g.it.some(function (i) { if (i.a === vis) { k = i.k; return true; } }); }); if (k) marca(k); }
@@ -189,6 +189,7 @@
     if (i.a === "premium") premDes();
     if (i.a === "config") confDes();
     if (i.a === "aulas") acDes();
+    if (i.a === "admin") setTimeout(admAcesso, 300);
     try { history.replaceState(null, "", "#" + (i.s ? i.a + "/" + i.s : i.a)); } catch (e) {}
     window.scrollTo(0, 0);
   }
@@ -222,42 +223,103 @@
   }
 
   /* ================= Free x Pro ================= */
-  var PRO_ALVOS = [
-    { s: "#mj-etfs", t: "Dados de ETFs", d: "Fluxos diários, patrimônio e volume dos ETFs de Bitcoin e Ethereum, com histórico completo.", cta: "Desbloquear dados históricos" },
-    { s: "#mj-onchain", t: "Indicadores on-chain avançados", d: "MVRV, SOPR, NUPL, preço realizado, fluxo das corretoras e stablecoins, com gráficos e leitura.", cta: "Ver análise completa" },
-    { s: "#mj-defi", t: "Dados DeFi avançados", d: "TVL por rede e categoria, maiores protocolos, volume em DEX e stablecoins com histórico.", cta: "Desbloquear Alpha Pro" },
-    { s: "#area-tradfi", t: "TradFi on-chain", d: "Ativos reais tokenizados, protocolos, redes e plataformas para ter exposição a cada mercado.", cta: "Desbloquear Alpha Pro" },
-    { s: "#funding-conteudo", t: "Renda e arbitragem", d: "Arbitragem de funding, pools, vaults, trades e opções com custos reais e simulador com dados históricos.", cta: "Comparar estratégias" },
-    { s: "#area-relatorio", t: "Alpha Reports", d: "O relatório completo de mercado, com gráficos e PDF para baixar.", cta: "Ver análise completa" },
-    { s: "#area-analises", t: "Análises de ativos", d: "Leitura de cada ativo e protocolo a partir das fontes acompanhadas e dos números de mercado.", cta: "Ver análise completa" },
-    { s: "#area-newsletter", t: "Newsletter", d: "As edições completas da newsletter do Alpha Radar.", cta: "Desbloquear Alpha Pro" },
-    { s: "#cj-desempenho", t: "Carteira completa", d: "Desempenho da carteira ao longo do tempo comparado com CDI, Ibovespa e S&P 500.", cta: "Desbloquear dados históricos" },
-    { s: "#pd-alertas", t: "Alertas do Radar", d: "Sinais de mercado disparados por regras fixas: sentimento extremo, fluxos fortes, eventos e níveis técnicos.", cta: "Conhecer todos os recursos" },
-    { s: "#pd-rels", t: "Novos relatórios", d: "As últimas edições e relatórios do Alpha Radar.", cta: "Conhecer todos os recursos" },
-    { s: "#ac-pro", t: "Academy completa", d: "Níveis Intermediário e Avançado, com DeFi, on-chain, macro, gestão de risco e construção de carteira.", cta: "Desbloquear Alpha Pro" },
-    { s: "#au-wrap", t: "Aulas em vídeo", d: "Os módulos completos do curso com vídeos, comentários e avaliação.", cta: "Desbloquear Alpha Pro" }
+  /* Acesso por item: "todos" (grátis), "assinante" (cadeado), "oculta" (escondido para não assinantes), "admin" (só administrador).
+     O administrador define cada item em Administração → Acesso por área e recurso (config_site, chave acesso_v2). */
+  var ACESSO = [
+    ["dash", "Dashboard", "Dashboard (página inicial)", "#area-inicio", "todos", "Dashboard", ""],
+    ["r-alertas", "Dashboard", "Alertas do Radar", "#pd-alertas", "assinante", "Alertas do Radar", "Sinais de mercado disparados por regras fixas: sentimento extremo, fluxos fortes, eventos e níveis técnicos."],
+    ["r-rels", "Dashboard", "Novos relatórios no Dashboard", "#pd-rels", "assinante", "Novos relatórios", "As últimas edições e relatórios do Alpha Radar."],
+    ["m-resumo", "Mercado", "Visão geral", "#mj-resumo", "todos", "Visão geral do mercado", "", "resumo"],
+    ["m-cripto", "Mercado", "Cripto (tabela e detalhe dos ativos)", "#mj-ativos", "todos", "Criptomoedas", "Tabela das 100 maiores com detalhe de cada ativo.", "ativos"],
+    ["m-etfs", "Mercado", "ETFs", "#mj-etfs", "assinante", "Dados de ETFs", "Fluxos diários, patrimônio e volume dos ETFs de Bitcoin e Ethereum, com histórico completo.", "etfs"],
+    ["m-macro", "Mercado", "Macro", "#mj-macro", "todos", "Macro", "Juros, inflação, dólar e liquidez.", "macro"],
+    ["m-onchain", "Mercado", "On-chain", "#mj-onchain", "assinante", "Indicadores on-chain avançados", "MVRV, SOPR, NUPL, preço realizado, fluxo das corretoras e stablecoins, com gráficos e leitura.", "onchain"],
+    ["m-defi", "Mercado", "DeFi", "#mj-defi", "assinante", "Dados DeFi avançados", "TVL por rede e categoria, maiores protocolos, volume em DEX e stablecoins com histórico.", "defi"],
+    ["m-tradfi", "Mercado", "TradFi on-chain", "#area-tradfi", "assinante", "TradFi on-chain", "Ativos reais tokenizados, protocolos, redes e plataformas para ter exposição a cada mercado."],
+    ["m-cal", "Mercado", "Calendário econômico", "#mj-calendario", "todos", "Calendário econômico", "", "calendario"],
+    ["f-sim", "Ferramentas", "Simuladores (página com todas as ferramentas)", "#fer-sim", "todos", "Simuladores", ""],
+    ["f-est", "Ferramentas", "Estratégias: DCA e aporte único", "#fer-est", "todos", "Comparador de estratégias", "DCA e aporte único com preço histórico real."],
+    ["r-est-avanc", "Ferramentas", "Estratégias avançadas (quedas, rebalanceamento, personalizada)", null, "assinante", "Estratégias avançadas", ""],
+    ["f-calc", "Ferramentas", "Calculadoras (juros compostos, aportes, preço médio)", "#fer-calc", "todos", "Calculadoras", ""],
+    ["f-renda", "Ferramentas", "Renda e arbitragem + simulador com dados reais", "#funding-conteudo", "assinante", "Renda e arbitragem", "Arbitragem de funding, pools, vaults, trades e opções com custos reais e simulador com dados históricos."],
+    ["cart", "Minha Carteira", "Minha Carteira", "#area-carteira", "todos", "Minha Carteira", ""],
+    ["r-cart-desemp", "Minha Carteira", "Desempenho histórico da carteira", "#cj-desempenho", "assinante", "Carteira completa", "Desempenho da carteira ao longo do tempo comparado com CDI, Ibovespa e S&P 500."],
+    ["i-nots", "Insights", "Notícias", "#mj-noticias", "todos", "Notícias", "", "noticias"],
+    ["i-rel", "Insights", "Alpha Reports", "#area-relatorio", "assinante", "Alpha Reports", "O relatório completo de mercado, com gráficos e PDF para baixar."],
+    ["i-an", "Insights", "Análises de ativos", "#area-analises", "assinante", "Análises de ativos", "Leitura de cada ativo e protocolo a partir das fontes acompanhadas e dos números de mercado."],
+    ["i-nl", "Insights", "Newsletter", "#area-newsletter", "assinante", "Newsletter", "As edições completas da newsletter do Alpha Radar."],
+    ["acad", "Academy", "Academy (nível Básico)", "#area-aulas", "todos", "Academy", ""],
+    ["r-acad-pro", "Academy", "Academy Intermediário e Avançado", "#ac-pro", "assinante", "Academy completa", "Níveis Intermediário e Avançado, com DeFi, on-chain, macro, gestão de risco e construção de carteira."],
+    ["r-aulas-video", "Academy", "Aulas em vídeo do curso", "#au-wrap", "assinante", "Aulas em vídeo", "Os módulos completos do curso com vídeos, comentários e avaliação."],
+    ["sup", "Conta", "Suporte", "#area-suporte", "todos", "Suporte", ""]
   ];
+  var ACX = {}; ACESSO.forEach(function (a) { ACX[a[0]] = a; });
+  var ACFG = lsGet("ar_acesso_v2") || {};
+  var NIVEIS = [["todos", "Todos (grátis)"], ["assinante", "Só assinantes (cadeado)"], ["oculta", "Só assinantes (escondido)"], ["admin", "Só o administrador"]];
+  function nivel(k) { var a = ACX[k]; if (!a) return "todos"; var v = ACFG[k]; return NIVEIS.some(function (n) { return n[0] === v; }) ? v : a[4]; }
+  function estado(k) { var n = nivel(k), p = plano(); if (p === "admin") return "livre"; if (n === "todos") return "livre"; if (n === "admin") return "some"; if (p === "assinante") return "livre"; return n === "oculta" ? "some" : "tranca"; }
+  function livre(k) { return estado(k) === "livre"; }
   function aplicaPro() {
-    var pro = ehPro();
-    PRO_ALVOS.forEach(function (a) {
-      var e = document.querySelector(a.s); if (!e) return;
-      var trancado = !pro && logado() && !e.closest(".bloq");
-      e.classList.add("pro-alvo"); e.classList.toggle("pro-on", trancado);
+    if (!logado()) return;
+    ACESSO.forEach(function (a) {
+      if (!a[3]) return; var e = document.querySelector(a[3]); if (!e) return;
+      var st = estado(a[0]), pai = e.parentElement && e.parentElement.closest(".pro-on,.pro-some");
+      var tranca = st === "tranca" && !e.closest(".bloq") && !pai, some = st === "some";
+      e.classList.add("pro-alvo"); e.classList.toggle("pro-on", tranca); e.classList.toggle("pro-some", some && !/^#area-|^#mj-|^#fer-/.test(a[3]));
       var lk = e.querySelector(":scope>.pro-lock");
-      if (trancado && !lk) {
+      if (tranca && !lk) {
         lk = h("div", "pro-lock"); var d = h("div");
         d.appendChild(h("div", null, "🔒")); d.appendChild(h("h3", null, "Recurso Alpha Pro"));
-        d.appendChild(h("p", null, a.t + ". " + "Tenha acesso a dados avançados, histórico completo e ferramentas profissionais."));
-        var p2 = h("p", null, a.d); p2.style.fontSize = "13px"; d.appendChild(p2);
-        var b = h("button", "bt-pro", a.cta || "Conhecer Alpha Pro"); b.type = "button"; b.addEventListener("click", function () { ir("prem"); });
-        var b2 = h("button", "bt-sec", "Conhecer Alpha Pro"); b2.type = "button"; b2.style.marginLeft = "8px"; b2.addEventListener("click", function () { ir("prem"); });
-        d.appendChild(b); if ((a.cta || "") !== "Conhecer Alpha Pro") d.appendChild(b2);
+        d.appendChild(h("p", null, a[5] + ". Tenha acesso a dados avançados, histórico completo e ferramentas profissionais."));
+        if (a[6]) { var p2 = h("p", null, a[6]); p2.style.fontSize = "13px"; d.appendChild(p2); }
+        var b = h("button", "bt-pro", "Conhecer Alpha Pro"); b.type = "button"; b.addEventListener("click", function () { ir("prem"); }); d.appendChild(b);
         lk.appendChild(d); e.appendChild(lk);
         [].forEach.call(e.children, function (c) { if (c !== lk) c.setAttribute("inert", ""); });
-      } else if (!trancado && lk) { lk.remove(); [].forEach.call(e.children, function (c) { if (!c.closest(".bloq")) c.removeAttribute("inert"); }); }
+      } else if (!tranca && lk) { lk.remove(); [].forEach.call(e.children, function (c) { if (!c.closest(".bloq")) c.removeAttribute("inert"); }); }
+      if (a[7]) { var bt = document.querySelector('#mabas button[data-mj="' + a[7] + '"]'); if (bt && bt.hidden !== some) bt.hidden = some; }
     });
-    if (!pro) { var f = $("sim-real"); if (f && f.getAttribute("src")) f.removeAttribute("src"); }
-    espelhaOriginais();
+    if (!livre("f-renda")) { var f = $("sim-real"); if (f && f.getAttribute("src")) f.removeAttribute("src"); }
+    var k = ATUAL; if (k && ACX[k] && estado(k) === "some" && k !== "dash") ir("dash");
+    var ms = ATUAL && ITENS[ATUAL] && ITENS[ATUAL].s; if (ms && ACX[ATUAL] && estado(ATUAL) === "some") ir("dash");
+    espelhaOriginais(); ferBotoes(); if (typeof estLibera === "function") estLibera();
+  }
+  function cfgAcesso(v) { var o = {}; try { o = typeof v === "string" ? JSON.parse(v) : v || {}; } catch (e) { o = {}; } ACFG = o || {}; lsSet("ar_acesso_v2", ACFG); aplicaPro(); }
+
+  /* Administração: acesso por área e recurso */
+  function admAcesso() {
+    var pn = $("adm-painel"); if (!pn || plano() !== "admin" && G("PLANOREAL") !== "admin") return;
+    var velho = $("adm-abas");
+    if (velho && !velho.dataset.oculto) { velho.dataset.oculto = 1; var irm = [velho.previousElementSibling, velho.previousElementSibling && velho.previousElementSibling.previousElementSibling, $("adm-abas-salvar") && $("adm-abas-salvar").parentNode]; irm.concat([velho]).forEach(function (x) { if (x && x !== pn) x.style.display = "none"; }); }
+    var box = $("adm-acesso");
+    if (!box) {
+      box = h("section", "box"); box.id = "adm-acesso"; box.style.marginBottom = "20px";
+      box.innerHTML = '<h2>Acesso por área e recurso</h2><p class="sub">Escolha quem pode usar cada página e cada recurso do painel. O administrador sempre vê tudo. Use "Ver o site como" no menu do seu perfil para conferir como fica para cada tipo de usuário.</p>' +
+        '<div class="pscroll" style="margin-top:12px"><table class="pt" id="adm-ac-tab" style="font-size:14px"><thead><tr><th class="t">Grupo</th><th class="t">Página ou recurso</th><th class="t">Quem pode usar</th></tr></thead><tbody></tbody></table></div>' +
+        '<p style="margin-top:12px;display:flex;gap:8px;flex-wrap:wrap;align-items:center"><button type="button" class="bt-pro" id="adm-ac-salvar">Salvar acessos</button><button type="button" class="bt-sec" id="adm-ac-padrao">Restaurar o padrão</button><span class="sub" id="adm-ac-msg"></span></p>' +
+        '<p class="note">"Com cadeado": quem não assina vê o recurso desfocado e o convite para o Alpha Pro. "Escondido": o item some do menu para quem não assina. Análises, aulas, newsletter e comentários continuam protegidos também no banco de dados.</p>';
+      var alvo = velho ? velho.previousElementSibling && velho.previousElementSibling.previousElementSibling || velho : null;
+      if (alvo && alvo.parentNode) alvo.parentNode.insertBefore(box, alvo); else pn.insertBefore(box, pn.firstChild);
+      $("adm-ac-salvar").addEventListener("click", function () { admSalva(admLe()); });
+      $("adm-ac-padrao").addEventListener("click", function () { admSalva({}); });
+    }
+    var tb = box.querySelector("tbody"); tb.textContent = ""; var grupo = "";
+    ACESSO.forEach(function (a) {
+      var tr = h("tr"); tr.style.cursor = "default";
+      tr.appendChild(h("td", "t", a[1] !== grupo ? a[1] : "")); grupo = a[1];
+      var n = h("td", "t", a[2]); n.style.whiteSpace = "normal"; tr.appendChild(n);
+      var td = h("td", "t"), se = h("select"); se.dataset.k = a[0]; se.style.cssText = "font:inherit;font-size:13.5px;padding:6px 8px;border:1px solid var(--line);border-radius:4px;background:var(--surface);color:var(--fg);max-width:100%";
+      NIVEIS.forEach(function (x) { var o = h("option", null, x[1] + (x[0] === a[4] ? " (padrão)" : "")); o.value = x[0]; se.appendChild(o); });
+      se.value = nivel(a[0]); td.appendChild(se); tr.appendChild(td); tb.appendChild(tr);
+    });
+  }
+  function admLe() { var o = {}; [].forEach.call(document.querySelectorAll("#adm-ac-tab select"), function (se) { if (se.value !== ACX[se.dataset.k][4]) o[se.dataset.k] = se.value; }); return o; }
+  function admSalva(o) {
+    var SB = G("SB"), msg = $("adm-ac-msg"); if (!SB) return; msg.textContent = "Salvando…";
+    SB.from("config_site").upsert({ chave: "acesso_v2", valor: JSON.stringify(o) }).then(function (r) {
+      if (r.error) { msg.textContent = "Não consegui salvar: " + (r.error.message || "tente de novo."); return; }
+      cfgAcesso(o); admAcesso(); msg.textContent = "Acessos salvos. Valem na próxima vez que cada pessoa abrir o site.";
+      var AB = G("ABAS"), sv = G("abasSalva"); if (Array.isArray(AB) && typeof sv === "function" && AB.some(function (x) { return x.acesso && x.acesso !== "todos"; })) sv(AB.map(function (x) { return { id: x.id, nome: x.nome, acesso: "todos" }; }));
+    });
   }
   function embrulha(nome, depois) { var t = 0; (function tenta() { var f = window[nome]; if (typeof f !== "function") { if (t++ < 40) setTimeout(tenta, 300); return; } if (f._pl) return; var w = function () { var r = f.apply(this, arguments); try { depois.apply(this, arguments); } catch (e) { console.warn("[plataforma]", nome, e); } return r; }; w._pl = 1; window[nome] = w; })(); }
 
@@ -467,7 +529,7 @@
   }
   function relDes() {
     var bx = $("pd-rel-lista"); if (!bx) return; var SB = G("SB");
-    if (!ehPro() || !SB) { bx.textContent = ""; bx.appendChild(h("p", "pd-vazio", "As edições aparecem aqui para assinantes.")); return; }
+    if (!livre("r-rels") || !SB) { bx.textContent = ""; bx.appendChild(h("p", "pd-vazio", "As edições aparecem aqui para assinantes.")); return; }
     if (D.rel && Date.now() - D.rel.t < 300000) return mostra(D.rel.l);
     SB.from("newsletters").select("id,titulo,criado_em").order("criado_em", { ascending: false }).limit(4).then(function (r) { D.rel = { t: Date.now(), l: r.data || [] }; mostra(D.rel.l); });
     function mostra(l) { bx.textContent = ""; var hoje = h("div", "pd-ev"); hoje.appendChild(h("time", null, "Hoje")); hoje.appendChild(h("span", null, "Alpha Report do dia, gerado com os dados de agora")); bx.appendChild(hoje);
@@ -540,7 +602,7 @@
       '<section class="box"><h2>Notícias relacionadas</h2><ul class="nots" id="cg-nots"></ul></section>' +
       '<p style="display:flex;gap:8px;flex-wrap:wrap"><button type="button" class="bt-pro" id="cg-an">Ver análise completa</button><button type="button" class="bt-sec" id="cg-tv">Gráfico avançado</button></p><p class="pd-risco">' + AVISO + '</p>';
     $("cg-fecha").addEventListener("click", fechaGaveta); $("cg-fecha").focus();
-    $("cg-an").addEventListener("click", function () { fechaGaveta(); ir("i-an"); var i = $("an-nomes"), f = $("an-form"); if (i && f && ehPro() && c) { i.value = c.name + ", " + c.sym; if (f.requestSubmit) f.requestSubmit(); } });
+    $("cg-an").addEventListener("click", function () { fechaGaveta(); ir("i-an"); var i = $("an-nomes"), f = $("an-form"); if (i && f && livre("i-an") && c) { i.value = c.name + ", " + c.sym; if (f.requestSubmit) f.requestSubmit(); } });
     var P = G("PRECOS") || {}; $("cg-tv").hidden = !(c && P[c.sym] && typeof window.abrirGrafico === "function"); $("cg-tv").addEventListener("click", function () { fechaGaveta(); window.abrirGrafico(c.sym); });
     var dias = 90, info = null, serie = null;
     var desenha = function () {
@@ -645,7 +707,7 @@
     }
     if (!t.children.length) t.appendChild(h("p", "pd-load", "Aguardando os dados macro"));
     var gf = G("grafFaz"), cor = G("cor"), c = function (v, f) { try { return (typeof cor === "function" && cor(v)) || f; } catch (e) { return f; } };
-    var ser = function (s, n) { return (s || []).slice(-(n || 800)).map(function (x) { return { time: x[0], value: x[1] }; }); };
+    var ser = function (s, n) { var m = {}; (s || []).forEach(function (x) { if (x && x[0] && isFinite(x[1])) m[String(x[0]).slice(0, 10)] = +x[1]; }); return Object.keys(m).sort().slice(-(n || 800)).map(function (d) { return { time: d, value: m[d] }; }); };
     if (typeof gf === "function") {
       gf("mc-g-juros", [{ tipo: "linha", cor: c("--s1", "#1f4e8c"), titulo: "Selic", dados: ser(S.selic), degrau: 1 }, { tipo: "linha", cor: c("--s2", "#b8690a"), titulo: "EUA 3m", dados: ser(S.us3m) }, { tipo: "linha", cor: c("--s3", "#6a4fb3"), titulo: "EUA 10a", dados: ser(S.us10y) }], function (v) { return nf(v, 2) + "%"; });
       gf("mc-g-ipca", [{ tipo: "linha", cor: c("--bad", "#b23a30"), titulo: "IPCA 12m", dados: ser(S.ipca12) }], function (v) { return nf(v, 2) + "%"; });
@@ -673,28 +735,34 @@
     sim.appendChild(H("p", "sub", "Todas as ferramentas do Alpha Radar em um lugar. As marcadas como <b>Pro</b> fazem parte do Alpha Pro."));
     var cards = h("div", "pf-cards"); cards.style.marginTop = "14px"; sim.appendChild(cards);
     var FER = [
-      ["Simulador de estratégias", "Ranking do que rende agora em vaults, pools e arbitragem, com backtest de cada mercado usando o histórico real e todas as taxas.", 1, function () { ir("f-renda", "sim"); }],
-      ["Comparador de estratégias", "Compara DCA, aporte único, aporte em quedas, rebalanceamento e estratégia personalizada com o histórico de preço real.", 0, function () { ir("f-est"); }],
-      ["Simulador de DCA", "Quanto teria virado um aporte mensal fixo em Bitcoin, Ethereum ou outro ativo, com taxas incluídas.", 0, function () { ir("f-est"); }],
-      ["Simulador de aportes", "Quanto aportar por mês para chegar a uma meta, dada uma taxa de rendimento e um prazo.", 0, function () { ir("f-calc"); setTimeout(function () { var e = $("cc-meta-box"); if (e) e.scrollIntoView({ behavior: "smooth" }); }, 100); }],
-      ["Simulador de preço médio", "Calcula o preço médio de várias compras e quanto comprar para levar o preço médio a um alvo.", 0, function () { ir("f-calc"); setTimeout(function () { var e = $("cc-pm-box"); if (e) e.scrollIntoView({ behavior: "smooth" }); }, 100); }],
-      ["Simulador de juros compostos", "Evolução de um valor inicial com aportes mensais e juros compostos, mês a mês.", 0, function () { ir("f-calc"); }],
-      ["Cenários de carteira", "Monte Carlo com 400 cenários para uma carteira de funding, pools, vaults, opções e trades, com testes de estresse.", 1, function () { ir("f-renda", "sim"); setTimeout(function () { var d = $("sim-mc"); if (d) { d.open = true; d.scrollIntoView({ behavior: "smooth" }); } }, 400); }],
-      ["Renda e arbitragem", "Arbitragem de funding entre corretoras, pools de liquidez, vaults, trades e opções, com custos reais.", 1, function () { ir("f-renda", "funding"); }]
+      ["f-renda", "Simulador de estratégias", "Ranking do que rende agora em vaults, pools e arbitragem, com backtest de cada mercado usando o histórico real e todas as taxas.", 1, function () { ir("f-renda", "sim"); }],
+      ["f-est", "Comparador de estratégias", "Compara DCA, aporte único, aporte em quedas, rebalanceamento e estratégia personalizada com o histórico de preço real.", 0, function () { ir("f-est"); }],
+      ["f-est", "Simulador de DCA", "Quanto teria virado um aporte mensal fixo em Bitcoin, Ethereum ou outro ativo, com taxas incluídas.", 0, function () { ir("f-est"); }],
+      ["f-calc", "Simulador de aportes", "Quanto aportar por mês para chegar a uma meta, dada uma taxa de rendimento e um prazo.", 0, function () { ir("f-calc"); setTimeout(function () { var e = $("cc-meta-box"); if (e) e.scrollIntoView({ behavior: "smooth" }); }, 100); }],
+      ["f-calc", "Simulador de preço médio", "Calcula o preço médio de várias compras e quanto comprar para levar o preço médio a um alvo.", 0, function () { ir("f-calc"); setTimeout(function () { var e = $("cc-pm-box"); if (e) e.scrollIntoView({ behavior: "smooth" }); }, 100); }],
+      ["f-calc", "Simulador de juros compostos", "Evolução de um valor inicial com aportes mensais e juros compostos, mês a mês.", 0, function () { ir("f-calc"); }],
+      ["f-renda", "Cenários de carteira", "Monte Carlo com 400 cenários para uma carteira de funding, pools, vaults, opções e trades, com testes de estresse.", 1, function () { ir("f-renda", "sim"); setTimeout(function () { var d = $("sim-mc"); if (d) { d.open = true; d.scrollIntoView({ behavior: "smooth" }); } }, 400); }],
+      ["f-renda", "Renda e arbitragem", "Arbitragem de funding entre corretoras, pools de liquidez, vaults, trades e opções, com custos reais.", 1, function () { ir("f-renda", "funding"); }]
     ];
     FER.forEach(function (f) {
-      var c = h("article", "pf-card"), t = h("h3"); t.appendChild(h("span", null, f[0])); t.appendChild(h("span", "bdg " + (f[2] ? "pro" : "free"), f[2] ? "Pro" : "Free")); c.appendChild(t);
-      c.appendChild(h("p", null, f[1])); var b = h("button", f[2] && !ehPro() ? "bt-sec" : "bt-pro", f[2] && !ehPro() ? "🔒 Desbloquear Alpha Pro" : "Abrir"); b.type = "button"; b.dataset.pro = f[2] ? 1 : "";
-      b.addEventListener("click", function () { if (f[2] && !ehPro()) ir("prem"); else f[3](); }); c.appendChild(b); cards.appendChild(c);
+      var c = h("article", "pf-card"), t = h("h3"); t.appendChild(h("span", null, f[1])); var bg = h("span", "bdg"); bg.dataset.k = f[0]; t.appendChild(bg); c.appendChild(t);
+      c.appendChild(h("p", null, f[2])); var b = h("button"); b.type = "button"; b.dataset.k = f[0];
+      b.addEventListener("click", function () { if (!livre(f[0])) ir("prem"); else f[4](); }); c.appendChild(b); c.dataset.k = f[0]; cards.appendChild(c);
     });
+    ferBotoes();
     var est = h("section"); est.id = "fer-est"; est.hidden = true; ar.appendChild(est); montaEst(est);
     var calc = h("section"); calc.id = "fer-calc"; calc.hidden = true; ar.appendChild(calc); montaCalc(calc);
+  }
+  function ferBotoes() {
+    [].forEach.call(document.querySelectorAll("#fer-sim .pf-card"), function (c) { var k = c.dataset.k, st = estado(k), b = c.querySelector("button"), bg = c.querySelector(".bdg"), pago = nivel(k) !== "todos";
+      c.hidden = st === "some"; bg.className = "bdg " + (pago ? "pro" : "free"); bg.textContent = pago ? "Pro" : "Free";
+      b.className = st === "livre" ? "bt-pro" : "bt-sec"; b.textContent = st === "livre" ? "Abrir" : "🔒 Desbloquear Alpha Pro"; });
   }
   function ferAba(s) {
     montaFer(); s = s || "sim";
     ["sim", "est", "calc"].forEach(function (x) { var e = $("fer-" + x); if (e) e.hidden = x !== s; });
     [].forEach.call(document.querySelectorAll("#area-ferramentas .pf-tabs button"), function (b) { b.setAttribute("aria-selected", b.dataset.f === s ? "true" : "false"); });
-    [].forEach.call(document.querySelectorAll("#fer-sim button[data-pro]"), function (b) { if (b.dataset.pro) { b.className = ehPro() ? "bt-pro" : "bt-sec"; b.textContent = ehPro() ? "Abrir" : "🔒 Desbloquear Alpha Pro"; } });
+    ferBotoes();
     if (s === "est") estRoda(true);
     if (s === "calc") { jcCalc(); metaCalc(); pmCalc(); }
   }
@@ -730,9 +798,9 @@
     $("es-rodar").addEventListener("click", function () { estRoda(); });
   }
   function estLibera() {
-    var pro = ehPro();
-    [].forEach.call(document.querySelectorAll("#es-chk label"), function (l) { var e = ESTS.filter(function (x) { return x.k === l.dataset.k; })[0]; var i = l.querySelector("input"); if (!e.free) { i.disabled = !pro; if (!pro) i.checked = false; l.classList.toggle("lck", !pro); l.title = pro ? "" : "Recurso Alpha Pro"; } });
-    var aviso = $("fer-est-pro"); if (aviso) { aviso.textContent = ""; if (!pro) { var d = h("div", "box"); d.style.cssText = "flex-direction:row;justify-content:space-between;align-items:center;gap:14px;flex-wrap:wrap;margin-top:20px"; d.appendChild(H("div", null, "<b>🔒 Recurso Alpha Pro</b><br><span class='sub'>Aporte em quedas, rebalanceamento e estratégias personalizadas fazem parte do Alpha Pro.</span>")); var b = h("button", "bt-pro", "Conhecer Alpha Pro"); b.type = "button"; b.addEventListener("click", function () { ir("prem"); }); d.appendChild(b); aviso.appendChild(d); } }
+    var pro = livre("r-est-avanc"), sumir = estado("r-est-avanc") === "some";
+    [].forEach.call(document.querySelectorAll("#es-chk label"), function (l) { var e = ESTS.filter(function (x) { return x.k === l.dataset.k; })[0]; var i = l.querySelector("input"); if (!e.free) { i.disabled = !pro; if (!pro) i.checked = false; l.classList.toggle("lck", !pro); l.title = pro ? "" : "Recurso Alpha Pro"; l.hidden = sumir; var bd = l.querySelector(".bdg"); if (bd) bd.hidden = nivel("r-est-avanc") === "todos"; } });
+    var aviso = $("fer-est-pro"); if (aviso) { aviso.textContent = ""; if (!pro && !sumir) { var d = h("div", "box"); d.style.cssText = "flex-direction:row;justify-content:space-between;align-items:center;gap:14px;flex-wrap:wrap;margin-top:20px"; d.appendChild(H("div", null, "<b>🔒 Recurso Alpha Pro</b><br><span class='sub'>Aporte em quedas, rebalanceamento e estratégias personalizadas fazem parte do Alpha Pro.</span>")); var b = h("button", "bt-pro", "Conhecer Alpha Pro"); b.type = "button"; b.addEventListener("click", function () { ir("prem"); }); d.appendChild(b); aviso.appendChild(d); } }
   }
   function klines(par, dias) {
     var k = par + dias; if (EST.cache[k]) return EST.cache[k];
@@ -894,7 +962,7 @@
     aplicaPro();
   }
   function acAbre(nv, l) {
-    if (!nv.free && !ehPro()) { ir("prem"); return; }
+    if (!nv.free && !livre("r-acad-pro")) { ir("prem"); return; }
     var s = $("ac-leitura"); s.hidden = false; var F = acFeitos();
     s.innerHTML = '<p class="pd-sec-tit" style="margin:0 0 6px">' + esc(nv.n) + '</p><h2 style="margin:0 0 12px;font:600 24px var(--serif)">' + esc(l[1]) + '</h2><div class="prosa">' + l[2].map(function (p) { return "<p>" + esc(p) + "</p>"; }).join("") + '</div>' +
       '<p style="display:flex;gap:8px;flex-wrap:wrap;margin-top:6px"><button type="button" class="' + (F[l[0]] ? "bt-sec" : "bt-pro") + '" id="ac-feito">' + (F[l[0]] ? "✓ Concluída (desmarcar)" : "Marcar como concluída") + '</button>' + (l[3] ? '<button type="button" class="bt-sec" id="ac-ir">Ver na prática no Alpha Radar →</button>' : "") + '<button type="button" class="bt-sec" id="ac-fechar">Fechar</button></p>';
@@ -914,8 +982,9 @@
       '<div class="pp-plano"><h3 style="margin:0;font:600 18px var(--sans)">Mensal</h3><div class="vl">R$ ' + mes + ' <small>/mês</small></div><p class="sub" style="margin:0">Sem fidelidade. Reembolso integral nos primeiros 7 dias.</p><button type="button" class="bt-pro" id="pp-mes"' + (pro ? " disabled" : "") + '>' + (pro ? "Plano ativo" : "Desbloquear Alpha Pro") + '</button><p class="sub" id="pp-msg-mes" hidden></p></div>' +
       '<div class="pp-plano dest"><span class="pp-selo">Economize ' + nf(eco / (mesN * 12) * 100, 0) + '%</span><h3 style="margin:0;font:600 18px var(--sans)">Anual</h3><div class="vl">R$ ' + ano + ' <small>/ano</small></div><p class="sub" style="margin:0">Equivale a R$ ' + nf(anoN / 12, 2) + ' por mês: <b>R$ ' + nf(eco, 2) + ' a menos</b> do que 12 meses do plano mensal.</p><button type="button" class="bt-pro" id="pp-ano"' + (pro ? " disabled" : "") + '>' + (pro ? "Plano ativo" : "Assinar o plano anual") + '</button><p class="sub" id="pp-msg-ano" hidden></p></div></div>' +
       '<section class="box"><h2>O que está incluído</h2><div class="pscroll"><table class="pp-comp"><thead><tr><th>Recurso</th><th>Free</th><th>Alpha Pro</th></tr></thead><tbody>' +
-      [["Dashboard com Radar do Dia", 1, 1], ["Preços, tabela de criptomoedas e detalhe de cada ativo", 1, 1], ["Notícias e calendário econômico EUA e Brasil", 1, 1], ["Macro: juros, inflação, dólar e liquidez", 1, 1], ["Calculadoras e simuladores básicos (juros compostos, aportes, preço médio, DCA)", 1, 1], ["Minha Carteira: patrimônio, preço médio e lucro", 1, 1], ["Academy: nível Básico", 1, 1],
-       ["Simulador de estratégias com dados históricos reais", 0, 1], ["Comparador de estratégias avançadas (quedas, rebalanceamento, personalizada)", 0, 1], ["Indicadores on-chain avançados (MVRV, SOPR, NUPL, fluxos)", 0, 1], ["Dados de ETFs de Bitcoin e Ethereum", 0, 1], ["DeFi avançado: TVL, protocolos, redes e yields", 0, 1], ["Renda e arbitragem: funding, pools, vaults, trades e opções", 0, 1], ["TradFi on-chain", 0, 1], ["Desempenho histórico da carteira", 0, 1], ["Alpha Reports, análises de ativos e newsletter", 0, 1], ["Alertas do Radar", 0, 1], ["Academy completa e aulas em vídeo", 0, 1]]
+      [["Dashboard com Radar do Dia", "dash"], ["Preços, tabela de criptomoedas e detalhe de cada ativo", "m-cripto"], ["Notícias", "i-nots"], ["Calendário econômico EUA e Brasil", "m-cal"], ["Macro: juros, inflação, dólar e liquidez", "m-macro"], ["Calculadoras: juros compostos, aportes e preço médio", "f-calc"], ["Comparador de estratégias: DCA e aporte único", "f-est"], ["Minha Carteira: patrimônio, preço médio e lucro", "cart"], ["Academy: nível Básico", "acad"],
+       ["Simulador de estratégias com dados reais, renda e arbitragem", "f-renda"], ["Estratégias avançadas: quedas, rebalanceamento e personalizada", "r-est-avanc"], ["Indicadores on-chain avançados (MVRV, SOPR, NUPL, fluxos)", "m-onchain"], ["Dados de ETFs de Bitcoin e Ethereum", "m-etfs"], ["DeFi avançado: TVL, protocolos, redes e stablecoins", "m-defi"], ["TradFi on-chain", "m-tradfi"], ["Desempenho histórico da carteira", "r-cart-desemp"], ["Alpha Reports", "i-rel"], ["Análises de ativos", "i-an"], ["Newsletter", "i-nl"], ["Alertas do Radar", "r-alertas"], ["Academy Intermediário e Avançado", "r-acad-pro"], ["Aulas em vídeo", "r-aulas-video"]]
+        .filter(function (r) { return nivel(r[1]) !== "admin"; }).map(function (r) { return [r[0], nivel(r[1]) === "todos" ? 1 : 0]; })
         .map(function (r) { return "<tr><td>" + esc(r[0]) + "</td><td class='" + (r[1] ? "s" : "n") + "'>" + (r[1] ? "✓" : "—") + "</td><td class='s'>✓</td></tr>"; }).join("") +
       '</tbody></table></div></section>' +
       '<section class="box"><h2>Dúvidas</h2><div class="lp-faq"><details><summary>Posso cancelar quando quiser?</summary><p>Sim. Não há fidelidade nem multa, e nos primeiros 7 dias você pode pedir o reembolso integral pela aba Suporte.</p></details><details><summary>O Alpha Pro diz o que comprar?</summary><p>Não. O Alpha Radar entrega dados, simulações e análises para você entender o mercado. A decisão é sempre sua.</p></details><details><summary>Como a assinatura é liberada?</summary><p>Assim que o pagamento é confirmado, o acesso Pro é liberado na sua conta. Se tiver qualquer problema, fale com o suporte.</p></details></div></section>' +
@@ -926,7 +995,7 @@
       $("pp-ano").addEventListener("click", function () { var m = $("pp-msg-ano"); if (/^https:\/\//.test(ANUAL.link)) { window.open(ANUAL.link, "_blank", "noopener"); return; } if (typeof assinar === "function") assinar(m); });
     }
   }
-  function cfgPremium() { var SB = G("SB"); if (!SB) return; SB.from("config_site").select("chave,valor").in("chave", ["link_pagamento_anual", "preco_anual", "preco"]).then(function (r) { (r.data || []).forEach(function (x) { if (x.chave === "link_pagamento_anual") ANUAL.link = x.valor || ""; if (x.chave === "preco_anual" && x.valor) PRECO_ANO = x.valor; if (x.chave === "preco" && x.valor) PRECO_MES = x.valor; }); if (!$("area-premium") || !$("area-premium").hidden) premDes(); }); }
+  function cfgPremium() { var SB = G("SB"); if (!SB) return; SB.from("config_site").select("chave,valor").in("chave", ["link_pagamento_anual", "preco_anual", "preco", "acesso_v2"]).then(function (r) { (r.data || []).forEach(function (x) { if (x.chave === "link_pagamento_anual") ANUAL.link = x.valor || ""; if (x.chave === "preco_anual" && x.valor) PRECO_ANO = x.valor; if (x.chave === "preco" && x.valor) PRECO_MES = x.valor; if (x.chave === "acesso_v2") cfgAcesso(x.valor); }); if (!$("area-premium") || !$("area-premium").hidden) premDes(); }); }
 
   /* ================= Configurações ================= */
   function confDes() {
@@ -963,7 +1032,7 @@
   /* ================= Simulador dentro de Renda e arbitragem ================= */
   function simReal() {
     var f = $("sim-real"); if (!f) return; var painel = $("est-sim");
-    var ativa = function () { if (!painel || painel.hidden || !painel.getClientRects().length) return; if (!ehPro()) { f.removeAttribute("src"); return; } if (!f.getAttribute("src")) f.setAttribute("src", f.dataset.src); };
+    var ativa = function () { if (!painel || painel.hidden || !painel.getClientRects().length) return; if (!livre("f-renda")) { f.removeAttribute("src"); return; } if (!f.getAttribute("src")) f.setAttribute("src", f.dataset.src); };
     new MutationObserver(ativa).observe($("area-funding"), { attributes: true, subtree: true, attributeFilter: ["hidden"] });
     f.addEventListener("load", function () { try { var d = f.contentDocument; if (!d || !d.body) return; var ajusta = function () { var hgt = Math.ceil(d.documentElement.scrollHeight) + 4; if (hgt > 200) f.style.height = hgt + "px"; }; ajusta(); new ResizeObserver(ajusta).observe(d.body); var t = document.documentElement.getAttribute("data-theme"); if (t) d.documentElement.setAttribute("data-theme", t); } catch (e) {} });
     new MutationObserver(function () { try { var d = f.contentDocument, t = document.documentElement.getAttribute("data-theme"); if (d) { if (t) d.documentElement.setAttribute("data-theme", t); else d.documentElement.removeAttribute("data-theme"); } } catch (e) {} }).observe(document.documentElement, { attributes: true, attributeFilter: ["data-theme"] });
@@ -989,6 +1058,7 @@
     embrulha("contaDesenha", function () { aplicaPro(); if (!$("area-inicio").hidden) dashDes(); if (logado() && !D.rota) { D.rota = 1; setTimeout(rotaInicial, 400); cfgPremium(); } });
     embrulha("mercDesenha", function () { if (!$("area-inicio").hidden) dashDes(); if ($("mj-macro") && !$("mj-macro").hidden) macroDes(); });
     embrulha("cDesenha", function () { carteiraDes(); });
+    embrulha("admCarrega", function () { setTimeout(admAcesso, 200); });
     embrulha("abasAplica", function () { var T2 = G("TITULOS"); if (T2) { T2.inicio = "Dashboard"; T2.ferramentas = "Ferramentas"; T2.premium = "Alpha Pro"; T2.config = "Configurações"; } espelhaOriginais(); });
     embrulha("mjanela", function (j) { if (j === "ativos") criptoDes(); var mk = { resumo: "m-resumo", ativos: "m-cripto", etfs: "m-etfs", macro: "m-macro", onchain: "m-onchain", defi: "m-defi", calendario: "m-cal", noticias: "i-nots" }[j]; if (mk && areaVisivel() === "mercado") marca(mk); });
     [].forEach.call(document.querySelectorAll("#mabas button"), function (b) { b.addEventListener("click", function () { var mx = $("mj-macro"); if (mx && b.dataset.mj !== "macro") mx.hidden = true; var bm = document.querySelector('#mabas button[data-mj="macro"]'); if (bm && b.dataset.mj !== "macro") bm.setAttribute("aria-selected", "false"); }); });

@@ -221,7 +221,9 @@ def macro():
                 if v != ant:
                     pts.append(["-".join(reversed(x["data"].split("/"))), v])
                     ant = v
-            pts.append(["-".join(reversed(d[-1]["data"].split("/"))), float(d[-1]["valor"])])
+            fim = "-".join(reversed(d[-1]["data"].split("/")))
+            if not pts or pts[-1][0] != fim:
+                pts.append([fim, float(d[-1]["valor"])])
             out["series"][chave] = pts
         except Exception:
             pass
@@ -233,7 +235,8 @@ def macro():
             if alvo is not None and alvo != ant:
                 pts.append([x["effectiveDate"], alvo])
                 ant = alvo
-        pts.append([d[0]["effectiveDate"], d[0].get("targetRateTo")])
+        if not pts or pts[-1][0] != d[0]["effectiveDate"]:
+            pts.append([d[0]["effectiveDate"], d[0].get("targetRateTo")])
         out["series"]["fed"] = pts
         out["fed"] = {"de": d[0].get("targetRateFrom"), "ate": d[0].get("targetRateTo"), "efetiva": d[0].get("percentRate"), "data": d[0]["effectiveDate"]}
     except Exception:
