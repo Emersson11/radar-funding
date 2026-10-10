@@ -103,6 +103,55 @@ def calendario():
     return ev
 
 
+COPOM_2026 = ["2026-01-28", "2026-03-18", "2026-04-29", "2026-06-17", "2026-08-05", "2026-09-16", "2026-11-04", "2026-12-09"]
+FERIADOS_BR = {"2026-01-01", "2026-02-16", "2026-02-17", "2026-04-21", "2026-06-04", "2026-09-07", "2026-10-12", "2026-11-02", "2026-11-20", "2026-12-25"}
+IBGE_ALTO = ("IPCA", "Contas Nacionais Trimestrais", "PIB")
+IBGE_MEDIO = ("PNAD Contínua", "Produção Industrial", "Pesquisa Mensal de Comércio", "Pesquisa Mensal de Serviços", "INPC")
+
+
+def calendario_br():
+    """Agenda do Brasil (já em português): Copom, ata do Copom, Boletim Focus e divulgações do IBGE desta semana e da próxima."""
+    from datetime import datetime, timedelta, timezone
+    br = timezone(timedelta(hours=-3))
+    hoje = datetime.now(br).date()
+    ini = hoje - timedelta(days=hoje.weekday())
+    fim = ini + timedelta(days=13)
+    dentro = lambda d: ini <= d <= fim
+    ev = []
+    iso = lambda d, h: f"{d.isoformat()}T{h}:00-03:00"
+    for s in COPOM_2026:
+        d = datetime.strptime(s, "%Y-%m-%d").date()
+        if dentro(d):
+            ev.append({"data": iso(d, "18:30"), "moeda": "BRL", "titulo": "Copom: decisão da taxa Selic", "impacto": "High", "previsao": "", "anterior": ""})
+        ata = d + timedelta(days=(1 - d.weekday()) % 7 or 7)
+        if dentro(ata):
+            ev.append({"data": iso(ata, "08:00"), "moeda": "BRL", "titulo": "Ata do Copom", "impacto": "Medium", "previsao": "", "anterior": ""})
+    for k in range(0, 14, 7):
+        seg = ini + timedelta(days=k)
+        if seg.isoformat() in FERIADOS_BR:
+            seg += timedelta(days=1)
+        ev.append({"data": iso(seg, "08:25"), "moeda": "BRL", "titulo": "Boletim Focus (Banco Central)", "impacto": "Medium", "previsao": "", "anterior": ""})
+    try:
+        url = f"https://servicodados.ibge.gov.br/api/v3/calendario/?qtd=200&de={ini.strftime('%m-%d-%Y')}&ate={fim.strftime('%m-%d-%Y')}"
+        r = S.get(url, timeout=30).json()
+        for x in r.get("items", []):
+            t = (x.get("titulo") or "").strip()
+            imp = "High" if any(k.lower() in t.lower() for k in IBGE_ALTO) else "Medium" if any(k.lower() in t.lower() for k in IBGE_MEDIO) else ""
+            if not imp:
+                continue
+            dt = datetime.strptime(x["data_divulgacao"][:16], "%d/%m/%Y %H:%M")
+            if dentro(dt.date()):
+                ev.append({"data": f"{dt.date().isoformat()}T{dt.strftime('%H:%M')}:00-03:00", "moeda": "BRL", "titulo": "IBGE: " + t, "impacto": imp, "previsao": "", "anterior": ""})
+    except Exception:
+        pass
+    vistos, out = set(), []
+    for e in sorted(ev, key=lambda e: e["data"]):
+        if (e["data"], e["titulo"]) not in vistos:
+            vistos.add((e["data"], e["titulo"]))
+            out.append(e)
+    return out
+
+
 def referencias():
     """Séries diárias para o gráfico de desempenho: CDI (% ao dia), Ibovespa e S&P 500 (fechamento)."""
     from datetime import datetime, timedelta, timezone
@@ -250,6 +299,10 @@ def main():
             m[chave] = fn()
         except Exception as e:
             erros.append(f"{chave}: {e}")
+    try:
+        m["calendario"] = [e for e in m.get("calendario", []) if e.get("moeda") != "BRL"] + calendario_br()
+    except Exception as e:
+        erros.append(f"calendario_br: {e}")
     try:
         m["noticias"], falhas = noticias()
         erros += ["notícias sem resposta: " + f for f in falhas]
