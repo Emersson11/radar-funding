@@ -517,7 +517,8 @@
     var cheio = $("c-cheio"), txt = function (id) { var e = $(id); return e ? e.textContent.trim() : ""; };
     if (cheio && !cheio.hidden && txt("k-valor") && txt("k-valor") !== "–") {
       var r = h("div", "pf-res"); r.style.margin = "4px 0 10px";
-      [["Patrimônio", txt("k-valor")], ["Lucro ou prejuízo", txt("k-lp") + " " + txt("k-lpp")], ["Hoje (24h)", txt("k-24")]].forEach(function (x) { var d = h("div"); d.appendChild(h("span", null, x[0])); d.appendChild(h("b", null, x[1])); r.appendChild(d); });
+      var sinal = function (t) { t = (t || "").trim(); return /^[−-]/.test(t) ? -1 : /^\+/.test(t) ? 1 : 0; };
+      [["Patrimônio", txt("k-valor"), 0], ["Investido", txt("k-inv"), 0], ["Lucro ou prejuízo", txt("k-lp") + " " + txt("k-lpp"), sinal(txt("k-lp"))], ["Hoje (24h)", txt("k-24"), sinal(txt("k-24"))]].forEach(function (x) { var d = h("div"); d.appendChild(h("span", null, x[0])); var v = h("b", null, x[1]); if (x[2]) v.style.color = x[2] > 0 ? "var(--good)" : "var(--bad)"; d.appendChild(v); r.appendChild(d); });
       bx.appendChild(r);
       var b = h("button", "bt-sec", "Abrir minha carteira"); b.type = "button"; b.addEventListener("click", function () { ir("cart"); }); bx.appendChild(b);
     } else {
