@@ -105,8 +105,8 @@ def calendario():
 
 COPOM_2026 = ["2026-01-28", "2026-03-18", "2026-04-29", "2026-06-17", "2026-08-05", "2026-09-16", "2026-11-04", "2026-12-09"]
 FERIADOS_BR = {"2026-01-01", "2026-02-16", "2026-02-17", "2026-04-21", "2026-06-04", "2026-09-07", "2026-10-12", "2026-11-02", "2026-11-20", "2026-12-25"}
-IBGE_ALTO = ("IPCA", "Contas Nacionais Trimestrais", "PIB")
-IBGE_MEDIO = ("PNAD Contínua", "Produção Industrial", "Pesquisa Mensal de Comércio", "Pesquisa Mensal de Serviços", "INPC")
+IBGE_ALTO = ("IPCA", "Preços ao Consumidor Amplo", "Índices de Preços ao Consumidor", "Contas Nacionais Trimestrais", "PIB")
+IBGE_MEDIO = ("PNAD Contínua", "Amostra de Domicílios Contínua", "Pesquisa Industrial Mensal", "Produção Industrial", "Pesquisa Mensal de Comércio", "Pesquisa Mensal de Serviços", "INPC")
 
 
 def calendario_br():
