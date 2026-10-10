@@ -40,6 +40,7 @@ table{width:100%;border-collapse:collapse;font-size:14px} th{font:600 11.5px var
 .rm{border:0;background:none;color:var(--bad);cursor:pointer;font-weight:600}
 .nota{font-size:12.5px;color:var(--muted);margin:12px 0 0}
 .carregando{opacity:.55}
+.mc-pos{border-top-color:var(--accent)} .mc-cab{display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;align-items:flex-start} .mc-cab .rot{font:600 11.5px var(--sans);letter-spacing:.1em;text-transform:uppercase;color:var(--muted)} .mc-cab h3{margin:4px 0 2px;font:600 19px/1.3 var(--serif)} .mc-num{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:1px;background:var(--line);border:1px solid var(--line);border-radius:4px;overflow:hidden;margin:14px 0} .mc-num>div{background:var(--surface);padding:10px 12px} .mc-num span{display:block;font-size:12px;color:var(--muted)} .mc-num b{font:600 17px var(--sans);font-variant-numeric:tabular-nums} .mc-num b.pos{color:var(--good)} .mc-num b.neg{color:var(--bad)} .mc-g{display:grid;grid-template-columns:minmax(0,1.3fr) minmax(0,1fr);gap:20px} @media (max-width:860px){.mc-g{grid-template-columns:1fr}} .mc-g h4{margin:0 0 8px;font:600 14px var(--sans)} .mc-g ol,.mc-g ul{margin:0;padding-left:20px;display:flex;flex-direction:column;gap:6px;font-size:14px;line-height:1.5} .mc-troca{font:inherit;font-size:13.5px;padding:7px 9px;border:1px solid var(--line);border-radius:4px;background:var(--surface);color:var(--fg);max-width:100%}
 </style>
 </head>
 <body>
@@ -47,9 +48,25 @@ table{width:100%;border-collapse:collapse;font-size:14px} th{font:600 11.5px var
 <style>.ar-embed header.faixa{display:none}.ar-embed body{background:transparent}</style>
 <header class="faixa"><div class="in"><div style="display:flex;align-items:center;gap:18px"><img src="logo_escuro.png" alt="Alpha Radar"><div><h1>Simulador de estratégias</h1><p>Backtest com dados reais e taxas incluídas. Monte uma carteira de simulação e acompanhe.</p></div></div><a class="volta" href="app.html#funding">Voltar ao painel</a></div></header>
 <main>
-  <div class="abas" role="tablist"><button type="button" role="tab" aria-selected="true" data-aba="agora">O que fazer agora</button><button type="button" role="tab" aria-selected="false" data-aba="simular">Simular uma estratégia</button><button type="button" role="tab" aria-selected="false" data-aba="carteira">Carteira de simulação</button></div>
+  <div class="abas" role="tablist"><button type="button" role="tab" aria-selected="true" data-aba="montar">Montar carteira</button><button type="button" role="tab" aria-selected="false" data-aba="agora">O que fazer agora</button><button type="button" role="tab" aria-selected="false" data-aba="simular">Simular uma estratégia</button><button type="button" role="tab" aria-selected="false" data-aba="carteira">Carteira de simulação</button></div>
 
-  <section id="aba-agora">
+  <section id="aba-montar">
+    <div class="box"><h2>Monte uma carteira com vaults, pools, arbitragem e opções</h2><p class="sub">Defina o capital, o prazo e quanto vai para cada estratégia. O simulador escolhe o melhor mercado de cada uma com os dados de agora, mostra onde aplicar, o passo a passo e a rentabilidade líquida depois de todas as taxas. Você pode trocar o mercado de cada estratégia.</p>
+      <div class="campos" style="margin-top:14px;max-width:900px"><label>Capital total (US$)<input id="mc-cap" type="number" value="10000" step="any"></label><label>Prazo (dias)<input id="mc-dias" type="number" value="30" step="1"></label><label>Tamanho mínimo do mercado<select id="mc-min"><option value="1e6">US$ 1 milhão</option><option value="1e7" selected>US$ 10 milhões</option><option value="1e8">US$ 100 milhões</option></select></label><label>Taxa usada<select id="mc-base"><option value="media" selected>Média de 30 dias (mais estável)</option><option value="agora">Taxa de agora</option></select></label></div>
+      <h2 style="margin-top:18px;font-size:17px">Divisão do capital</h2>
+      <div class="acoes" style="margin-top:8px" id="mc-perfis"><button type="button" class="bt sec" data-p="cons">Conservador</button><button type="button" class="bt sec" data-p="equi">Equilibrado</button><button type="button" class="bt sec" data-p="arro">Arrojado</button></div>
+      <div class="campos" style="margin-top:12px;max-width:900px"><label>Vaults e empréstimos (%)<input id="mc-vault" type="number" min="0" max="100" step="5" value="40"></label><label>Pools de stablecoins (%)<input id="mc-pool" type="number" min="0" max="100" step="5" value="20"></label><label>Arbitragem de funding (%)<input id="mc-fund" type="number" min="0" max="100" step="5" value="30"></label><label>Venda de opções (%)<input id="mc-opc" type="number" min="0" max="100" step="5" value="10"></label></div>
+      <p class="status" id="mc-soma" style="margin-top:6px"></p>
+      <div class="acoes"><button type="button" class="bt" id="mc-montar">Montar carteira</button><button type="button" class="bt teal" id="mc-addall" disabled>Acompanhar na carteira de simulação</button></div><p class="status" id="mc-st" style="margin-top:8px"></p></div>
+    <div id="mc-res" hidden>
+      <div class="tiles" id="mc-tiles"></div>
+      <div class="box"><h2>Distribuição e resultado por estratégia</h2><p class="sub">Quanto vai para cada estratégia e quanto cada uma deve render no prazo, já líquido.</p><div class="barras" id="mc-barras" style="margin-top:10px"></div></div>
+      <div id="mc-pos" style="display:flex;flex-direction:column;gap:20px"></div>
+      <p class="nota">Projeção com as taxas de agora (ou a média de 30 dias) e custos típicos. Rendimentos mudam todos os dias e podem cair ou ficar negativos; use "Testar com o histórico" para ver como cada mercado se comportou. Conteúdo educacional, não é recomendação de investimento.</p>
+    </div>
+  </section>
+
+  <section id="aba-agora" hidden>
     <div class="box"><h2>Onde o seu capital rende mais agora, já descontando custos</h2><p class="sub">Informe quanto quer aplicar e por quanto tempo. O simulador compara todos os mercados das estratégias e mostra o resultado líquido esperado de cada um, com taxas, deslizamento e gás descontados. Clique em "Simular" para conferir com o histórico real antes de decidir.</p>
       <div class="campos" style="margin-top:14px;max-width:760px"><label>Capital (US$)<input id="r-cap" type="number" value="10000" step="any"></label><label>Prazo (dias)<input id="r-dias" type="number" value="30" step="1"></label><label>Tamanho mínimo do mercado<select id="r-min"><option value="1e6">US$ 1 milhão</option><option value="1e7" selected>US$ 10 milhões</option><option value="5e7">US$ 50 milhões</option><option value="1e8">US$ 100 milhões</option></select></label><label>Taxa usada<select id="r-base"><option value="media">Média dos últimos 30 dias (mais estável)</option><option value="atual">Taxa de agora</option></select></label></div>
       <div class="acoes"><button type="button" class="bt" id="r-calc">Comparar agora</button></div><p class="status" id="r-st" style="margin-top:8px"></p></div>
@@ -265,7 +282,7 @@ function csv(){ const r=S.cart||[]; const lin=[["estrategia","mercado","inicio",
 document.querySelectorAll("#tipos button").forEach(b=>b.addEventListener("click",()=>{ S.t=b.dataset.t; S.sel=null; document.querySelectorAll("#tipos button").forEach(o=>o.setAttribute("aria-pressed",o===b?"true":"false")); $("q").value=""; montaCampos(); desenhaEscolha(); $("add").disabled=true; preparaBusca(); }));
 $("q").addEventListener("input",mostraLista); $("q").addEventListener("focus",mostraLista); document.addEventListener("click",e=>{ if(!e.target.closest(".busca")) $("lista").hidden=true; });
 $("rodar").addEventListener("click",rodar); $("add").addEventListener("click",adicionar); $("recalc").addEventListener("click",cartDes); $("csv").addEventListener("click",csv);
-function abre(a){ document.querySelectorAll(".abas button").forEach(o=>o.setAttribute("aria-selected",o.dataset.aba===a?"true":"false")); ["agora","simular","carteira"].forEach(k=>$("aba-"+k).hidden=k!==a); if(a==="carteira") cartDes(); }
+function abre(a){ document.querySelectorAll(".abas button").forEach(o=>o.setAttribute("aria-selected",o.dataset.aba===a?"true":"false")); ["montar","agora","simular","carteira"].forEach(k=>$("aba-"+k).hidden=k!==a); if(a==="carteira") cartDes(); }
 document.querySelectorAll(".abas button").forEach(b=>b.addEventListener("click",()=>abre(b.dataset.aba)));
 /* ---------- Ranking: o que fazer agora ---------- */
 async function simularDe(t,item){ document.querySelector('#tipos button[data-t="'+t+'"]').click(); abre("simular"); await new Promise(r=>{ const iv=setInterval(()=>{ if(BUSCA.length&&!$("q").disabled){ clearInterval(iv); r(); } },300); }); const it=BUSCA.find(b=>b.id===item.id); S.sel=it||item; $("q").value=S.sel.t1; desenhaEscolha(); if(t==="funding"&&item.modo){ $("f-modo").value=item.modo; desenhaEscolha(); if(item.outra) $("f-outra").value=item.outra; $("f-taxaC").value=item.modo==="cruz"?VEN[item.outra.split("|")[0]].perp:SPOT_TAXA; } $("f-capital").value=$("r-cap").value; const d=Math.max(7,+$("r-dias").value||30); $("f-inicio").value=dataPadrao(d); rodar(); }
@@ -287,6 +304,76 @@ async function ranking(){ const C=+$("r-cap").value||10000, d=Math.max(1,+$("r-d
   }catch(e){ $("r-st").textContent="Não consegui comparar agora. Tente de novo em instantes."; }
   $("r-calc").disabled=false; }
 $("r-calc").addEventListener("click",ranking);
+/* ---------- Montar carteira ---------- */
+const MC={pos:[],perfis:{cons:{vault:60,pool:25,fund:15,opc:0},equi:{vault:40,pool:20,fund:30,opc:10},arro:{vault:20,pool:15,fund:40,opc:25}}};
+function mcSoma(){ const t=["vault","pool","fund","opc"].reduce((a,k)=>a+Math.max(0,+$("mc-"+k).value||0),0); $("mc-soma").textContent=t>100?"A soma passou de 100% ("+t+"%). Ajuste antes de montar.":"Alocado: "+t+"%. Em caixa (sem rendimento): "+(100-t)+"%."; $("mc-soma").style.color=t>100?"var(--bad)":""; return t; }
+["vault","pool","fund","opc"].forEach(k=>$("mc-"+k).addEventListener("input",mcSoma));
+document.querySelectorAll("#mc-perfis button").forEach(b=>b.addEventListener("click",()=>{ const p=MC.perfis[b.dataset.p]; Object.keys(p).forEach(k=>$("mc-"+k).value=p[k]); mcSoma(); }));
+function link(u,t){ return u?'<a href="'+u+'" target="_blank" rel="noopener">'+t+'</a>':t; }
+const VURL={binance:"https://www.binance.com/en/futures/",bybit:"https://www.bybit.com/trade/usdt/",okx:"https://www.okx.com/trade-swap/",bitget:"https://www.bitget.com/futures/usdt/",gate:"https://www.gate.com/futures/USDT/",hyper:"https://app.hyperliquid.xyz/trade/",dydx:"https://dydx.trade/trade/"};
+function mcPoolOpc(pools,C,d,mn,media,multi){ const taxa=p=>media&&p.apyMean30d!=null?p.apyMean30d:p.apy;
+  return pools.filter(p=>p.stablecoin&&p.tvlUsd>=mn&&(multi?(p.exposure==="multi"&&p.ilRisk==="no"):p.exposure!=="multi")).map(p=>{ const g=gasDe(p.chain)*(multi?3:2), sw=C*(multi?0.1:0.05)/100, ap=taxa(p), br=C*(Math.pow(1+ap/100,d/365)-1), liq=br-g-sw; return {t:multi?"pool":"vault",p,apr:ap/100,bruto:br,custos:g+sw,cd:[["Gás de entrada e saída ("+p.chain+")",g],["Troca para montar"+(multi?" e desmontar":"")+" a posição",sw]],liq}; }).sort((a,b)=>b.liq-a.liq).slice(0,8); }
+function mcFundOpc(fund,C,d,mn){ const por={}; fund.filter(x=>x.vol>=Math.min(mn,5e6)).forEach(x=>(por[x.b]=por[x.b]||[]).push(x)); const ops=[];
+  Object.keys(por).forEach(b=>{ const l=por[b].sort((a,c)=>c.apr-a.apr), alto=l[0], baixo=l[l.length-1]; const N=C/2;
+    if(alto.apr>0){ const tx=N*(VEN[alto.v].perp+SPOT_TAXA+2*SLIP)/100*2, custo=tx+4, br=N*alto.apr*d/365; ops.push({t:"funding",modo:"spot",b,alto,N,apr:alto.apr/2,bruto:br,custos:custo,cd:[["Taxas de abrir e fechar as duas pontas",tx],["Transferências e saques",4]],liq:br-custo}); }
+    if(l.length>1&&baixo.v!==alto.v){ const sp=alto.apr-baixo.apr, tx=N*(VEN[alto.v].perp+VEN[baixo.v].perp+2*SLIP)/100*2, custo=tx+4, br=N*sp*d/365; ops.push({t:"funding",modo:"cruz",b,alto,baixo,N,apr:sp/2,bruto:br,custos:custo,cd:[["Taxas de abrir e fechar as duas pontas",tx],["Transferências entre corretoras",4]],liq:br-custo}); } });
+  return ops.sort((a,b)=>b.liq-a.liq).slice(0,8); }
+function mcOpcOpc(opcs,C,d){ const alvo=Date.now()+Math.max(7,d)*DIA, ops=[];
+  ["BTC","ETH"].forEach(a=>{ const l=opcs.filter(o=>o.a===a&&o.tipo==="P"&&o.t>Date.now()+5*DIA); if(!l.length) return; const venc=l.map(o=>o.t).sort((x,y)=>Math.abs(x-alvo)-Math.abs(y-alvo))[0];
+    l.filter(o=>o.t===venc&&o.k<=o.und*0.95&&o.k>=o.und*0.75&&o.mark>0).forEach(o=>{ const mn=a==="BTC"?0.1:1, q=Math.floor(C/o.k/mn)*mn; if(q<mn) return; const dias=(o.t-Date.now())/DIA, pr=o.mark*o.und*q, fee=Math.min(o.und*q*0.0003,pr*0.125), liq=pr-fee, usado=q*o.k;
+      ops.push({t:"opcao",o,a,q,dias,bruto:pr,custos:fee,cd:[["Taxa da Deribit na venda",fee]],liq,usado,apr:liq/usado*365/dias,dist:1-o.k/o.und}); }); });
+  return ops.sort((a,b)=>Math.abs(a.dist-0.1)-Math.abs(b.dist-0.1)).slice(0,8); }
+function mcComo(x,C){ if(x.t==="vault"){ const p=x.p, u=p.url||"https://defillama.com/yields/pool/"+p.pool; return {onde:link(u,p.project.replace(/-/g," "))+" na rede "+p.chain+", mercado "+p.symbol+(p.poolMeta?" ("+p.poolMeta+")":""),
+      passos:["Compre "+US(C,0)+" em "+p.symbol.split("-")[0]+" numa corretora e saque para uma carteira própria na rede "+p.chain+".","Abra "+link(u,"o site do protocolo")+", conecte a carteira e escolha o mercado "+p.symbol+".","Deposite o valor. O rendimento cai sozinho e aparece no saldo depositado.","No fim do prazo, saque, troque se precisar e volte para a corretora."],
+      riscos:["Falha no contrato ou no oráculo do protocolo.","A stablecoin perder a paridade com o dólar.",p.apyReward?"Parte do rendimento vem em token de recompensa, que pode cair de preço.":"O rendimento é variável e pode cair a qualquer momento."]}; }
+    if(x.t==="pool"){ const p=x.p, u=p.url||"https://defillama.com/yields/pool/"+p.pool; return {onde:link(u,p.project.replace(/-/g," "))+" na rede "+p.chain+", pool "+p.symbol+(p.poolMeta?" ("+p.poolMeta+")":""),
+      passos:["Separe "+US(C,0)+" e divida entre os ativos do par "+p.symbol+" na proporção que o pool pede.","Envie para uma carteira própria na rede "+p.chain+".","Em "+link(u,"o site do protocolo")+", escolha o pool e adicione liquidez. Você recebe o comprovante (LP).","Se houver recompensas, faça o claim e, se quiser, deposite o LP no gauge para receber mais.","No fim do prazo, retire a liquidez e volte para a stablecoin de origem."],
+      riscos:["Uma das stablecoins do par perder a paridade: o pool fica com mais dela.","Falha no contrato do pool.",p.apyReward?"Parte do rendimento vem em token de recompensa, que oscila.":"As taxas recebidas dependem do volume de trocas."]}; }
+    if(x.t==="funding"){ const A=VEN[x.alto.v].n; if(x.modo==="spot") return {onde:link(VURL[x.alto.v],A)+": "+x.b+" à vista + perpétuo "+x.alto.sym,
+      passos:["Deposite "+US(C,0)+" em USDT na "+A+".","Compre "+US(x.N,0)+" em "+x.b+" no mercado à vista.","Use o restante como margem e abra uma venda (short) de "+US(x.N,0)+" em "+x.b+" no perpétuo, com alavancagem de 1x.","A cada "+x.alto.h+"h você recebe o funding enquanto ele estiver positivo ("+PC(x.alto.apr,1)+" ao ano agora).","Feche as duas pontas juntas quando o funding cair perto de zero ou no fim do prazo."],
+      riscos:["O funding virar negativo e você passar a pagar.","Alta forte do preço consumir a margem do short: acompanhe e reponha.","Risco de custódia da corretora."]};
+      const B=VEN[x.baixo.v].n; return {onde:link(VURL[x.alto.v],A)+" (vendido) e "+link(VURL[x.baixo.v],B)+" (comprado): perpétuo de "+x.b,
+      passos:["Deposite "+US(C/2,0)+" em USDT na "+A+" e "+US(C/2,0)+" na "+B+".","Na "+A+", abra uma venda (short) de "+US(x.N,0)+" no perpétuo de "+x.b+", 1x.","Na "+B+", abra uma compra (long) do mesmo tamanho no perpétuo de "+x.b+", 1x.","Você recebe a diferença de funding entre as duas ("+PC(x.alto.apr-x.baixo.apr,1)+" ao ano agora).","Feche as duas ao mesmo tempo quando a diferença sumir ou no fim do prazo."],
+      riscos:["A diferença de funding inverter.","Movimento forte liquidar uma das pontas: deixe margem sobrando e acompanhe.","Risco de custódia em duas corretoras."]}; }
+    const o=x.o; return {onde:link("https://www.deribit.com/options/"+o.a,"Deribit")+": venda de put "+o.nome,
+      passos:["Deposite o colateral na Deribit: o equivalente a "+US(x.usado,0)+" (preço de exercício × quantidade).","Venda "+nf(x.q,1)+" contrato(s) da put "+o.nome+" (exercício US$ "+nf(o.k,0)+", "+nf(x.dist*100,0)+"% abaixo do preço atual).","Você recebe o prêmio na hora: cerca de "+US(x.bruto,0)+".","Se no vencimento ("+new Date(o.t).toLocaleDateString("pt-BR")+") o "+o.a+" estiver acima de US$ "+nf(o.k,0)+", você fica com o prêmio inteiro.","Se estiver abaixo, você compra "+o.a+" a US$ "+nf(o.k,0)+" (preço de equilíbrio: US$ "+nf(o.k-o.mark*o.und,0)+")."],
+      riscos:["Queda forte do "+o.a+": a perda pode ser bem maior que o prêmio.","O colateral fica preso até o vencimento.","Quantidade mínima de "+(o.a==="BTC"?"0,1 contrato":"1 contrato")+"; nas opções inversas o colateral é o próprio "+o.a+"."]}; }
+function mcRot(x){ return x.t==="funding"?x.b+" · "+(x.modo==="spot"?"à vista + perpétuo na "+VEN[x.alto.v].n:VEN[x.alto.v].n+" × "+VEN[x.baixo.v].n):x.t==="opcao"?"Venda de put "+x.o.nome:x.p.symbol+(x.p.poolMeta?" ("+x.p.poolMeta+")":"")+" · "+x.p.project.replace(/-/g," ")+" · "+x.p.chain; }
+async function mcMontar(){ if(mcSoma()>100) return; const C=+$("mc-cap").value||10000, d=Math.max(1,+$("mc-dias").value||30), mn=+$("mc-min").value, media=$("mc-base").value==="media";
+  $("mc-st").textContent="Comparando todos os mercados…"; $("mc-montar").disabled=true;
+  try{ const al={vault:+$("mc-vault").value||0,pool:+$("mc-pool").value||0,fund:+$("mc-fund").value||0,opc:+$("mc-opc").value||0};
+    const [pools,fund,opcs]=await Promise.all([al.vault||al.pool?carregaPools():[],al.fund?carregaFunding():[],al.opc?carregaOpcoes():[]]);
+    MC.pos=[];
+    if(al.vault){ const c=C*al.vault/100; MC.pos.push({k:"vault",nome:"Vaults e empréstimos",C:c,ops:mcPoolOpc(pools,c,d,mn,media,false),i:0}); }
+    if(al.pool){ const c=C*al.pool/100; MC.pos.push({k:"pool",nome:"Pool de stablecoins",C:c,ops:mcPoolOpc(pools,c,d,mn,media,true),i:0}); }
+    if(al.fund){ const c=C*al.fund/100; MC.pos.push({k:"funding",nome:"Arbitragem de funding",C:c,ops:mcFundOpc(fund,c,d,mn),i:0}); }
+    if(al.opc){ const c=C*al.opc/100; MC.pos.push({k:"opcao",nome:"Venda de opções (put coberta)",C:c,ops:mcOpcOpc(opcs,c,d),i:0}); }
+    MC.C=C; MC.d=d; mcDes(); $("mc-st").textContent="Carteira montada com os dados de "+new Date().toLocaleTimeString("pt-BR")+". Troque o mercado de cada estratégia se quiser."; $("mc-addall").disabled=false;
+  }catch(e){ $("mc-st").textContent="Não consegui montar agora. Tente de novo em instantes."; }
+  $("mc-montar").disabled=false; }
+function mcDes(){ $("mc-res").hidden=false; const C=MC.C, d=MC.d; let br=0, cu=0, li=0, n=0; const box=$("mc-pos"); box.textContent="";
+  MC.pos.forEach((P,ix)=>{ const x=P.ops[P.i]; const s=el("div","box mc-pos");
+    if(!x){ s.innerHTML='<div class="mc-cab"><div><span class="rot">'+P.nome+'</span><h3>Nenhum mercado disponível agora</h3></div></div><p class="sub">'+(P.k==="opcao"?"O capital desta parte ("+US(P.C,0)+") não cobre o contrato mínimo da Deribit: 0,1 BTC ou 1 ETH, com colateral igual ao preço de exercício (hoje algo como US$ 7 mil em BTC ou US$ 2 mil em ETH). Aumente o percentual de opções ou o capital.":"Com o tamanho mínimo escolhido não há mercado que renda depois dos custos. Diminua o tamanho mínimo ou mova esse percentual para outra estratégia.")+'</p>'; box.appendChild(s); return; }
+    n++; br+=x.bruto; cu+=x.custos; li+=x.liq; const como=mcComo(x,P.C), dias=x.t==="opcao"?x.dias:d, aa=x.t==="opcao"?x.apr:x.liq/P.C*365/dias;
+    s.innerHTML='<div class="mc-cab"><div><span class="rot">'+P.nome+' · '+nf(P.C/C*100,0)+'% do capital</span><h3>'+mcRot(x)+'</h3><p class="sub">Onde aplicar: '+como.onde+'</p></div><label class="sub" style="display:flex;flex-direction:column;gap:4px;min-width:240px">Trocar mercado<select class="mc-troca"></select></label></div>'+
+      '<div class="mc-num"><div><span>Capital</span><b>'+US(P.C,0)+'</b></div><div><span>Taxa bruta ao ano</span><b>'+PC(x.apr,2)+'</b></div><div><span>Rendimento bruto em '+nf(dias,0)+' dias</span><b class="pos">'+US(x.bruto)+'</b></div><div><span>Custos</span><b class="neg">'+US(-x.custos)+'</b></div><div><span>Resultado líquido</span><b class="'+cl(x.liq)+'">'+US(x.liq)+'</b></div><div><span>Rentabilidade líquida ao ano</span><b class="'+cl(aa)+'">'+PC(aa,2)+'</b></div></div>'+
+      '<div class="mc-g"><div><h4>Como fazer</h4><ol>'+como.passos.map(t=>"<li>"+t+"</li>").join("")+'</ol></div><div><h4>Custos considerados</h4><ul>'+x.cd.map(c=>"<li>"+c[0]+": "+US(c[1])+"</li>").join("")+'</ul><h4 style="margin-top:14px">Riscos</h4><ul>'+como.riscos.map(t=>"<li>"+t+"</li>").join("")+'</ul></div></div>'+
+      '<div class="acoes"></div>';
+    const se=s.querySelector(".mc-troca"); P.ops.forEach((o,j)=>{ const op=el("option",null,mcRot(o)+" · "+PC(o.t==="opcao"?o.apr:o.liq/P.C*365/d,1)+" a.a. líquido"); op.value=j; se.appendChild(op); }); se.value=P.i; se.addEventListener("change",()=>{ P.i=+se.value; mcDes(); });
+    const ac=s.querySelector(".acoes");
+    if(x.t!=="opcao"){ const b=el("button","bt sec","Testar com o histórico"); b.type="button"; b.addEventListener("click",()=>{ $("r-cap").value=Math.round(P.C); $("r-dias").value=d; simularDe(x.t,x.t==="funding"?{id:x.alto.v+"|"+x.alto.sym,t1:x.b+" · "+VEN[x.alto.v].n,x:x.alto,modo:x.modo,outra:x.baixo?x.baixo.v+"|"+x.baixo.sym:""}:{id:x.p.pool,t1:mcRot(x),x:x.p}); }); ac.appendChild(b); }
+    box.appendChild(s); });
+  const caixa=C-MC.pos.reduce((a,P)=>a+P.C,0), ret=C?li/C:0;
+  tiles($("mc-tiles"),[["Capital",US(C,0),n+" estratégias"+(caixa>0?" · "+US(caixa,0)+" em caixa":"")],["Rendimento bruto",US(br),"em "+d+" dias","pos"],["Custos totais",US(-cu),"taxas, gás e deslizamento","neg"],["Resultado líquido",US(li),PC(ret)+" do capital",cl(li)],["Rentabilidade líquida ao ano",PC(ret*365/d,2),"da carteira inteira",cl(li)]]);
+  const bx=$("mc-barras"); bx.textContent=""; const mx=Math.max(1,...MC.pos.map(P=>P.C)); MC.pos.forEach(P=>{ const x=P.ops[P.i], r=el("div","bl"), em=el("em"), i=el("i"); r.appendChild(el("span",null,P.nome)); i.style.width=Math.max(2,P.C/mx*100)+"%"; em.appendChild(i); r.appendChild(em); r.appendChild(el("b",x?cl(x.liq):"",US(P.C,0)+" → "+(x?US(x.liq):"–"))); bx.appendChild(r); });
+  if(caixa>0){ const r=el("div","bl"), em=el("em"), i=el("i"); r.appendChild(el("span",null,"Caixa")); i.style.width=Math.max(2,caixa/mx*100)+"%"; i.style.background="var(--muted)"; em.appendChild(i); r.appendChild(em); r.appendChild(el("b",null,US(caixa,0)+" → US$ 0")); bx.appendChild(r); } }
+async function mcAddAll(){ const b=$("mc-addall"); b.disabled=true; let n=0; for(const P of MC.pos){ const x=P.ops[P.i]; if(!x||x.t==="opcao") continue; const base={capital:Math.round(P.C),inicio:hoje(),rot:mcRot(x)};
+    let p; if(x.t==="funding") p={...base,t:"funding",modo:x.modo,alav:1,taxaV:VEN[x.alto.v].perp,taxaC:x.modo==="cruz"?VEN[x.baixo.v].perp:SPOT_TAXA,slip:SLIP,fixo:4,outra:x.baixo?x.baixo.v+"|"+x.baixo.sym:"",x:{v:x.alto.v,sym:x.alto.sym,b:x.alto.b,h:x.alto.h,apr:x.alto.apr}};
+    else { const q=x.p; p={...base,t:x.t,swap:x.t==="pool"?0.1:0.05,gas:gasDe(q.chain),perf:0,saque:0,ilmanual:"",x:{pool:q.pool,symbol:q.symbol,project:q.project,chain:q.chain,ilRisk:q.ilRisk,stablecoin:q.stablecoin,apyReward:q.apyReward,url:q.url}}; }
+    await salva(p); n++; }
+  $("mc-st").textContent=n+" posições adicionadas à carteira de simulação a partir de hoje. Acompanhe o resultado real dia a dia na aba \"Carteira de simulação\"."+(MC.pos.some(P=>P.k==="opcao")?" A venda de opção é acompanhada até o vencimento pela própria Deribit.":""); }
+$("mc-montar").addEventListener("click",mcMontar); $("mc-addall").addEventListener("click",mcAddAll); mcSoma();
+
 montaCampos(); preparaBusca(); iniciaSB(); ranking();
 </script>
 </body>

@@ -127,6 +127,7 @@
       { k: "m-tradfi", ic: "⌂", t: "TradFi on-chain", a: "tradfi", pro: 1 },
       { k: "m-cal", ic: "▦", t: "Calendário", a: "mercado", s: "calendario" }] },
     { g: "Ferramentas", it: [
+      { k: "f-cart", ic: "◈", t: "Carteira de estratégias", a: "funding", e: "sim", ac: "f-renda" },
       { k: "f-sim", ic: "◫", t: "Simuladores", a: "ferramentas", s: "sim" },
       { k: "f-est", ic: "⇄", t: "Estratégias", a: "ferramentas", s: "est" },
       { k: "f-calc", ic: "∑", t: "Calculadoras", a: "ferramentas", s: "calc" },
@@ -169,8 +170,8 @@
   function espelhaOriginais() {
     NAV.forEach(function (g) { g.it.forEach(function (i) {
       if (!i.el) return; var o = original(i.a);
-      var esc_ = i.adm ? (!o || o.hidden) : (o ? o.hidden : false); if (ACX[i.k] && logado() && estado(i.k) === "some") esc_ = true; if (i.el.hidden !== esc_) i.el.hidden = esc_;
-      var ok = !(ACX[i.k] && logado() && estado(i.k) === "tranca"); var p = i.el.querySelector(".pro"); if (p && p.classList.contains("ok") !== ok) p.classList.toggle("ok", ok);
+      var esc_ = i.adm ? (!o || o.hidden) : (o ? o.hidden : false); var kk = i.ac || i.k; if (ACX[kk] && logado() && estado(kk) === "some") esc_ = true; if (i.el.hidden !== esc_) i.el.hidden = esc_;
+      var ok = !(ACX[kk] && logado() && estado(kk) === "tranca"); var p = i.el.querySelector(".pro"); if (p && p.classList.contains("ok") !== ok) p.classList.toggle("ok", ok);
     }); });
     var vis = areaVisivel();
     if (vis && (!ATUAL || ITENS[ATUAL].a !== vis)) { var k = null; NAV.some(function (g) { return g.it.some(function (i) { if (i.a === vis) { k = i.k; return true; } }); }); if (k) marca(k); }
@@ -183,7 +184,7 @@
     if (o) o.click(); else if (typeof window.area === "function") window.area(i.a);
     if (i.a === "mercado" && i.s) abreMj(i.s);
     if (i.a === "ferramentas") ferAba(i.s || "sim");
-    if (i.a === "funding" && extra && typeof window.estJanela === "function") window.estJanela(extra);
+    if (i.a === "funding" && (extra || i.e) && typeof window.estJanela === "function") window.estJanela(extra || i.e);
     marca(k);
     if (i.a === "inicio") dashDes();
     if (i.a === "premium") premDes();
@@ -735,7 +736,7 @@
     sim.appendChild(H("p", "sub", "Todas as ferramentas do Alpha Radar em um lugar. As marcadas como <b>Pro</b> fazem parte do Alpha Pro."));
     var cards = h("div", "pf-cards"); cards.style.marginTop = "14px"; sim.appendChild(cards);
     var FER = [
-      ["f-renda", "Simulador de estratégias", "Ranking do que rende agora em vaults, pools e arbitragem, com backtest de cada mercado usando o histórico real e todas as taxas.", 1, function () { ir("f-renda", "sim"); }],
+      ["f-renda", "Carteira de estratégias", "Monte uma carteira com vaults, pools, arbitragem e opções: onde aplicar, passo a passo, custos e rentabilidade líquida. Inclui ranking do que rende agora e backtest com histórico real.", 1, function () { ir("f-cart"); }],
       ["f-est", "Comparador de estratégias", "Compara DCA, aporte único, aporte em quedas, rebalanceamento e estratégia personalizada com o histórico de preço real.", 0, function () { ir("f-est"); }],
       ["f-est", "Simulador de DCA", "Quanto teria virado um aporte mensal fixo em Bitcoin, Ethereum ou outro ativo, com taxas incluídas.", 0, function () { ir("f-est"); }],
       ["f-calc", "Simulador de aportes", "Quanto aportar por mês para chegar a uma meta, dada uma taxa de rendimento e um prazo.", 0, function () { ir("f-calc"); setTimeout(function () { var e = $("cc-meta-box"); if (e) e.scrollIntoView({ behavior: "smooth" }); }, 100); }],
