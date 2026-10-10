@@ -264,6 +264,7 @@
   function livre(k) { return estado(k) === "livre"; }
   function aplicaPro() {
     if (!logado()) return;
+    var _p = plano(); if (_p == null || _p === "") return;
     ACESSO.forEach(function (a) {
       if (!a[3]) return; var e = document.querySelector(a[3]); if (!e) return;
       var st = estado(a[0]), pai = e.parentElement && e.parentElement.closest(".pro-on,.pro-some");
@@ -281,7 +282,7 @@
       } else if (!tranca && lk) { lk.remove(); [].forEach.call(e.children, function (c) { if (!c.closest(".bloq")) c.removeAttribute("inert"); }); }
       if (a[7]) { var bt = document.querySelector('#mabas button[data-mj="' + a[7] + '"]'); if (bt && bt.hidden !== some) bt.hidden = some; }
     });
-    if (!livre("f-renda")) { var f = $("sim-real"); if (f && f.getAttribute("src")) f.removeAttribute("src"); }
+    var fr = $("sim-real"); if (fr) { if (!livre("f-renda")) { if (fr.getAttribute("src")) fr.removeAttribute("src"); } else if (typeof fr._ativa === "function") fr._ativa(); }
     var k = ATUAL; if (k && ACX[k] && estado(k) === "some" && k !== "dash") ir("dash");
     var ms = ATUAL && ITENS[ATUAL] && ITENS[ATUAL].s; if (ms && ACX[ATUAL] && estado(ATUAL) === "some") ir("dash");
     espelhaOriginais(); ferBotoes(); if (typeof estLibera === "function") estLibera();
@@ -1037,10 +1038,32 @@
 
   /* ================= Simulador dentro de Renda e arbitragem ================= */
   function simReal() {
-    var f = $("sim-real"); if (!f) return; var painel = $("est-sim");
-    var ativa = function () { if (!painel || painel.hidden || !painel.getClientRects().length) return; if (!livre("f-renda")) { f.removeAttribute("src"); return; } if (!f.getAttribute("src")) f.setAttribute("src", f.dataset.src); };
+    var f = $("sim-real"); if (!f) return; var painel = $("est-sim"); var carregando = false, falhas = 0;
+    var aviso = function (txt) { var a = $("sim-real-aviso"); if (!a) { a = h("div", "box"); a.id = "sim-real-aviso"; a.style.cssText = "margin:12px;text-align:center"; f.parentNode.insertBefore(a, f); } a.hidden = !txt; a.textContent = ""; if (txt) { a.appendChild(h("p", null, txt)); var b = h("button", "bt-sec", "Tentar de novo"); b.type = "button"; b.style.marginTop = "8px"; b.addEventListener("click", function () { falhas = 0; f.removeAttribute("src"); ativa(); }); a.appendChild(b); } };
+    var cookie = function () { var SB = G("SB"); if (!SB) return Promise.resolve(false); return SB.auth.getSession().then(function (r) { var s = r.data && r.data.session; if (!s) return false; var ttl = Math.max(60, ((s.expires_at ? s.expires_at * 1000 : Date.now() + 3600e3) - Date.now()) / 1000 | 0); document.cookie = "ar_at=" + encodeURIComponent(s.access_token) + "; Path=/; Max-Age=" + ttl + "; Secure; SameSite=Lax"; return true; }).catch(function () { return false; }); };
+    var ativa = function () {
+      if (!painel || painel.hidden || !painel.getClientRects().length) return;
+      var p = plano(); if (p == null || p === "") return;
+      if (!livre("f-renda")) { f.removeAttribute("src"); return; }
+      if (f.getAttribute("src") || carregando) return;
+      carregando = true; f.style.visibility = "hidden";
+      cookie().then(function (ok) { carregando = false; if (!ok) { aviso("Sua sessão expirou. Entre de novo para usar o simulador."); return; } aviso(""); f.setAttribute("src", f.dataset.src + "?t=" + Date.now()); });
+    };
+    f._ativa = ativa;
     new MutationObserver(ativa).observe($("area-funding"), { attributes: true, subtree: true, attributeFilter: ["hidden"] });
-    f.addEventListener("load", function () { try { var d = f.contentDocument; if (!d || !d.body) return; var ajusta = function () { var hgt = Math.ceil(d.documentElement.scrollHeight) + 4; if (hgt > 200) f.style.height = hgt + "px"; }; ajusta(); new ResizeObserver(ajusta).observe(d.body); var t = document.documentElement.getAttribute("data-theme"); if (t) d.documentElement.setAttribute("data-theme", t); } catch (e) {} });
+    f.addEventListener("load", function () {
+      if (!f.getAttribute("src")) return;
+      var caminho = ""; try { caminho = f.contentWindow.location.pathname || ""; } catch (e) {}
+      if (!/simulador-estrategias/.test(caminho)) {
+        /* o servidor recusou (cookie vencido ou plano não confirmado): não mostra o site dentro do quadro */
+        f.removeAttribute("src"); f.style.visibility = "hidden";
+        if (falhas++ < 1) { setTimeout(ativa, 800); return; }
+        aviso("Não consegui confirmar a sua assinatura para abrir o simulador. Atualize a página ou entre de novo.");
+        return;
+      }
+      falhas = 0; f.style.visibility = "visible"; aviso("");
+      try { var d = f.contentDocument; if (!d || !d.body) return; var ajusta = function () { var hgt = Math.ceil(d.documentElement.scrollHeight) + 4; if (hgt > 200) f.style.height = hgt + "px"; }; ajusta(); new ResizeObserver(ajusta).observe(d.body); var t = document.documentElement.getAttribute("data-theme"); if (t) d.documentElement.setAttribute("data-theme", t); } catch (e) {}
+    });
     new MutationObserver(function () { try { var d = f.contentDocument, t = document.documentElement.getAttribute("data-theme"); if (d) { if (t) d.documentElement.setAttribute("data-theme", t); else d.documentElement.removeAttribute("data-theme"); } } catch (e) {} }).observe(document.documentElement, { attributes: true, attributeFilter: ["data-theme"] });
     ativa();
   }
