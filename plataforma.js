@@ -63,6 +63,7 @@
     ".pd-rb .lk{margin-top:auto;padding-top:6px;font-size:13px;background:none;border:0;color:var(--accent);cursor:pointer;text-align:left;padding-left:0}",
     ".pd-acontece{margin-top:16px;border-top:1px solid var(--line);padding-top:14px}.pd-acontece h3{margin:0 0 8px;font:600 16px var(--sans)}.pd-acontece ul{margin:0;padding-left:18px;display:flex;flex-direction:column;gap:6px;line-height:1.5}",
     ".pd-row3{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:20px}@media (max-width:1100px){.pd-row3{grid-template-columns:1fr}}",
+    ".pd-row2x{grid-template-columns:minmax(0,2fr) minmax(0,1fr)}@media (max-width:1100px){.pd-row2x{grid-template-columns:1fr}}",
     ".pd-ev{display:flex;gap:10px;align-items:baseline;padding:7px 0;border-top:1px solid var(--line);font-size:13.5px}.pd-ev:first-child{border-top:0}.pd-ev time{color:var(--muted);white-space:nowrap;min-width:92px;font-variant-numeric:tabular-nums}",
     ".pd-al{display:flex;gap:10px;padding:8px 0;border-top:1px solid var(--line);font-size:13.5px;line-height:1.45}.pd-al:first-child{border-top:0}.pd-al i{font-style:normal;flex:none}",
     ".pd-vazio{color:var(--muted);font-size:13.5px;margin:4px 0}",
@@ -385,7 +386,7 @@
     row.innerHTML = '<section class="box"><h2>Eventos importantes</h2><p class="sub">Próximos dados e decisões nos Estados Unidos e no Brasil.</p><div id="pd-eventos"><p class="pd-load">Carregando</p></div><p style="margin-top:auto;padding-top:8px"><button type="button" class="bt-sec" id="pd-ir-cal">Ver o calendário completo</button></p></section>' +
       '<section class="box" id="pd-alertas"><h2>Alertas do Radar</h2><p class="sub">Regras fixas aplicadas aos dados de agora. Servem para chamar atenção, não para indicar compra ou venda.</p><div id="pd-al-lista"><p class="pd-load">Verificando</p></div></section>' +
       '<section class="box"><h2>Sua carteira</h2><p class="sub">Evolução do seu patrimônio cadastrado.</p><div id="pd-cart"></div></section>';
-    var row2 = h("div", "pd-row3"); row2.style.gridTemplateColumns = "minmax(0,2fr) minmax(0,1fr)";
+    var row2 = h("div", "pd-row3 pd-row2x");
     row2.innerHTML = '<section class="box"><h2>Novas notícias</h2><ul class="nots" id="pd-nots"></ul><p style="margin-top:8px"><button type="button" class="bt-sec" id="pd-ir-nots">Ver todas as notícias</button></p></section>' +
       '<section class="box" id="pd-rels"><h2>Novos relatórios</h2><p class="sub">Alpha Reports e edições da newsletter.</p><div id="pd-rel-lista"><p class="pd-load">Carregando</p></div><p style="margin-top:8px"><button type="button" class="bt-sec" id="pd-ir-rel">Abrir o Alpha Report de hoje</button></p></section>';
     var sep = h("p", "pd-sec-tit", "Análise do dia e mercados");

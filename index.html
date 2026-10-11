@@ -2026,15 +2026,14 @@ function grafExtras(id,ch,fmt){ var alvo=$(id); if(!alvo||!ch) return; alvo.clas
     try{ ch.applyOptions({layout:{fontSize:9}}); }catch(e){ return; }
     requestAnimationFrame(function(){ requestAnimationFrame(function(){
       var shot; try{ shot=ch.takeScreenshot(); }catch(e){ restaura(); return; } restaura(); if(!shot) return;
-      var rsw=0; try{ rsw=Math.round((ch.priceScale("right").width()||0)*(window.devicePixelRatio||1)); }catch(e){}
-      var esc=escuro(), W=shot.width, baseM=Math.round(W*0.035), mL=baseM+rsw, mR=baseM, rodH=Math.round(W*0.05);
+      var esc=escuro(), W=shot.width, mL=Math.round(W*0.02), mR=mL, rodH=Math.round(W*0.05);
       var tituloFonte=Math.round(W*0.034), subFonte=Math.round(W*0.0175), subLinhaAlt=Math.round(subFonte*1.4);
       var sub=box?box.querySelector("p.sub"):null, subTxt=sub?sub.textContent.trim():"";
       var tmpCtx=document.createElement("canvas").getContext("2d"); tmpCtx.font="400 "+subFonte+"px 'IBM Plex Sans',sans-serif";
       var subLinhas=subTxt?quebraLinhas(tmpCtx,subTxt,W*0.62,2):[];
       var padTopo=Math.round(W*0.034), padEntre=Math.round(W*0.012), padBase=Math.round(W*0.022);
       var cabH=padTopo+tituloFonte+(subLinhas.length?padEntre+subLinhas.length*subLinhaAlt:0)+padBase;
-      var c=document.createElement("canvas"); c.width=mL+W+mR; var esp=Math.round(W*0.085); c.height=shot.height+cabH+esp+rodH+baseM; var g=c.getContext("2d"), tinta=esc?"#e4e9f0":"#0e1a2b", suave=esc?"#93a0b3":"#5a6678";
+      var c=document.createElement("canvas"); c.width=mL+W+mR; var esp=Math.round(W*0.02); c.height=shot.height+cabH+esp+rodH+mL; var g=c.getContext("2d"), tinta=esc?"#e4e9f0":"#0e1a2b", suave=esc?"#93a0b3":"#5a6678";
       g.fillStyle=esc?"#0d1726":"#ffffff"; g.fillRect(0,0,c.width,c.height); g.fillStyle="#0b2545"; g.fillRect(0,0,c.width,Math.max(6,Math.round(W*0.012))); g.fillStyle="#3ebed6"; g.fillRect(0,Math.max(6,Math.round(W*0.012)),Math.round(c.width*0.22),Math.max(2,Math.round(W*0.004)));
       g.fillStyle=tinta; g.textAlign="left"; g.textBaseline="alphabetic"; g.font="600 "+tituloFonte+"px 'Source Serif 4',Georgia,serif"; g.fillText(titulo,mL,padTopo+Math.round(tituloFonte*0.82),W*0.62);
       if(subLinhas.length){ g.fillStyle=suave; g.font="400 "+subFonte+"px 'IBM Plex Sans',sans-serif"; var subY=padTopo+tituloFonte+padEntre+Math.round(subFonte*0.82); subLinhas.forEach(function(ln){ g.fillText(ln,mL,subY); subY+=subLinhaAlt; }); }
