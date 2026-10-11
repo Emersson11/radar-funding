@@ -209,7 +209,7 @@ async function btPool(par,vault){ const x=par.x, C=par.capital, t0=Date.parse(pa
   let f=1; const serie=[]; pts.forEach(d=>{ f*=1+(+d.apy)/100/365; serie.push({time:dIso(Date.parse(d.timestamp)),value:C*(f-1)}); }); const bruto=C*(f-1);
   let il=0, ilTxt="sem perda impermanente (ativo único ou estável)"; const ilS={};
   if(!vault&&x.ilRisk!=="no"&&!x.stablecoin){ const toks=String(x.symbol).split(/[-\/ ]+/).map(precoTok).filter(Boolean); const vol=toks.filter(s=>!ESTAVEL.test(s));
-    if(F("ilmanual")!==""){ const r=1+FN("ilmanual")/100; il=C*(2*Math.sqrt(r)/(1+r)-1); ilTxt="variação informada de "+PC(r-1,1); }
+    if(par.ilmanual!=null&&par.ilmanual!==""){ const r=1+(+par.ilmanual||0)/100; il=C*(2*Math.sqrt(r)/(1+r)-1); ilTxt="variação informada de "+PC(r-1,1); }
     else if(vol.length){ try{ const k1=await klines(vol[0]+"USDT",t0); let k2=null; if(vol.length>1) k2=await klines(vol[1]+"USDT",t0); const p0=k1[0].o, m2={}; if(k2) k2.forEach(k=>m2[dIso(k.t)]=k.c); const q0=k2?k2[0].o:1;
         k1.forEach(k=>{ const q=k2?(m2[dIso(k.t)]||q0):1, r=(k.c/p0)/(q/q0); ilS[dIso(k.t)]=C*(2*Math.sqrt(r)/(1+r)-1); }); const ul=k1[k1.length-1], q1=k2?k2[k2.length-1].c:1, r=(ul.c/p0)/(q1/q0); il=C*(2*Math.sqrt(r)/(1+r)-1); ilTxt="preço relativo de "+vol.join("/")+" variou "+PC(r-1,1); }catch(e){ ilTxt="não encontrei o preço de "+vol.join("/")+"; informe a variação manualmente"; } } }
   const txs=vault?2:3, gas=par.gas*txs, troca=vault?C*par.swap/100:C*par.swap/100, perf=vault?bruto*(par.perf||0)/100:0, saque=vault?(C+bruto-perf)*(par.saque||0)/100:0, custos=gas+troca+perf+saque;

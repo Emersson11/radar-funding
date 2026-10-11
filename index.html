@@ -2074,7 +2074,7 @@ function defiDes(){ defiCarrega().then(function(d){ if(!d){ $("df-status").textC
 /* On-chain */
 function cm(ativos,met,n){ return gj("https://community-api.coinmetrics.io/v4/timeseries/asset-metrics?assets="+ativos+"&metrics="+met+"&frequency=1d&page_size="+n+"&paging_from=end").then(function(j){ return j&&j.data?j.data.slice().sort(function(a,b){return a.time<b.time?-1:1;}):null; }); }
 function bgBusca(){ var c=null; try{ c=JSON.parse(localStorage.getItem("oc_bg_v1")); }catch(e){} if(c&&Date.now()-c.t<21600000) return Promise.resolve(c);
-  var um=function(n,k){ return gj("https://bitcoin-data.com/v1/"+n).then(function(l){ return Array.isArray(l)?l.slice(-730).map(function(x){return [x.d,+x[k]];}).filter(function(x){return isFinite(x[1]);}):null; }); };
+  var um=function(n,k){ return gj("/api/btc-data?v="+n).then(function(l){ return Array.isArray(l)?l.slice(-730).map(function(x){return [x.d,+x[k]];}).filter(function(x){return isFinite(x[1]);}):null; }); };
   return Promise.all([um("sth-realized-price","sthRealizedPrice"),um("sopr","sopr"),um("nupl","nupl")]).then(function(r){ var n={t:Date.now(),sth:r[0]||(c&&c.sth)||null,sopr:r[1]||(c&&c.sopr)||null,nupl:r[2]||(c&&c.nupl)||null}; if(r[0]&&r[1]&&r[2]){ try{ localStorage.setItem("oc_bg_v1",JSON.stringify(n)); }catch(e){} } return n; }); }
 function ocCarrega(){ if(M2.oc&&Date.now()-M2.ocT<1800000) return Promise.resolve(M2.oc); if(M2.ocP) return M2.ocP;
   M2.ocP=Promise.all([cm("btc","AdrActCnt,TxCnt,CapMVRVCur,PriceUSD,SplyExNtv,FlowInExUSD,FlowOutExUSD",730),cm("eth","AdrActCnt,TxCnt",400),bgBusca().catch(function(){return null;}),defiCarrega().catch(function(){return null;})]).then(function(r){ M2.ocP=null;
@@ -2123,7 +2123,7 @@ function ocDes(){ ocCarrega().then(function(o){ var t=$("oc-tiles"); t.textConte
 /* ETFs */
 function etfCarrega(){ if(M2.etf&&Date.now()-M2.etfT<7200000) return Promise.resolve(M2.etf); if(M2.etfP) return M2.etfP;
   var cache=null; try{ cache=JSON.parse(localStorage.getItem("etf_btc_v1")); }catch(e){}
-  var busca=cache&&Date.now()-cache.t<7200000?Promise.resolve([cache.f,cache.tot]):Promise.all([gj("https://bitcoin-data.com/v1/etf-flow-btc"),gj("https://bitcoin-data.com/v1/etf-btc-total")]);
+  var busca=cache&&Date.now()-cache.t<7200000?Promise.resolve([cache.f,cache.tot]):Promise.all([gj("/api/btc-data?v=etf-flow-btc"),gj("/api/btc-data?v=etf-btc-total")]);
   M2.etfP=Promise.all([busca,histDe("BTCUSDT")]).then(function(r){ M2.etfP=null; var f=r[0][0], tot=r[0][1], px=r[1]||{};
     if(!Array.isArray(f)){ if(cache){ f=cache.f; tot=cache.tot; } else return M2.etf; } else if(!(cache&&Date.now()-cache.t<7200000)){ try{ localStorage.setItem("etf_btc_v1",JSON.stringify({t:Date.now(),f:f,tot:tot})); }catch(e){} }
     var ult=null, e={}; e.fl=f.map(function(x){ var p=ultimo(px,x.d)||ult||(PRECOS.BTC&&PRECOS.BTC.p)||0; ult=p; var b=+x.etfFlow; return {time:x.d,btc:b,usd:b*p,p:p}; });
