@@ -162,3 +162,36 @@ drop policy if exists "admin grava analises" on public.analises;
 create policy "admin grava analises" on public.analises for insert with check (public.eh_admin());
 drop policy if exists "admin apaga analises" on public.analises;
 create policy "admin apaga analises" on public.analises for delete using (public.eh_admin());
+
+-- ===== Newsletter: edições publicadas e quem pediu para receber por e-mail =====
+-- (as duas tabelas já existiam no banco; ficam documentadas aqui para o schema bater com o código)
+create table if not exists public.newsletters (
+  id bigint generated always as identity primary key,
+  titulo text not null check (char_length(titulo) between 1 and 140),
+  corpo text not null check (char_length(corpo) between 1 and 60000),
+  categoria text not null default 'geral' check (categoria in ('mercado','onchain','defi','etfs','educacao','aviso','geral')),
+  user_id uuid not null default auth.uid() references auth.users on delete cascade,
+  criado_em timestamptz not null default now()
+);
+alter table public.newsletters enable row level security;
+drop policy if exists "todos leem newsletters" on public.newsletters;
+create policy "todos leem newsletters" on public.newsletters for select using (true);
+drop policy if exists "admin grava newsletters" on public.newsletters;
+create policy "admin grava newsletters" on public.newsletters for insert with check (public.eh_admin());
+drop policy if exists "admin apaga newsletters" on public.newsletters;
+create policy "admin apaga newsletters" on public.newsletters for delete using (public.eh_admin());
+-- Coluna nova numa tabela que já existia antes da categoria ser criada:
+alter table public.newsletters add column if not exists categoria text not null default 'geral';
+
+create table if not exists public.news_inscritos (
+  user_id uuid primary key references auth.users on delete cascade,
+  email text not null,
+  criado_em timestamptz not null default now()
+);
+alter table public.news_inscritos enable row level security;
+drop policy if exists "admin le inscritos" on public.news_inscritos;
+create policy "admin le inscritos" on public.news_inscritos for select using (public.eh_admin() or auth.uid() = user_id);
+drop policy if exists "inscreve a si mesmo" on public.news_inscritos;
+create policy "inscreve a si mesmo" on public.news_inscritos for insert with check (auth.uid() = user_id);
+drop policy if exists "cancela a propria inscricao" on public.news_inscritos;
+create policy "cancela a propria inscricao" on public.news_inscritos for delete using (auth.uid() = user_id);
