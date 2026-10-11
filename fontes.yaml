@@ -92,6 +92,36 @@ fontes:
     intervalo_min: 60
     max_itens: 8
     tags: "noticias"
+  # Bloomberg: feeds RSS oficiais (manchetes e resumo; o texto completo é para assinantes).
+  # Se o servidor do GitHub levar 403, o coletor tenta pela ponte do site (functions/api/feed.js).
+  - nome: "Bloomberg Markets"
+    url: "https://feeds.bloomberg.com/markets/news.rss"
+    tipo: rss
+    ativo: sim
+    intervalo_min: 60
+    max_itens: 8
+    tags: "noticias"
+  - nome: "Bloomberg Economics"
+    url: "https://feeds.bloomberg.com/economics/news.rss"
+    tipo: rss
+    ativo: sim
+    intervalo_min: 60
+    max_itens: 8
+    tags: "noticias"
+  - nome: "Bloomberg Politics"
+    url: "https://feeds.bloomberg.com/politics/news.rss"
+    tipo: rss
+    ativo: sim
+    intervalo_min: 60
+    max_itens: 8
+    tags: "noticias"
+  - nome: "Bloomberg Crypto"
+    url: "https://feeds.bloomberg.com/crypto/news.rss"
+    tipo: rss
+    ativo: sim
+    intervalo_min: 60
+    max_itens: 8
+    tags: "noticias"
 
   # ---------------------------------------------------------------
   # TWITTER/X VIA TELEGRAM — os mesmos posts (e gráficos) publicados no
@@ -177,12 +207,13 @@ fontes:
     intervalo_min: 720
     max_itens: 3
     tags: "notícias e mercado"
+  # Robin J. Brooks (@robin_j_brooks no X): macro e câmbio. Lido pelo feed do Substack.
   - nome: "Robin Brooks"
-    url: "https://robinjbrooks.substack.com/"
-    tipo: auto
+    url: "https://robinjbrooks.substack.com/feed"
+    tipo: rss
     ativo: sim
-    intervalo_min: 720
-    max_itens: 3
+    intervalo_min: 180
+    max_itens: 5
     tags: "analista (substack)"
   - nome: "The Leah Files"
     url: "https://theleahfiles.substack.com/"

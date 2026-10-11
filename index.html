@@ -2081,7 +2081,7 @@ var LOGOS={}; ["claro","escuro"].forEach(function(k){ var i=new Image(); i.src="
 /* ---------- Posts para redes sociais (a partir da análise do dia) ---------- */
 var SOCIAL_ASSINANTES=false;
 function socialCfgCarrega(){ if(!SB) return; SB.from("config_site").select("valor").eq("chave","social_assinantes").then(function(r){ SOCIAL_ASSINANTES=!!(r.data&&r.data[0]&&r.data[0].valor==="1"); socialAplica(); }); }
-function socialAplica(){ var bx=$("in-social"); if(!bx) return; var mostra=PLANO==="admin"||(PLANO==="assinante"&&SOCIAL_ASSINANTES); bx.hidden=!mostra; var cb=$("in-social-pub"); if(cb) cb.checked=SOCIAL_ASSINANTES; var desc=$("in-social-desc"); if(desc) desc.textContent=PLANO==="admin"?"Gere imagens prontas, com a identidade visual do site, para postar no X.":"Gostou da nossa análise? Publique na sua rede social."; var at=$("in-social-atalho"); if(at) at.hidden=!mostra; }
+function socialAplica(){ var bx=$("in-social"); if(!bx) return; var mostra=PLANO==="admin"||(PLANO==="assinante"&&SOCIAL_ASSINANTES); bx.hidden=!mostra; var cb=$("in-social-pub"); if(cb) cb.checked=SOCIAL_ASSINANTES; var desc=$("in-social-desc"); if(desc) desc.textContent=PLANO==="admin"?"Gere imagens prontas, com a identidade visual do site, para postar no X.":"Gostou da nossa análise? Publique na sua rede social."; var at=$("in-social-atalho"); if(at){ at.hidden=!mostra; var top=$("pd-top"), alvo=top&&top.firstElementChild; if(alvo&&at.parentNode!==alvo){ at.style.marginTop="12px"; at.style.padding="9px 16px"; at.style.fontSize="14px"; alvo.appendChild(at); } } }
 document.addEventListener("DOMContentLoaded",function(){ var at=$("in-social-atalho"); if(at) at.addEventListener("click",function(){ var bx=$("in-social"); if(bx) bx.scrollIntoView({behavior:"smooth",block:"start"}); }); });
 document.addEventListener("DOMContentLoaded",function(){
   var cb=$("in-social-pub"); if(cb) cb.addEventListener("change",function(){ if(!SB||PLANO!=="admin") return; var v=cb.checked; SB.from("config_site").upsert({chave:"social_assinantes",valor:v?"1":"0"}).then(function(r){ if(r.error){ cb.checked=!v; return; } SOCIAL_ASSINANTES=v; socialAplica(); }); });
@@ -2090,21 +2090,34 @@ document.addEventListener("DOMContentLoaded",function(){
 function socialTexto(cap){ var txt="", chave=cap.querySelector(".txt>.chave"); if(chave) return chave.lastChild.textContent; var p=cap.querySelector(".txt>p:not(.note)"); return p?p.textContent:""; }
 function socialLegenda(titulo,txt){ var link=" alpharadarglobal.com.br", base=titulo+": "+txt, max=280-link.length; if(base.length>max) base=base.slice(0,max-1).replace(/\s+\S*$/,"")+"…"; return base+link; }
 function socialCanvas(titulo,fig){
-  var svgEl=fig.querySelector("svg"); if(!svgEl) return Promise.resolve(null);
-  var xml=new XMLSerializer().serializeToString(svgEl), W=1200, H=675;
+  var svgOrig=fig.querySelector("svg"); if(!svgOrig) return Promise.resolve(null);
+  var esc=escuro(), corTxt=esc?"#c9d3e0":"#2a3647", W=1200, H=675;
+  /* cópia do gráfico com cores explícitas: dentro de uma imagem, "currentColor" vira preto e some no tema escuro */
+  var svgEl=svgOrig.cloneNode(true), vb=(svgEl.getAttribute("viewBox")||"0 0 900 320").split(/\s+/).map(Number); svgEl.setAttribute("viewBox",(vb[0]-36)+" "+vb[1]+" "+(vb[2]+44)+" "+vb[3]); svgEl.setAttribute("color",corTxt); svgEl.setAttribute("font-family","'IBM Plex Sans',Arial,Helvetica,sans-serif");
+  [].forEach.call(svgEl.querySelectorAll("[fill='currentColor'],[stroke='currentColor']"),function(n){ if(n.getAttribute("fill")==="currentColor") n.setAttribute("fill",corTxt); if(n.getAttribute("stroke")==="currentColor") n.setAttribute("stroke",corTxt); });
+  [].forEach.call(svgEl.querySelectorAll("text"),function(n){ if(+n.getAttribute("font-size")<13) n.setAttribute("font-size","13"); if(n.getAttribute("opacity")===".65") n.setAttribute("opacity",".85"); });
+  var leg=[].map.call(fig.querySelectorAll(".leg span"),function(sp){ var i=sp.querySelector("i"); return {n:sp.textContent.trim(), c:i?i.style.background:corTxt}; }).filter(function(x){return x.n;});
+  var sub=fig.querySelector("figcaption small"), subTxt=sub?sub.textContent.trim():"";
+  var xml=new XMLSerializer().serializeToString(svgEl);
   return new Promise(function(resolve){
     var img=new Image();
     img.onload=function(){
-      var esc=escuro(), c=document.createElement("canvas"); c.width=W; c.height=H; var g=c.getContext("2d");
+      var c=document.createElement("canvas"); c.width=W; c.height=H; var g=c.getContext("2d");
       g.fillStyle=esc?"#0d1726":"#ffffff"; g.fillRect(0,0,W,H);
       g.fillStyle="#0b2545"; g.fillRect(0,0,W,86); g.fillStyle="#3ebed6"; g.fillRect(0,86,Math.round(W*0.22),4);
-      var lg=esc?LOGOS.escuro:LOGOS.claro; if(lg.complete&&lg.naturalWidth){ var lh=32, lw=lh*lg.naturalWidth/lg.naturalHeight; g.drawImage(lg,W-32-lw,27,lw,lh); }
+      var lg=LOGOS.escuro; if(lg&&lg.complete&&lg.naturalWidth){ var lh=32, lw=lh*lg.naturalWidth/lg.naturalHeight; g.drawImage(lg,W-32-lw,27,lw,lh); }
       g.fillStyle="#fff"; g.textAlign="left"; g.textBaseline="middle"; g.font="600 16px 'IBM Plex Sans',sans-serif"; g.fillText("ALPHA RADAR · MERCADO GLOBAL",32,43);
       var tmp=document.createElement("canvas").getContext("2d"); tmp.font="600 36px 'Source Serif 4',Georgia,serif";
       var linhas=quebraLinhas(tmp,titulo,W-64,2), ty=86+54;
       g.textBaseline="alphabetic"; g.fillStyle=esc?"#e4e9f0":"#0e1a2b"; g.font="600 36px 'Source Serif 4',Georgia,serif";
       linhas.forEach(function(l){ g.fillText(l,32,ty); ty+=42; });
-      var chY=ty+18, chH=H-chY-56, chW=W-64, ratio=Math.min(chW/img.width,chH/img.height), dw=img.width*ratio, dh=img.height*ratio;
+      if(subTxt){ g.fillStyle=esc?"#9fb0c6":"#5a6678"; g.font="400 17px 'IBM Plex Sans',sans-serif"; g.fillText(subTxt.length>120?subTxt.slice(0,117)+"…":subTxt,32,ty-8); ty+=24; }
+      if(leg.length){ /* legenda: o que é cada linha */
+        var lx=32, ly=ty+4; g.font="500 16px 'IBM Plex Sans',sans-serif"; g.textBaseline="middle";
+        leg.forEach(function(it){ var tw=g.measureText(it.n).width; if(lx+34+tw>W-32){ lx=32; ly+=28; }
+          g.fillStyle=it.c; g.fillRect(lx,ly-2,24,4); g.fillStyle=esc?"#dbe3ee":"#1c2838"; g.fillText(it.n,lx+32,ly); lx+=32+tw+28; });
+        g.textBaseline="alphabetic"; ty=ly+22; }
+      var chY=ty+6, chH=H-chY-56, chW=W-64, ratio=Math.min(chW/img.width,chH/img.height), dw=img.width*ratio, dh=img.height*ratio;
       g.drawImage(img,32+(chW-dw)/2,chY+(chH-dh)/2,dw,dh);
       g.strokeStyle=esc?"rgba(159,176,198,.25)":"rgba(14,26,43,.15)"; g.lineWidth=1; g.beginPath(); g.moveTo(32,H-44); g.lineTo(W-32,H-44); g.stroke();
       g.fillStyle=esc?"#93a0b3":"#5a6678"; g.font="400 14px 'IBM Plex Sans',sans-serif"; g.textBaseline="middle"; g.textAlign="left";
@@ -2144,6 +2157,8 @@ function socialGera(){
   });
 }
 
+/* Resumo das notícias escrito pela IA da Cloudflare (functions/api/resumo.js). Se não vier em 25 s, o relatório segue com o resumo automático. */
+function relResumo(){ return Promise.race([fetch("/api/resumo").then(function(r){ return r.ok?r.json():null; }).catch(function(){ return null; }), new Promise(function(ok){ setTimeout(function(){ ok(null); },25000); })]); }
 /* ---------- Relatório: copiar texto e baixar imagens (liberável para assinantes) ---------- */
 var REL_ASSINANTES=false;
 function relCfgCarrega(){ if(!SB) return; SB.from("config_site").select("valor").eq("chave","relatorio_assinantes").then(function(r){ REL_ASSINANTES=!!(r.data&&r.data[0]&&r.data[0].valor==="1"); relAplicaAcoes(); }); }
@@ -2363,8 +2378,8 @@ function svgLinhas(series){ var W=900,H=300,L=50,R=10,T=10,B=24, xs=[], lo=0, hi
   series.forEach(function(s){ o+='<polyline fill="none" stroke="'+s.c+'" stroke-width="'+(s.w||2)+'" stroke-linejoin="round" points="'+s.p.map(function(x){return X(x[0]).toFixed(1)+","+Y(x[1]).toFixed(1);}).join(" ")+'"/>'; }); return o+"</svg>"; }
 function relGera(){ var doc=$("rel-doc"); $("rel-status").textContent="Montando o relatório…";
   var CORES={carteira:"#1f4e8c",cdi:"#1a7f4b",btc:"#d98a00",eth:"#7a5cc2",ibov:"#c0392b",spx:"#9a6b00",usd:"#6b7686"};
-  return Promise.all([defiCarrega().catch(function(){return null;}),ocCarrega().catch(function(){return null;}),etfCarrega().catch(function(){return null;}),(typeof perfCalcula==="function"&&CART.lanc.length&&!CART.exemplo?perfCalcula():Promise.resolve(null)).catch(function(){return null;})]).then(function(r){
-    var d=r[0], o=r[1], e=r[2], p=r[3], agora=new Date(), sin=[]; doc.textContent="";
+  return Promise.all([defiCarrega().catch(function(){return null;}),ocCarrega().catch(function(){return null;}),etfCarrega().catch(function(){return null;}),(typeof perfCalcula==="function"&&CART.lanc.length&&!CART.exemplo?perfCalcula():Promise.resolve(null)).catch(function(){return null;}),relResumo()]).then(function(r){
+    var d=r[0], o=r[1], e=r[2], p=r[3], rs=r[4], agora=new Date(), sin=[]; doc.textContent="";
     var H=function(t){ doc.appendChild(el("h2",null,t)); }, H3=function(t){ doc.appendChild(el("h3",null,t)); }, P=function(t,c){ doc.appendChild(el("p",c||null,t)); }, UL=function(l){ var u=el("ul"); l.forEach(function(x){u.appendChild(el("li",null,x));}); doc.appendChild(u); },
       KP=function(l){ var k=el("div","rk"); l.forEach(function(x){ var c=el("div"); c.appendChild(el("span",null,x[0])); c.appendChild(el("b",null,x[1])); if(x[2]) c.appendChild(el("span",null,x[2])); k.appendChild(c); }); doc.appendChild(k); },
       TB=function(cab,linhas){ var sc=el("div","scroll"), t=el("table"), h=el("tr"); cab.forEach(function(c,i){h.appendChild(el("th",i===0?"txt":null,c));}); t.appendChild(h); linhas.forEach(function(l){ var tr=el("tr"); l.forEach(function(c,i){ var v=Array.isArray(c)?c:[c,""]; cel(tr,v[0],(i===0?"txt ":"")+v[1]); }); t.appendChild(tr); }); sc.appendChild(t); doc.appendChild(sc); },
@@ -2436,10 +2451,14 @@ function relGera(){ var doc=$("rel-doc"); $("rel-status").textContent="Montando 
       TB(["Quando","Importância","Evento"],ev.slice(0,10).map(function(x){return [new Date(x.data).toLocaleString("pt-BR",{weekday:"short",day:"2-digit",month:"2-digit",hour:"2-digit",minute:"2-digit"}),x.impacto==="High"?"★★★":"★★",x.titulo];})); }
     else P("Não há eventos importantes dos Estados Unidos até o fim da semana, o que reduz a chance de oscilações vindas da macroeconomia.");
 
-    H3("2.6 O que as notícias dizem");
-    if(nt.length){ var fontes={}, TEMAS=[["ETFs e investidores institucionais",/\bETFs?\b|BlackRock|institucion|institution|Grayscale|tesouraria|treasury/i],["Regulação e governos",/\bSEC\b|regula|lei\b|law|congress|senado|senate|governo|government|tribunal|court|CVM|banco central|Fed\b/i],["Bitcoin",/bitcoin|\bBTC\b/i],["Ethereum",/ethereum|\bETH\b/i],["Altcoins",/solana|\bXRP\b|ripple|cardano|dogecoin|\bBNB\b|altcoin/i],["DeFi e stablecoins",/defi|stablecoin|tether|USDC|\bUSDT\b|staking/i],["Ataques e segurança",/hack|exploit|ataque|golpe|scam|roub|stolen|invas/i],["Empresas e corretoras",/binance|coinbase|\bOKX\b|kraken|bybit|corretora|exchange|IPO/i]];
+    H3("2.6 Resumo dos principais acontecimentos");
+    if(rs&&rs.itens&&rs.itens.length){ rs.itens.forEach(function(x){ doc.appendChild(el("p","rtema",x.tema)); P(x.texto); }); P("Resumo escrito com apoio de inteligência artificial a partir de "+rs.manchetes+" manchetes de "+rs.fontes+" fontes das últimas 24 horas (portais de notícias, Bloomberg, analistas de macro e perfis acompanhados). Confira as manchetes originais abaixo.","note"); }
+    if(nt.length){ var fontes={}, TEMAS=[["Geopolítica",/guerra|\bwar\b|cessar-fogo|ceasefire|ucr[aâ]nia|ukrain|r[uú]ssia|russia|putin|zelensk|china|\bir[aã]\b|\biran\b|israel|gaza|otan|\bnato\b|san[cç][oõ]es|sanction/i],["Juros, inflação e economia",/\bFed\b|juros|rate cut|rate hike|infla[cç]|inflation|\bCPI\b|\bIPC\b|\bPCE\b|powell|payroll|desemprego|unemployment|\bPIB\b|\bGDP\b|recess|treasur|\byields?\b|d[oó]lar|dollar/i],["Política e tarifas dos EUA",/trump|casa branca|white house|tarifa|tariff|shutdown|congress|senado|senate/i],["ETFs e investidores institucionais",/\bETFs?\b|BlackRock|institucion|institution|Grayscale|tesouraria|treasury/i],["Regulação e governos",/\bSEC\b|regula|lei\b|law|congress|senado|senate|governo|government|tribunal|court|CVM|banco central|Fed\b/i],["Bitcoin",/bitcoin|\bBTC\b/i],["Ethereum",/ethereum|\bETH\b/i],["Altcoins",/solana|\bXRP\b|ripple|cardano|dogecoin|\bBNB\b|altcoin/i],["DeFi e stablecoins",/defi|stablecoin|tether|USDC|\bUSDT\b|staking/i],["Ataques e segurança",/hack|exploit|ataque|golpe|scam|roub|stolen|invas/i],["Empresas e corretoras",/binance|coinbase|\bOKX\b|kraken|bybit|corretora|exchange|IPO/i]];
       nt.forEach(function(n){ (fontes[n.fonte]=fontes[n.fonte]||[]).push(n); }); var nf=Object.keys(fontes).sort(), cont=TEMAS.map(function(T){ var l=nt.filter(function(n){return T[1].test(n.titulo);}); return {n:T[0],l:l}; }).filter(function(x){return x.l.length;}).sort(function(a,b){return b.l.length-a.l.length;});
-      P("Nas últimas 24 horas foram coletadas "+nt.length+" publicações em "+nf.length+" fontes"+(nf.length<=14?" ("+nf.join(", ")+")":", entre portais de notícias, casas de research, analistas, canais oficiais e perfis acompanhados pelo Telegram")+". "+(cont.length?"Os assuntos mais presentes foram "+cont.slice(0,3).map(function(x){return x.n.toLowerCase()+" ("+x.l.length+" manchetes)";}).join(", ")+". A seguir, as manchetes mais recentes de cada assunto.":""));
+      if(!(rs&&rs.itens&&rs.itens.length)){ /* sem a IA: resumo automático por assunto */
+        P("Nas últimas 24 horas foram coletadas "+nt.length+" publicações em "+nf.length+" fontes"+(nf.length<=14?" ("+nf.join(", ")+")":", entre portais de notícias, Bloomberg, casas de research, analistas de macro e perfis acompanhados pelo Telegram")+". "+(cont.length?"Os assuntos que mais pesaram foram "+cont.slice(0,3).map(function(x){return x.n.toLowerCase()+" ("+x.l.length+" manchetes)";}).join(", ")+".":""));
+        cont.slice(0,5).forEach(function(c){ var l=c.l.slice(0,2); doc.appendChild(el("p","rtema",c.n)); P("O assunto apareceu em "+c.l.length+" "+(c.l.length===1?"manchete":"manchetes")+". "+(l.length>1?"Os destaques foram “"+l[0].titulo+"” ("+l[0].fonte+") e “"+l[1].titulo+"” ("+l[1].fonte+").":"O destaque foi “"+l[0].titulo+"” ("+l[0].fonte+").")); }); }
+      H3("Manchetes por assunto");
       var usadas={}; cont.slice(0,5).forEach(function(c){ var l=c.l.filter(function(n){return !usadas[n.link];}).slice(0,3); if(!l.length) return; doc.appendChild(el("p","rtema",c.n)); UL(l.map(function(n){ usadas[n.link]=1; return n.titulo+" ("+n.fonte+")"; })); });
       var resto=nt.filter(function(n){return !usadas[n.link];}).slice(0,4); if(resto.length){ doc.appendChild(el("p","rtema","Outros destaques")); UL(resto.map(function(n){return n.titulo+" ("+n.fonte+")";})); } }
     else P("Nenhuma notícia foi coletada nas últimas 24 horas.");

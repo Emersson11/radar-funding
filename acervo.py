@@ -33,6 +33,37 @@ def sessao():
     return s
 
 
+PONTE = "https://alpharadarglobal.com.br/api/feed?u="
+_PONTE_HOST = re.compile(r"(^|\.)substack\.com$|^(www\.)?bloomberg\.com$|^feeds\.bloomberg\.com$", re.I)
+
+
+def baixa(s, url, timeout=PRAZO):
+    """GET normal; se o site bloquear o servidor do GitHub (403/429) e for Substack ou Bloomberg,
+    tenta de novo pela ponte do próprio site (functions/api/feed.js), que só aceita esses feeds."""
+    try:
+        r = s.get(url, timeout=timeout)
+        if r.status_code not in (401, 403, 429):
+            return r
+    except requests.RequestException:
+        r = None
+    if _PONTE_HOST.search(urlparse(url).netloc or ""):
+        try:
+            rp = s.get(PONTE + requests.utils.quote(url, safe=""), timeout=timeout)
+            if rp.status_code == 200:
+                return rp
+        except requests.RequestException:
+            pass
+    if r is None:
+        raise RuntimeError("sem resposta")
+    return r
+
+
+def feed_substack(url):
+    """Endereço do feed RSS de uma publicação do Substack (a página em si bloqueia robôs)."""
+    p = urlparse(url)
+    return f"https://{p.netloc}/feed" if p.netloc.endswith("substack.com") else None
+
+
 def permitido(url):
     p = urlparse(url)
     base = f"{p.scheme}://{p.netloc}"
@@ -168,10 +199,20 @@ def coleta(f, est):
     try:
         if not permitido(url):
             return [], {**e, "ultimo": AGORA, "situacao": "robots.txt não permite"}, "robots.txt não permite"
+        fs = feed_substack(url) if tipo in ("auto", "page") else None
+        if fs:
+            tipo, url = "rss", fs
+            if not permitido(url):
+                return [], {**e, "ultimo": AGORA, "situacao": "robots.txt não permite"}, "robots.txt não permite"
         if tipo == "telegram":
             brutos = telegram(s.get(url, timeout=PRAZO).text)[-maxi * 3:]
         elif tipo == "rss":
-            brutos = itens_feed(s.get(url, timeout=PRAZO).content)
+            r = baixa(s, url)
+            if r.status_code >= 400:
+                raise RuntimeError(f"feed respondeu {r.status_code}")
+            brutos = itens_feed(r.content)
+            if fs:
+                situacao = "ok (feed do Substack)"
         elif tipo in ("auto", "page"):
             feed = e.get("feed")
             if feed is None or (feed == "" and AGORA - e.get("feed_t", 0) > 7 * 86400):
@@ -199,7 +240,7 @@ def coleta(f, est):
                         brutos = []
                     situacao = "ok (página, sem feed)"
             if feed:
-                brutos = itens_feed(s.get(feed, timeout=PRAZO).content)
+                brutos = itens_feed(baixa(s, feed).content)
             elif not brutos and situacao == "ok":
                 r = s.get(url, timeout=PRAZO)
                 if r.status_code >= 400:
