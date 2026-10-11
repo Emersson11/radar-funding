@@ -1628,11 +1628,11 @@ function nuvem(op,l){
 }
 function nuvemFalhou(){ $("f-erro").textContent="Não consegui salvar na sua conta. Recarreguei os lançamentos; tente de novo."; $("f-erro").hidden=false; nuvemCarrega().catch(function(){}); }
 function sessao(s){
-  var antes=USUARIO, primeira=!sessao.ja; sessao.ja=true; document.body.classList.remove("aguarda");
+  var antes=USUARIO, primeira=!sessao.ja; sessao.ja=true;
   USUARIO=s?s.user:null; PLANO=null; PLANOREAL=null; if(USUARIO&&!antes&&!primeira) area(ABAINI);
-  if(!USUARIO){ cLer(); contaDesenha(); cDesenha(); comCarrega(); return; }
+  if(!USUARIO){ document.body.classList.remove("aguarda"); cLer(); contaDesenha(); cDesenha(); comCarrega(); return; }
   contaDesenha();
-  SB.from("perfis").select("plano").eq("user_id",USUARIO.id).maybeSingle().then(function(r){ PLANOREAL=r.data?r.data.plano:"gratis"; var vc="admin"; try{ vc=sessionStorage.getItem("ver_como")||"admin"; }catch(e){} PLANO=PLANOREAL==="admin"?vc:PLANOREAL; $("ver-como").value=PLANO; contaDesenha(); comCarrega(); });
+  SB.from("perfis").select("plano").eq("user_id",USUARIO.id).maybeSingle().then(function(r){ PLANOREAL=r.data?r.data.plano:"gratis"; var vc="admin"; try{ vc=sessionStorage.getItem("ver_como")||"admin"; }catch(e){} PLANO=PLANOREAL==="admin"?vc:PLANOREAL; $("ver-como").value=PLANO; contaDesenha(); comCarrega(); document.body.classList.remove("aguarda"); }).catch(function(){ document.body.classList.remove("aguarda"); });
   nuvemCarrega().catch(function(){ $("cart-status").textContent="Não consegui ler os lançamentos da sua conta."; });
 }
 /* ---------- Conteúdo: módulos, aulas, comentários, nome do site ---------- */
