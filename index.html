@@ -889,6 +889,10 @@ button.mini{font-size:12px;color:var(--muted)}
     <label>Volume mínimo em 24h<select id="vol"><option value="1e7">US$ 10 milhões</option><option value="5e7" selected>US$ 50 milhões</option><option value="2e8">US$ 200 milhões</option></select></label>
     <label>Ativo<input id="busca" type="text" placeholder="BTC, ETH…"></label>
   </section>
+  <section class="box" aria-label="Corretoras" style="padding:14px 18px;margin-top:14px">
+    <span class="rot">Corretoras</span>
+    <div id="vsel" role="group" aria-label="Filtrar por corretora" style="display:flex;flex-wrap:wrap;gap:8px 18px;margin-top:10px"></div>
+  </section>
 
   <div class="abas" role="tablist">
     <button type="button" role="tab" data-aba="cruz" aria-selected="true">Entre corretoras</button>
@@ -1027,6 +1031,8 @@ button.mini{font-size:12px;color:var(--muted)}
 var VENUES=[["binance","Binance"],["bybit","Bybit"],["okx","OKX"],["bitget","Bitget"],["gate","Gate"],["hyper","Hyperliquid"],["dydx","dYdX"]];
 var NOME={}; VENUES.forEach(function(v){NOME[v[0]]=v[1];});
 var DATA={}, STATUS={};
+var VSEL={}; VENUES.forEach(function(v){VSEL[v[0]]=true;});
+function vselInit(){ var box=$("vsel"); if(!box||box.children.length) return; VENUES.forEach(function(v){ var lb=document.createElement("label"); lb.style.cssText="display:inline-flex;align-items:center;gap:6px;font:500 13px var(--sans);color:var(--muted);cursor:pointer"; var cb=document.createElement("input"); cb.type="checkbox"; cb.checked=true; cb.addEventListener("change",function(){ VSEL[v[0]]=cb.checked; desenha(); }); lb.appendChild(cb); lb.appendChild(document.createTextNode(v[1])); box.appendChild(lb); }); }
 function $(id){return document.getElementById(id);}
 
 function getJ(url,opts){
@@ -1159,7 +1165,7 @@ function aviso(box,msg){box.appendChild(el("div","box sub",msg));}
 function desenha(){
   var cap=Math.max(0,+$("capital").value||0), L=+$("alav").value, minVol=+$("vol").value, q=$("busca").value.trim().toUpperCase();
   var porAtivo={}, total=0, prontos=0;
-  Object.keys(DATA).forEach(function(v){DATA[v].forEach(function(r,b){ if(r.vol<minVol) return; var h=hist(v,r); total++; if(h!=="p") prontos++; if(q&&b.indexOf(q)<0) return; (porAtivo[b]=porAtivo[b]||[]).push({v:v,r:r,h:h}); });});
+  Object.keys(DATA).forEach(function(v){ if(!VSEL[v]) return; DATA[v].forEach(function(r,b){ if(r.vol<minVol) return; var h=hist(v,r); total++; if(h!=="p") prontos++; if(q&&b.indexOf(q)<0) return; (porAtivo[b]=porAtivo[b]||[]).push({v:v,r:r,h:h}); });});
   var carregando=prontos<total;
   function ok(x){return hOk(x.h)&&x.h.a30!=null;}
 
@@ -1194,13 +1200,14 @@ function desenha(){
   if(!spot.length) aviso(box,carregando?"Carregando o histórico de 30 dias…":"Nenhum funding positivo agora e em 30 dias com esse filtro.");
 
   // Matriz
+  var VV=VENUES.filter(function(v){return VSEL[v[0]];});
   var th=$("th-matriz"); th.textContent=""; var trh=el("tr"); trh.appendChild(el("th",null,"Ativo"));
-  VENUES.forEach(function(v){trh.appendChild(el("th",null,v[1]));}); th.appendChild(trh);
+  VV.forEach(function(v){trh.appendChild(el("th",null,v[1]));}); th.appendChild(trh);
   var ativos=Object.keys(porAtivo).map(function(b){var t=0,mx=-Infinity,mn=Infinity; porAtivo[b].forEach(function(x){t+=x.r.vol; mx=Math.max(mx,x.r.apr); mn=Math.min(mn,x.r.apr);}); return {b:b,t:t,mx:mx,mn:mn};})
     .sort(function(a,c){return MORD==="maior"?c.mx-a.mx:MORD==="menor"?a.mn-c.mn:c.t-a.t;}).slice(0,60);
   var tb=$("tb-matriz"); tb.textContent="";
   ativos.forEach(function(a){var tr=el("tr"); cel(tr,a.b);
-    VENUES.forEach(function(v){var r=DATA[v[0]]&&DATA[v[0]].get(a.b); if(r&&r.vol>=minVol) cel(tr,pct(r.apr),cls(r.apr)); else cel(tr,"–","vazio");}); tb.appendChild(tr);});
+    VV.forEach(function(v){var r=DATA[v[0]]&&DATA[v[0]].get(a.b); if(r&&r.vol>=minVol) cel(tr,pct(r.apr),cls(r.apr)); else cel(tr,"–","vazio");}); tb.appendChild(tr);});
 }
 
 function dh(t){return new Date(t*1000).toLocaleString("pt-BR",{day:"2-digit",month:"2-digit",hour:"2-digit",minute:"2-digit"});}
@@ -1239,6 +1246,7 @@ var MORD="vol";
 document.querySelectorAll(".ordbot button").forEach(function(b){b.addEventListener("click",function(){ MORD=b.dataset.mord;
   document.querySelectorAll(".ordbot button").forEach(function(o){o.setAttribute("aria-pressed",o===b?"true":"false");}); desenha(); });});
 function iniciar(){
+  vselInit();
   if(window.SNAP){
     DATA={}; STATUS={};
     SNAP.rows.forEach(function(x){ if(!DATA[x[0]]) DATA[x[0]]=new Map(); DATA[x[0]].set(x[1],{b:x[1],apr:x[2]/100,vol:x[3]*1e6}); HIST[x[0]+"|"+x[1]]=(x[4]==null&&x[5]==null)?null:{a7:x[4]==null?null:x[4]/100,a30:x[5]==null?null:x[5]/100}; });
