@@ -1,0 +1,8 @@
+User-agent: *
+Allow: /
+Disallow: /app.html
+Disallow: /app
+Disallow: /simulador-estrategias
+Disallow: /premium/
+
+Sitemap: https://alpharadarglobal.com.br/sitemap.xml
