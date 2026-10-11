@@ -24,6 +24,10 @@ jobs:
         run: |
           curl -sfL "https://ogpwdonofbcubnwykiae.supabase.co/storage/v1/object/public/dados/acervo.json" -o acervo.json || curl -sfL "https://raw.githubusercontent.com/${GITHUB_REPOSITORY}/acervo/acervo.json" -o acervo.json || true
           curl -sfL "https://ogpwdonofbcubnwykiae.supabase.co/storage/v1/object/public/dados/acervo_estado.json" -o acervo_estado.json || curl -sfL "https://raw.githubusercontent.com/${GITHUB_REPOSITORY}/acervo/acervo_estado.json" -o acervo_estado.json || true
+      - name: Expirar assinaturas vencidas (Hotmart)
+        if: ${{ env.SB_KEY != '' }}
+        run: |
+          curl -s -X POST "https://ogpwdonofbcubnwykiae.supabase.co/rest/v1/rpc/expira_assinaturas" -H "Authorization: Bearer ${SB_KEY}" -H "apikey: ${SB_KEY}" -H "Content-Type: application/json" -d '{}' || true
       - run: python acervo.py
       - name: Publicar no ramo acervo (um unico commit, sem reconstruir o site)
         env:
