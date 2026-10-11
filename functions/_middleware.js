@@ -13,8 +13,18 @@ function volta(url, ancora) {
   return Response.redirect(new URL("/app.html" + ancora, url).toString(), 302);
 }
 
+// Todo acesso fica no domínio oficial: alpharadar-86n.pages.dev, os endereços de cada deploy
+// (xxxx.alpharadar-86n.pages.dev) e o www são redirecionados para alpharadarglobal.com.br,
+// mantendo o caminho e os parâmetros. 301 para GET/HEAD; 308 para POST (não vira GET).
+const DOMINIO = "alpharadarglobal.com.br";
+
 export async function onRequest(ctx) {
   const url = new URL(ctx.request.url);
+  if (url.hostname !== DOMINIO && url.hostname !== "localhost" && url.hostname !== "127.0.0.1") {
+    const destino = "https://" + DOMINIO + url.pathname + url.search;
+    const m = ctx.request.method;
+    return new Response(null, { status: m === "GET" || m === "HEAD" ? 301 : 308, headers: { Location: destino, "Cache-Control": "public, max-age=3600" } });
+  }
   if (!PROTEGIDOS.some((r) => r.test(url.pathname))) return ctx.next();
   const token = cookie(ctx.request, "ar_at");
   let anon = ctx.env.SUPABASE_ANON_KEY || "";
