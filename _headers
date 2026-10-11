@@ -14,6 +14,12 @@
   X-Robots-Tag: noindex, nofollow
 /config.js
   Cache-Control: no-cache
+/plataforma.js
+  Cache-Control: no-cache
+/extras.js
+  Cache-Control: no-cache
+/simulador-estrategias.html
+  Cache-Control: no-cache
 
 /guias/*
   Cache-Control: public, max-age=3600

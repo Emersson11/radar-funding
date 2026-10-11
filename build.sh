@@ -8,6 +8,8 @@ cp index.html dist/app.html
 if [ -f extras.js ]; then echo "<script src=\"extras.js?v=$(date +%s)\"></script>" >> dist/app.html; fi
 for f in simulador-estrategias.html extras.js plataforma.js config.js logo_claro.png logo_escuro.png aulas.json; do [ -f "$f" ] && cp "$f" dist/; done
 [ -f _headers ] && cp _headers dist/
+# Versão nos scripts para o navegador sempre pegar a publicação nova
+V=$(date +%s); sed -i "s#src=\"plataforma.js\"#src=\"plataforma.js?v=$V\"#" dist/app.html
 # SEO: título, descrição, metatags, ícones, robots, sitemap e guias
 if [ -d seo ]; then
   for f in robots.txt sitemap.xml site.webmanifest og-image.png favicon.ico favicon-32.png apple-touch-icon.png icon-192.png icon-512.png; do [ -f "seo/$f" ] && cp "seo/$f" dist/; done
