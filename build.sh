@@ -12,6 +12,7 @@ for f in simulador-estrategias.html extras.js plataforma.js config.js logo_claro
 V=$(date +%s); sed -i "s#src=\"plataforma.js\"#src=\"plataforma.js?v=$V\"#" dist/app.html
 # SEO: título, descrição, metatags, ícones, robots, sitemap e guias
 if [ -d seo ]; then
+  for f in seo/google*.html; do [ -f "$f" ] && cp "$f" dist/; done
   for f in robots.txt sitemap.xml site.webmanifest og-image.png favicon.ico favicon-32.png apple-touch-icon.png icon-192.png icon-512.png; do [ -f "seo/$f" ] && cp "seo/$f" dist/; done
   sed -i 's#<title>[^<]*</title>#<title>Alpha Radar | Inteligência de mercado cripto, ETFs, macro e DeFi</title>#' dist/index.html
   sed -i 's#<meta name="description" content="[^"]*">#<meta name="description" content="Painel em português com dados ao vivo de cripto, ETFs de Bitcoin, macro, on-chain e DeFi, simuladores com histórico real e Alpha Academy. Comece grátis.">#' dist/index.html
