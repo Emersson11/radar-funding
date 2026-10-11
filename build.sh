@@ -22,6 +22,8 @@ fi
 [ -d guias ] && cp -r guias dist/guias
 # Política de Privacidade e Termos de Uso
 [ -d legal ] && cp legal/*.html dist/
+# Programa de afiliados: página e kit de divulgação
+[ -d afiliados ] && cp -r afiliados dist/afiliados
 # Pixels de anúncio (Meta/Google), ligados pelo Admin > Anúncios; sem ID preenchido não carregam nada
 if [ -f pixel.js ]; then for p in dist/index.html dist/app.html dist/privacidade.html dist/termos.html; do [ -f "$p" ] && sed -i "s#</body>#<script src=\"/pixel.js?v=$V\" defer></script></body>#" "$p"; done; fi
 ls -la dist
