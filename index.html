@@ -2,7 +2,7 @@
 <html lang="pt-BR">
 <head>
 <meta charset="utf-8">
-<script>window.HASH0=location.hash;</script>
+<script>window.HASH0=location.hash;try{var _rf=(location.search.match(/[?&]ref=([a-f0-9]{8})\b/)||[])[1];if(_rf&&!localStorage.getItem("ar_ref"))localStorage.setItem("ar_ref",_rf);}catch(e){}</script>
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Alpha Radar</title>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Source+Serif+4:opsz,wght@8..60,500;8..60,600&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
@@ -1005,8 +1005,8 @@ button.mini{font-size:12px;color:var(--muted)}
   </div>
 </div>
 
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js"></script>
-<script src="https://unpkg.com/lightweight-charts@4.2.0/dist/lightweight-charts.standalone.production.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js" integrity="sha384-GFr3yTh5lJznCbZfpTtXnwboFsxqtTQoeTZCRHhE0579KrRmlCzen5AA8ohaB5ug" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/lightweight-charts@4.2.0/dist/lightweight-charts.standalone.production.js" integrity="sha384-OK7vELvjHdhUFi31JYioPIcRHTROLdcDa6ZsNWgvgLaKj+9JqhU0Ad8g4wz3CXjA" crossorigin="anonymous"></script>
 <script>document.write('<script src="config.js?v='+Math.floor(Date.now()/60000)+'"><\/script>');</script>
 <script>
 var VENUES=[["binance","Binance"],["bybit","Bybit"],["okx","OKX"],["bitget","Bitget"],["gate","Gate"],["hyper","Hyperliquid"],["dydx","dYdX"]];
@@ -1898,7 +1898,7 @@ function erroLogin(m){ m=m||""; return /Invalid login/i.test(m)?"E-mail ou senha
 $("conta-form").addEventListener("submit",function(ev){ ev.preventDefault(); var e=$("conta-campo").value.trim(), p=$("conta-senha").value; if(!e) return; if(!p){ contaMsg("Digite a senha, ou use \"Entrar por link no e-mail\".",true); return; }
   contaMsg("Entrando…"); SB.auth.signInWithPassword({email:e,password:p}).then(function(r){ if(r.error) contaMsg(erroLogin(r.error.message),true); else { contaMsg(""); $("conta-senha").value=""; } }); });
 $("conta-criar").addEventListener("click",function(){ var e=$("conta-campo").value.trim(), p=$("conta-senha").value; if(!e||p.length<6){ contaMsg("Para criar a conta, digite o e-mail e uma senha de 6 caracteres ou mais.",true); return; }
-  contaMsg("Criando a conta…"); SB.auth.signUp({email:e,password:p,options:{emailRedirectTo:location.origin+location.pathname}}).then(function(r){ if(r.error) contaMsg(erroLogin(r.error.message),true); else if(r.data&&r.data.session){ contaMsg(""); $("conta-senha").value=""; } else contaMsg("Conta criada. Enviei um e-mail de confirmação para "+e+"; abra o link neste aparelho."); }); });
+  contaMsg("Criando a conta…"); SB.auth.signUp({email:e,password:p,options:{emailRedirectTo:location.origin+location.pathname,data:(function(){ var r=null; try{ r=localStorage.getItem("ar_ref"); }catch(x){} return (r&&/^[a-f0-9]{8}$/.test(r))?{ref:r}:{}; })()}}).then(function(r){ if(r.error) contaMsg(erroLogin(r.error.message),true); else if(r.data&&r.data.session){ contaMsg(""); $("conta-senha").value=""; } else contaMsg("Conta criada. Enviei um e-mail de confirmação para "+e+"; abra o link neste aparelho."); }); });
 $("conta-link").addEventListener("click",function(){ var e=$("conta-campo").value.trim(); if(!e){ contaMsg("Digite o seu e-mail primeiro.",true); return; }
   contaMsg("Enviando…"); SB.auth.signInWithOtp({email:e,options:{emailRedirectTo:location.origin+location.pathname}}).then(function(r){
     if(r.error) contaMsg(erroLogin(r.error.message),true); else contaMsg("Enviei um link de acesso para "+e+". Abra o e-mail neste aparelho e clique no link."); }); });
@@ -2144,7 +2144,7 @@ function etfGraf(e){ var alvo=$("ef-graf"); if(!alvo||!window.LightweightCharts)
   ch.timeScale().fitContent(); M2.g["ef-graf"]=ch; grafExtras("ef-graf",ch,fmt);
   var tot=0; fl.forEach(function(x){tot+=x[k];}); $("ef-leg").textContent=(gr==="acum"?"Saldo acumulado":"Barras: saldo "+(gr==="dia"?"de cada dia":gr==="semana"?"de cada semana":"de cada mês"))+(comM?". Linha azul: média móvel de "+nm+" "+(gr==="dia"?"dias":gr==="semana"?"semanas":"meses"):"")+(comP?". Linha laranja: preço do Bitcoin (escala da esquerda)":"")+". Saldo do período mostrado: "+fmt(tot)+"."; }
 /* Relatório */
-function esc(t){ return String(t).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;"); }
+function esc(t){ return String(t==null?"":t).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;").replace(/'/g,"&#39;"); }
 function svgGraf(titulo,sub,series,fmt,dim){ var W=(dim&&dim.W)||900,H=(dim&&dim.H)||320,L=70,R=16,T=16,B=28, xs={}, lo=Infinity, hi=-Infinity, nd=function(t){ return typeof t==="number"?new Date(t*1000).toISOString().slice(0,10):String(t).slice(0,10); };
   series=series.filter(function(q){return q&&q.p&&q.p.length>1;}).map(function(q){ return {n:q.n,c:q.c,tipo:q.tipo,p:q.p.map(function(x){ return Array.isArray(x)?[nd(x[0]),+x[1]]:[nd(x.time),+(x.value!=null?x.value:x.usd)]; }).filter(function(x){return isFinite(x[1]);})}; }); if(!series.length) return null;
   series.forEach(function(q){ q.p.forEach(function(x){ xs[x[0]]=1; if(x[1]<lo) lo=x[1]; if(x[1]>hi) hi=x[1]; }); if(q.tipo==="barras"){ lo=Math.min(lo,0); hi=Math.max(hi,0); } }); var dx=Object.keys(xs).sort(), ix={}; dx.forEach(function(d,i){ix[d]=i;}); if(dx.length<2) return null; var pad=(hi-lo)*0.08||Math.abs(hi)*0.05||1; if(lo!==0) lo-=pad; hi+=pad;

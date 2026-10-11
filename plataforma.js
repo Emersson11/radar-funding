@@ -111,7 +111,11 @@
     ".pc-form{display:flex;flex-direction:column;gap:10px;max-width:420px}.pc-form input{font:inherit;padding:9px 10px;border:1px solid var(--line);border-radius:4px;background:var(--surface);color:var(--fg)}",
     ".pc-msg{font-size:13px;color:var(--muted);min-height:1.2em;margin:0}",
     ".pd-load{color:var(--muted);font-size:13.5px}.pd-load::before{content:'';display:inline-block;width:10px;height:10px;margin-right:8px;border:2px solid var(--line);border-top-color:var(--accent);border-radius:50%;animation:pdgira .8s linear infinite;vertical-align:-1px}@keyframes pdgira{to{transform:rotate(360deg)}}",
-    ".pd-ttl{cursor:help;border-bottom:1px dotted var(--muted)}"
+    ".pd-ttl{cursor:help;border-bottom:1px dotted var(--muted)}",
+    "@media (min-width:1100px){ header.faixa .in > div:has(> #titulo){max-width:calc(50% - min(150px, 9.5vw) - 36px);min-width:0} header.faixa #titulo{overflow-wrap:anywhere} }",
+    "#marca-topo{pointer-events:auto!important;cursor:pointer} #marca{cursor:pointer;user-select:none} #marca:hover{opacity:.85}",
+    "#perfil-bt{overflow:hidden;padding:0} #perfil-bt img.pf-foto{width:100%;height:100%;object-fit:cover;border-radius:50%;display:block}",
+    ".pc-foto{display:flex;align-items:center;gap:14px;margin:4px 0 14px} .pc-foto .pf-av{width:64px;height:64px;border-radius:50%;background:var(--band,#0c1a2e);color:#fff;display:flex;align-items:center;justify-content:center;font:600 24px var(--sans);overflow:hidden;flex:none} .pc-foto .pf-av img{width:100%;height:100%;object-fit:cover}"
   ].join("\n");
 
   /* ================= Navegação ================= */
@@ -180,7 +184,7 @@
   function areaVisivel() { var a = document.querySelector("main>.area:not([hidden])"); return a ? a.id.replace("area-", "") : null; }
   function marca(k) { ATUAL = k; NAV.forEach(function (g) { g.it.forEach(function (i) { var v = i.k === k ? "page" : "false"; if (i.el && i.el.getAttribute("aria-current") !== v) i.el.setAttribute("aria-current", v); }); }); var i = ITENS[k]; if (i && $("titulo")) $("titulo").textContent = i.k === "dash" ? "Dashboard" : i.t; }
   function ir(k, extra) {
-    var i = ITENS[k]; if (!i) return;
+    var i = ITENS[k]; if (!i) return; evento("pagina", k);
     var o = original(i.a);
     if (o) o.click(); else if (typeof window.area === "function") window.area(i.a);
     if (i.a === "mercado" && i.s) abreMj(i.s);
@@ -289,6 +293,40 @@
   }
   function cfgAcesso(v) { var o = {}; try { o = typeof v === "string" ? JSON.parse(v) : v || {}; } catch (e) { o = {}; } ACFG = o || {}; lsSet("ar_acesso_v2", ACFG); aplicaPro(); }
 
+  /* Registro de uso (alimenta as estatísticas do Admin; só o administrador lê) */
+  var EV = { ult: {}, fila: [], t: 0 };
+  function evento(tipo, alvo) {
+    try { if (!logado() || G("PLANOREAL") === "admin") return; var SB = G("SB"); if (!SB) return; var ch = tipo + ":" + (alvo || ""), ag = Date.now(); if (EV.ult[ch] && ag - EV.ult[ch] < 60000) return; EV.ult[ch] = ag;
+      EV.fila.push({ tipo: String(tipo).slice(0, 30), alvo: alvo == null ? null : String(alvo).slice(0, 60) }); clearTimeout(EV.t);
+      EV.t = setTimeout(function () { var l = EV.fila.splice(0, 20); if (l.length) SB.from("eventos").insert(l).then(function () {}, function () {}); }, 1500);
+    } catch (e) {}
+  }
+  window.alphaEvento = evento;
+  /* Administração: estatísticas */
+  function admStats() {
+    var pn = $("adm-painel"); if (!pn || G("PLANOREAL") !== "admin") return; var SB = G("SB"); if (!SB) return;
+    var box = $("adm-stats"); if (!box) { box = h("section", "box"); box.id = "adm-stats"; box.style.marginBottom = "20px"; pn.insertBefore(box, pn.firstChild); }
+    box.innerHTML = '<div style="display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap"><h2 style="margin:0">Estatísticas</h2><button type="button" class="bt-sec" id="adm-st-at">Atualizar</button></div><p class="sub">Carregando…</p>';
+    $("adm-st-at").addEventListener("click", admStats);
+    SB.rpc("admin_estatisticas").then(function (r) {
+      if (r.error || !r.data) { box.querySelector("p.sub").textContent = "Não consegui carregar as estatísticas (" + ((r.error && r.error.message) || "sem dados") + ")."; return; }
+      var d = r.data, pl = d.planos || {}, pago = (pl.assinante || 0), tot = d.usuarios || 0;
+      var nomeK = function (k) { var i = ITENS[k]; return i ? i.t : k; };
+      var kp = [["Usuários cadastrados", tot, (d.confirmados || 0) + " com e-mail confirmado"], ["Novos (24h / 7d / 30d)", (d.novos_24h || 0) + " / " + (d.novos_7d || 0) + " / " + (d.novos_30d || 0), "cadastros no período"], ["Ativos (24h / 7d / 30d)", (d.ativos_24h || 0) + " / " + (d.ativos_7d || 0) + " / " + (d.ativos_30d || 0), (d.login_7d || 0) + " fizeram login em 7 dias"], ["Assinantes Alpha Pro", pago, tot ? nf(pago / tot * 100, 1) + "% dos usuários" : "–"], ["Interações em 7 dias", d.eventos_7d || 0, "páginas abertas e ações"], ["Simulações salvas", d.simulacoes || 0, (d.carteiras || 0) + " usuários com carteira"], ["Suporte em aberto", d.suporte_abertos || 0, "mensagens aguardando resposta"], ["Newsletter", d.newsletter || 0, (d.comentarios || 0) + " comentários no total"]];
+      var html = '<div style="display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap"><h2 style="margin:0">Estatísticas</h2><button type="button" class="bt-sec" id="adm-st-at">Atualizar</button></div><p class="sub">Uso do site pelos usuários (o seu próprio uso como administrador não entra na conta). Atualizado agora.</p>' +
+        '<div class="tiles" style="margin-top:12px">' + kp.map(function (x) { return '<div><span class="rot">' + esc(x[0]) + '</span><strong>' + esc(String(x[1])) + '</strong><small>' + esc(x[2]) + '</small></div>'; }).join("") + '</div>';
+      var barras = function (tit, l, cor) { var mx = Math.max.apply(null, l.map(function (x) { return x.n; }).concat([1])); return '<div style="margin-top:18px"><p class="pd-sec-tit" style="margin:0 0 6px">' + esc(tit) + '</p><div style="display:flex;align-items:flex-end;gap:2px;height:90px;border-bottom:1px solid var(--line,#2a3546)">' + l.map(function (x) { return '<div title="' + esc(x.d.split("-").reverse().join("/") + ": " + x.n) + '" style="flex:1;min-width:3px;background:' + cor + ';height:' + Math.max(x.n ? 4 : 0, Math.round(x.n / mx * 100)) + '%;border-radius:2px 2px 0 0"></div>'; }).join("") + '</div><p class="sub" style="display:flex;justify-content:space-between;margin:4px 0 0"><span>' + esc((l[0] || { d: "" }).d.split("-").reverse().join("/")) + '</span><span>máx. ' + mx + ' por dia</span><span>hoje</span></p></div>'; };
+      html += '<div class="duas" style="gap:20px">' + '<div>' + barras("Cadastros por dia (30 dias)", d.cadastros_dia || [], "#3ebed6") + '</div><div>' + barras("Usuários ativos por dia (30 dias)", d.ativos_dia || [], "#1a7a4c") + '</div></div>';
+      var tab = function (tit, cab, linhas) { return '<div style="margin-top:18px"><p class="pd-sec-tit" style="margin:0 0 6px">' + esc(tit) + '</p><div class="pscroll"><table class="pt" style="font-size:13.5px"><thead><tr>' + cab.map(function (c, i) { return '<th' + (i ? "" : ' class="t"') + '>' + esc(c) + '</th>'; }).join("") + '</tr></thead><tbody>' + (linhas.length ? linhas.join("") : '<tr><td class="t" colspan="' + cab.length + '">Ainda sem dados. Os registros começam a partir de hoje.</td></tr>') + '</tbody></table></div></div>'; };
+      html += '<div class="duas" style="gap:20px"><div>' + tab("Páginas mais abertas (7 dias)", ["Página", "Aberturas", "Pessoas"], (d.paginas_7d || []).map(function (x) { return '<tr><td class="t">' + esc(nomeK(x.alvo)) + '</td><td>' + x.n + '</td><td>' + x.u + '</td></tr>'; })) + '</div><div>' +
+        tab("Ações mais usadas (7 dias)", ["Ação", "Vezes"], (d.acoes_7d || []).map(function (x) { return '<tr><td class="t">' + esc(x.acao) + '</td><td>' + x.n + '</td></tr>'; })) + '</div></div>';
+      var dt = function (v) { if (!v) return "–"; var q = new Date(v); return q.toLocaleDateString("pt-BR") + " " + q.toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" }); };
+      html += tab("Últimos cadastros", ["E-mail", "Plano", "Confirmado", "Cadastro", "Último acesso"], (d.ultimos || []).map(function (x) { return '<tr><td class="t">' + esc(x.email) + '</td><td>' + esc(x.plano) + '</td><td>' + (x.confirmado ? "sim" : "não") + '</td><td>' + dt(x.criado) + '</td><td>' + dt(x.ultimo) + '</td></tr>'; }));
+      html += '<div id="adm-st-ref"></div>';
+      box.innerHTML = html; $("adm-st-at").addEventListener("click", admStats);
+      SB.rpc("admin_indicacoes").then(function (q) { var el = $("adm-st-ref"); if (!el || q.error) return; el.innerHTML = tab("Quem mais indicou", ["Usuário", "Indicações", "Viraram assinantes"], (q.data || []).map(function (x) { return '<tr><td class="t">' + esc(x.email) + '</td><td>' + x.n + '</td><td>' + x.pagos + '</td></tr>'; })); });
+    });
+  }
   /* Administração: acesso por área e recurso */
   function admAcesso() {
     var pn = $("adm-painel"); if (!pn || plano() !== "admin" && G("PLANOREAL") !== "admin") return;
@@ -780,7 +818,9 @@
     { k: "lump", t: "Aporte único no início", cor: "#b8690a", free: 1 },
     { k: "queda", t: "Aporte em quedas", cor: "#6a4fb3" },
     { k: "rebal", t: "Rebalanceamento com caixa", cor: "#1a7a4c" },
-    { k: "pers", t: "Personalizada: DCA pela média de 200 dias", cor: "#c2417a" }
+    { k: "pers", t: "Personalizada: DCA pela média de 200 dias", cor: "#c2417a" },
+    { k: "opc_put", t: "Opções: venda de put coberta todo mês", cor: "#0f8a8a" },
+    { k: "opc_call", t: "Opções: compra + venda de call coberta", cor: "#8a5a0f" }
   ];
   function montaEst(sec) {
     sec.innerHTML = '<div class="box"><h2>Comparador de estratégias</h2><p class="sub">Todas as estratégias recebem o mesmo dinheiro: o valor inicial e o aporte de todo mês. Muda só quando e como cada uma compra. Preços diários reais da Binance, com a taxa de cada compra.</p>' +
@@ -794,8 +834,11 @@
       '<label>Peso do ativo no rebalanceamento (%)<input id="es-w" type="number" min="5" max="95" step="5" value="60" style="width:90px"></label>' +
       '<label>Rendimento do caixa (% ao ano)<input id="es-cx" type="number" min="0" max="30" step="0.5" value="4" style="width:90px"></label>' +
       '<label>Multiplicador abaixo da média<input id="es-mb" type="number" min="0" max="5" step="0.25" value="2" style="width:90px"></label>' +
-      '<label>Multiplicador acima da média<input id="es-ma" type="number" min="0" max="5" step="0.25" value="0.5" style="width:90px"></label></div>' +
-      '<p class="note">Aporte em quedas: o aporte do mês fica em caixa e só compra quando o preço cai a porcentagem escolhida abaixo da máxima de 30 dias. Rebalanceamento: todo mês a carteira volta ao peso escolhido entre o ativo e o caixa em stablecoin. Personalizada: compra o multiplicador do aporte quando o preço está abaixo da média de 200 dias e o outro multiplicador quando está acima; o que sobra fica em caixa rendendo.</p></details>' +
+      '<label>Multiplicador acima da média<input id="es-ma" type="number" min="0" max="5" step="0.25" value="0.5" style="width:90px"></label>' +
+      '<label>Opções: distância do preço de exercício (%)<input id="es-otm" type="number" min="0" max="50" step="1" value="10" style="width:90px"></label>' +
+      '<label>Opções: volatilidade implícita = histórica ×<input id="es-iv" type="number" min="0.5" max="2" step="0.05" value="1" style="width:90px"></label></div>' +
+      '<p class="note">Aporte em quedas: o aporte do mês fica em caixa e só compra quando o preço cai a porcentagem escolhida abaixo da máxima de 30 dias. Rebalanceamento: todo mês a carteira volta ao peso escolhido entre o ativo e o caixa em stablecoin. Personalizada: compra o multiplicador do aporte quando o preço está abaixo da média de 200 dias e o outro multiplicador quando está acima; o que sobra fica em caixa rendendo.</p>' +
+      '<p class="note"><b>Opções.</b> Put coberta: o dinheiro fica em stablecoin e, todo mês, você vende uma put de 30 dias com preço de exercício abaixo do preço atual (a distância escolhida), usando o caixa como garantia. Recebe o prêmio na hora; se no vencimento o preço estiver abaixo do exercício, paga a diferença. Call coberta: compra o ativo com os aportes e, todo mês, vende uma call de 30 dias acima do preço atual sobre o que tem. Recebe o prêmio, mas abre mão da alta acima do exercício. Os prêmios são teóricos (fórmula de Black-Scholes com a volatilidade dos últimos 30 dias vezes o fator escolhido) e a liquidação é em dinheiro, como na Deribit, com a taxa da Deribit (0,03% do valor, limitada a 12,5% do prêmio). Na prática, opções líquidas existem para Bitcoin e Ethereum; os prêmios reais variam e o contrato mínimo é 0,1 BTC ou 1 ETH.</p></details>' +
       '<p style="margin-top:12px"><button type="button" class="bt-pro" id="es-rodar">Comparar estratégias</button> <span class="sub" id="es-status"></span></p></div>' +
       '<div class="box" id="es-res" hidden style="margin-top:20px"><h2>Resultado</h2><p class="sub" id="es-resumo"></p><div class="pscroll" style="margin-top:10px"><table class="pt" id="es-tab"></table></div><div class="graf-p" id="es-graf" style="margin-top:16px"></div><p class="note">Linha tracejada: total investido até cada data. Simulações históricas não garantem resultados futuros e não são recomendação de investimento.</p></div>' +
       '<div id="fer-est-pro" style="min-height:10px"></div>';
@@ -821,24 +864,24 @@
     var ks = [].map.call(document.querySelectorAll("#es-chk input:checked"), function (i) { return i.value; });
     if (!ks.length) { $("es-status").textContent = "Escolha ao menos uma estratégia."; return; }
     if (!C0 && !A) { $("es-status").textContent = "Informe um valor inicial ou um aporte mensal."; return; }
-    $("es-status").textContent = "Buscando o histórico de preços…"; EST.feito = 1;
+    $("es-status").textContent = "Buscando o histórico de preços…"; EST.feito = 1; if (!silencioso) evento("comparar", ks.join(",").slice(0, 60));
     klines(par, dias).then(function (k) {
       if (!k || k.length < 60) { $("es-status").textContent = "Não consegui o histórico agora. Tente de novo em instantes."; return; }
       var desde = new Date(Date.now() - dias * 864e5).toISOString().slice(0, 10), i0 = 0; while (i0 < k.length && k[i0].d < desde) i0++;
-      var P = { q: (+$("es-q").value || 10) / 100, w: Math.min(0.95, Math.max(0.05, (+$("es-w").value || 60) / 100)), cx: (+$("es-cx").value || 0) / 100, mb: +$("es-mb").value, ma: +$("es-ma").value };
+      var P = { q: (+$("es-q").value || 10) / 100, w: Math.min(0.95, Math.max(0.05, (+$("es-w").value || 60) / 100)), cx: (+$("es-cx").value || 0) / 100, mb: +$("es-mb").value, ma: +$("es-ma").value, otm: Math.max(0, Math.min(0.5, (+($("es-otm") || {}).value || 0) / 100)), iv: Math.max(0.5, Math.min(2, +($("es-iv") || {}).value || 1)) };
       var res = ks.map(function (s) { return estSim(s, k, i0, C0, A, fee, P); });
       estMostra(res, k, i0, par);
       $("es-status").textContent = "Período de " + k[i0].d.split("-").reverse().join("/") + " a " + k[k.length - 1].d.split("-").reverse().join("/") + ".";
     });
   }
   function estSim(s, k, i0, C0, A, fee, P) {
-    var u = 0, cash = 0, inv = 0, compras = 0, gasto = 0, curva = [], pico = 0, dd = 0, ultMes = null, dCx = Math.pow(1 + P.cx, 1 / 365) - 1;
+    var u = 0, cash = 0, inv = 0, compras = 0, gasto = 0, curva = [], pico = 0, dd = 0, ultMes = null, dCx = Math.pow(1 + P.cx, 1 / 365) - 1, op = null, opc = { premios: 0, pago: 0, vendas: 0, exerc: 0 };
     var compra = function (v, p) { if (v <= 0) return; v = Math.min(v, cash); if (v <= 0.0001) return; cash -= v; u += v * (1 - fee) / p; gasto += v; compras++; };
     var totalMeses = 0; for (var j = i0; j < k.length; j++) { var m = k[j].d.slice(0, 7); if (m !== ultMes) { totalMeses++; ultMes = m; } } ultMes = null;
     var mesN = 0;
     for (var i = i0; i < k.length; i++) {
       var p = k[i].c, mes = k[i].d.slice(0, 7), novoMes = mes !== ultMes; cash *= 1 + dCx;
-      if (i === i0) { var aporteIni = s === "lump" ? C0 + A * totalMeses : C0; cash += aporteIni; inv += aporteIni; if (s === "rebal") compra(cash * P.w, p); else if (s === "queda" || s === "pers") compra(C0, p); else compra(cash, p); }
+      if (i === i0) { var aporteIni = s === "lump" ? C0 + A * totalMeses : C0; cash += aporteIni; inv += aporteIni; if (s === "rebal") compra(cash * P.w, p); else if (s === "queda" || s === "pers") compra(C0, p); else if (s !== "opc_put") compra(cash, p); }
       if (novoMes) {
         if (i !== i0 && s !== "lump") { cash += A; inv += A; }
         if (i === i0 && s !== "lump") { cash += A; inv += A; }
@@ -846,14 +889,25 @@
         if (s === "dca") compra(A, p);
         if (s === "rebal") { var tot = cash + u * p, alvo = tot * P.w, atual = u * p; if (atual < alvo) compra(alvo - atual, p); else if (atual > alvo) { var vend = (atual - alvo) / p; u -= vend; cash += vend * p * (1 - fee); } }
         if (s === "pers") { var j0 = Math.max(0, i - 199), sm = 0; for (var z = j0; z <= i; z++) sm += k[z].c; var mm = sm / (i - j0 + 1); compra(A * (p < mm ? P.mb : P.ma), p); }
+        if (s === "opc_put" || s === "opc_call") {
+          if (op) { var pag = Math.max(0, op.call ? p - op.K : op.K - p) * op.q; cash -= pag; if (pag > 0) { opc.exerc++; opc.pago += pag; } op = null; if (cash < 0 && u > 0) { var vd = Math.min(u, -cash / (p * (1 - fee))); u -= vd; cash += vd * p * (1 - fee); } }
+          if (s === "opc_call") compra(cash, p);
+          var vol = volHist(k, i) * P.iv, dVenc = Math.max(1, diasAte(k, i)), T = dVenc / 365;
+          var K = s === "opc_put" ? p * (1 - P.otm) : p * (1 + P.otm), q = s === "opc_put" ? Math.max(0, cash) / K : u;
+          if (q > 0 && vol > 0) { var pr = bsPreco(p, K, T, vol, s === "opc_call") * q, tx = Math.min(0.0003 * p * q, 0.125 * pr); cash += pr - tx; opc.premios += pr - tx; opc.vendas++; op = { K: K, q: q, call: s === "opc_call", fim: i + dVenc, v: vol }; }
+        }
         ultMes = mes;
       }
       if (s === "queda" && cash > 1) { var mx = 0; for (var y = Math.max(0, i - 29); y <= i; y++) mx = Math.max(mx, k[y].c); if (p <= mx * (1 - P.q)) compra(cash, p); }
-      var val = cash + u * p; curva.push({ time: k[i].d, value: val, inv: inv }); if (val > pico) pico = val; if (pico > 0) dd = Math.max(dd, 1 - val / pico);
+      var val = cash + u * p; if (op) val -= bsPreco(p, op.K, Math.max(0, op.fim - i) / 365, op.v, op.call) * op.q; curva.push({ time: k[i].d, value: val, inv: inv }); if (val > pico) pico = val; if (pico > 0) dd = Math.max(dd, 1 - val / pico);
     }
     var fim = curva[curva.length - 1];
-    return { k: s, final: fim.value, inv: inv, lucro: fim.value - inv, ret: inv ? fim.value / inv - 1 : 0, dd: dd, compras: compras, pm: u > 0 ? (gasto * (1 - fee)) / u : null, caixa: cash, curva: curva };
+    return { k: s, final: fim.value, inv: inv, lucro: fim.value - inv, ret: inv ? fim.value / inv - 1 : 0, dd: dd, compras: compras, pm: u > 0 ? (gasto * (1 - fee)) / u : null, caixa: cash, curva: curva, opc: (s === "opc_put" || s === "opc_call") ? opc : null };
   }
+  function ncdf(x) { var t = 1 / (1 + 0.2316419 * Math.abs(x)), d = 0.3989423 * Math.exp(-x * x / 2), p = d * t * (0.3193815 + t * (-0.3565638 + t * (1.781478 + t * (-1.821256 + t * 1.330274)))); return x > 0 ? 1 - p : p; }
+  function bsPreco(S, K, T, v, call) { if (!(v > 0) || !(T > 0)) return Math.max(0, call ? S - K : K - S); var sq = v * Math.sqrt(T), d1 = (Math.log(S / K) + 0.5 * v * v * T) / sq, d2 = d1 - sq; return call ? S * ncdf(d1) - K * ncdf(d2) : K * ncdf(-d2) - S * ncdf(-d1); }
+  function volHist(k, i) { var j0 = Math.max(1, i - 30), r = []; for (var j = j0; j <= i; j++) r.push(Math.log(k[j].c / k[j - 1].c)); if (r.length < 5) return 0.6; var m = r.reduce(function (a, b) { return a + b; }, 0) / r.length, v = r.reduce(function (a, b) { return a + (b - m) * (b - m); }, 0) / (r.length - 1); return Math.sqrt(v * 365); }
+  function diasAte(k, i) { var m = k[i].d.slice(0, 7); for (var j = i + 1; j < k.length; j++) if (k[j].d.slice(0, 7) !== m) return j - i; return 30; }
   function estMostra(res, k, i0, par) {
     $("es-res").hidden = false; var t = $("es-tab"), nome = function (s) { return ESTS.filter(function (e) { return e.k === s; })[0]; };
     var melhor = res.slice().sort(function (a, b) { return b.final - a.final; })[0];
@@ -864,6 +918,9 @@
     res.forEach(function (r) { var e = nome(r.k), tr = h("tr"); tr.style.cursor = "default"; var td = h("td", "t"); td.innerHTML = '<span style="display:inline-block;width:10px;height:10px;border-radius:2px;margin-right:7px;background:' + e.cor + '"></span>' + esc(e.t) + (r === melhor ? ' <span class="pd-tag pos">maior saldo</span>' : ""); tr.appendChild(td);
       [[din(r.inv)], [din(r.final)], [din(r.lucro), cl(r.lucro)], [pc(r.ret), cl(r.ret)], ["−" + nf(r.dd * 100, 1) + "%"], [String(r.compras)], [r.pm && r.k !== "rebal" ? preco(r.pm) : "–"], [din(r.caixa)]].forEach(function (c) { tr.appendChild(h("td", c[1] || "", c[0])); }); tb.appendChild(tr); });
     t.appendChild(tb);
+    var shb = $("es-share"); if (!shb) { shb = h("button", "bt-sec", "Compartilhar resultado"); shb.type = "button"; shb.id = "es-share"; shb.style.marginTop = "10px"; $("es-resumo").parentNode.insertBefore(shb, $("es-resumo").nextSibling); shb.addEventListener("click", function () { compartilhar(EST.txt || "Simulei estratégias no Alpha Radar."); }); }
+    var nm = { BTCUSDT: "Bitcoin", ETHUSDT: "Ethereum", SOLUSDT: "Solana", BNBUSDT: "BNB", XRPUSDT: "XRP", ADAUSDT: "Cardano", LINKUSDT: "Chainlink" }[par] || par; EST.txt = "Simulei no Alpha Radar: em " + nm + ", com " + din(melhor.inv) + " investidos, a melhor estratégia foi \"" + nome(melhor.k).t + "\" (" + pc(melhor.ret) + "). Simulação com histórico real, não é recomendação.";
+    var ops = res.filter(function (r) { return r.opc; }); if (ops.length) { var on = h("p", "note"); on.id = "es-opc-res"; on.textContent = ops.map(function (r) { return nome(r.k).t + ": " + r.opc.vendas + " opções vendidas, " + din(r.opc.premios) + " em prêmios líquidos, " + r.opc.exerc + " vencimentos com pagamento (" + din(r.opc.pago) + " pagos)."; }).join(" "); var ol = $("es-opc-res"); if (ol) ol.remove(); t.parentNode.parentNode.insertBefore(on, t.parentNode.nextSibling); } else { var ol2 = $("es-opc-res"); if (ol2) ol2.remove(); }
     var alvo = $("es-graf"); alvo.textContent = ""; if (!window.LightweightCharts) return;
     var dk = typeof window.escuro === "function" && window.escuro();
     var ch = window.LightweightCharts.createChart(alvo, { height: 320, layout: { background: { color: "transparent" }, textColor: dk ? "#93a0b3" : "#5a6678" }, grid: { vertLines: { visible: false }, horzLines: { color: dk ? "#243042" : "#e6e9ee" } }, rightPriceScale: { borderVisible: false }, timeScale: { borderVisible: false }, localization: { priceFormatter: function (v) { return "US$ " + nf(v, 0); } } });
@@ -1003,20 +1060,72 @@
   }
   function cfgPremium() { var SB = G("SB"); if (!SB) return; SB.from("config_site").select("chave,valor").in("chave", ["link_pagamento_anual", "preco_anual", "preco", "acesso_v2"]).then(function (r) { (r.data || []).forEach(function (x) { if (x.chave === "link_pagamento_anual") ANUAL.link = x.valor || ""; if (x.chave === "preco_anual" && x.valor) PRECO_ANO = x.valor; if (x.chave === "preco" && x.valor) PRECO_MES = x.valor; if (x.chave === "acesso_v2") cfgAcesso(x.valor); }); if (!$("area-premium") || !$("area-premium").hidden) premDes(); }); }
 
+  /* ================= Foto de perfil ================= */
+  var FOTO = { url: null, tentou: {} };
+  function sha256hex(t) { return crypto.subtle.digest("SHA-256", new TextEncoder().encode(t)).then(function (b) { return [].map.call(new Uint8Array(b), function (x) { return ("0" + x.toString(16)).slice(-2); }).join(""); }); }
+  function fotoUrl() {
+    var u = G("USUARIO"); if (!u) return Promise.resolve(null); var m = u.user_metadata || {};
+    var dir = m.avatar_url || m.picture || ""; if (/^https:\/\//.test(dir)) return Promise.resolve(dir);
+    var em = String(u.email || "").trim().toLowerCase(); if (!em || !window.crypto || !crypto.subtle) return Promise.resolve(null);
+    if (FOTO.tentou[em] !== undefined) return Promise.resolve(FOTO.tentou[em]);
+    return sha256hex(em).then(function (hx) { var url = "https://gravatar.com/avatar/" + hx + "?s=160&d=404"; return new Promise(function (ok) { var im = new Image(); im.onload = function () { FOTO.tentou[em] = url; ok(url); }; im.onerror = function () { FOTO.tentou[em] = null; ok(null); }; im.src = url; }); }).catch(function () { return null; });
+  }
+  function fotoAplica() {
+    fotoUrl().then(function (url) {
+      FOTO.url = url; var b = $("perfil-bt"); if (!b) return;
+      var old = b.querySelector("img.pf-foto"); if (!url) { if (old) old.remove(); return; }
+      if (old && old.getAttribute("src") === url) return; if (old) old.remove();
+      var im = h("img", "pf-foto"); im.alt = ""; im.referrerPolicy = "no-referrer"; im.onerror = function () { im.remove(); }; im.src = url; b.textContent = ""; b.appendChild(im);
+      var av = $("pc-av"); if (av) { av.textContent = ""; var i2 = h("img"); i2.alt = "Sua foto"; i2.referrerPolicy = "no-referrer"; i2.src = url; av.appendChild(i2); }
+    });
+  }
+  function fotoConfig() {
+    var u = G("USUARIO"), av = $("pc-av"); if (!av || !u) return;
+    av.textContent = (nomeUsuario() || u.email || "?").charAt(0).toUpperCase(); fotoAplica();
+    var msg = function (t, e) { var m = $("pc-foto-msg"); if (m) { m.textContent = t; m.style.color = e ? "var(--neg,#c0392b)" : ""; } };
+    $("pc-foto-in").addEventListener("change", function () {
+      var f = this.files && this.files[0]; if (!f) return; if (!/^image\/(jpeg|png|webp)$/.test(f.type)) { msg("Use uma imagem JPG, PNG ou WebP.", 1); return; } if (f.size > 8e6) { msg("A imagem passa de 8 MB. Escolha uma menor.", 1); return; }
+      msg("Enviando…"); var SB = G("SB"), rd = new FileReader();
+      rd.onload = function () { var im = new Image(); im.onload = function () { var c = document.createElement("canvas"), L = 256, lado = Math.min(im.width, im.height); c.width = c.height = L; c.getContext("2d").drawImage(im, (im.width - lado) / 2, (im.height - lado) / 2, lado, lado, 0, 0, L, L);
+        c.toBlob(function (bl) { if (!bl) { msg("Não consegui ler a imagem.", 1); return; } var cam = u.id + "/foto.jpg";
+          SB.storage.from("avatares").upload(cam, bl, { upsert: true, contentType: "image/jpeg", cacheControl: "3600" }).then(function (r) { if (r.error) throw r.error; var pub = SB.storage.from("avatares").getPublicUrl(cam).data.publicUrl + "?v=" + Date.now(); return SB.auth.updateUser({ data: { avatar_url: pub } }); })
+            .then(function (r) { if (r && r.error) throw r.error; if (r && r.data && r.data.user) window.USUARIO = r.data.user; msg("Foto atualizada."); fotoAplica(); })
+            .catch(function (e) { msg("Não consegui salvar a foto agora (" + ((e && e.message) || "erro") + ").", 1); }); }, "image/jpeg", 0.88); };
+        im.onerror = function () { msg("Não consegui ler a imagem.", 1); }; im.src = rd.result; };
+      rd.readAsDataURL(f);
+    });
+    $("pc-foto-rm").addEventListener("click", function () { var SB = G("SB"); msg("Removendo…"); SB.storage.from("avatares").remove([u.id + "/foto.jpg"]).then(function () { return SB.auth.updateUser({ data: { avatar_url: null } }); }).then(function (r) { if (r && r.data && r.data.user) window.USUARIO = r.data.user; FOTO.tentou = {}; msg("Foto removida."); var b = $("perfil-bt"); var o = b && b.querySelector("img.pf-foto"); if (o) { o.remove(); b.textContent = (u.email || "?").charAt(0); } av.textContent = (nomeUsuario() || u.email || "?").charAt(0).toUpperCase(); fotoAplica(); }).catch(function () { msg("Não consegui remover agora.", 1); }); });
+  }
+
+  /* ================= Indicações ================= */
+  function refCodigo() { var u = G("USUARIO"); return u ? String(u.id).replace(/-/g, "").slice(0, 8) : ""; }
+  function refLink() { return "https://alpharadarglobal.com.br/app.html?ref=" + refCodigo() + "#cs-entrar"; }
+  function refTexto() { return "Estou usando o Alpha Radar: painel em português com dados de cripto, ETFs, macro, on-chain e DeFi, e simuladores com histórico real. A conta é grátis:"; }
+  function refConfig() {
+    var inp = $("pc-ref-link"); if (!inp || !refCodigo()) return; var L = refLink(), T = refTexto(); inp.value = L;
+    $("pc-ref-copiar").addEventListener("click", function () { var b = this; (navigator.clipboard ? navigator.clipboard.writeText(L) : Promise.reject()).then(function () { b.textContent = "Copiado!"; setTimeout(function () { b.textContent = "Copiar link"; }, 1800); }, function () { inp.select(); try { document.execCommand("copy"); } catch (e) {} }); evento("indicar", "copiar"); });
+    $("pc-ref-wa").href = "https://wa.me/?text=" + encodeURIComponent(T + " " + L); $("pc-ref-tg").href = "https://t.me/share/url?url=" + encodeURIComponent(L) + "&text=" + encodeURIComponent(T); $("pc-ref-x").href = "https://twitter.com/intent/tweet?text=" + encodeURIComponent(T) + "&url=" + encodeURIComponent(L);
+    ["pc-ref-wa", "pc-ref-tg", "pc-ref-x"].forEach(function (id) { $(id).addEventListener("click", function () { evento("indicar", id.slice(7)); }); });
+    var SB = G("SB"); if (SB) SB.rpc("minhas_indicacoes").then(function (r) { var n = r && !r.error ? +r.data || 0 : null; var el = $("pc-ref-n"); if (el && n != null) el.textContent = n === 0 ? "Ainda sem indicações." : n === 1 ? "1 pessoa criou a conta pelo seu link." : n + " pessoas criaram a conta pelo seu link."; });
+  }
+  function compartilhar(txt) { var L = logado() ? refLink() : "https://alpharadarglobal.com.br/"; var full = txt + " " + L; evento("compartilhar", "resultado"); if (navigator.share) { navigator.share({ title: "Alpha Radar", text: txt, url: L }).catch(function () {}); return; } window.open("https://wa.me/?text=" + encodeURIComponent(full), "_blank", "noopener"); }
+
   /* ================= Configurações ================= */
   function confDes() {
     var ar = novaArea("config", "Configurações"); if (!ar) return; var u = G("USUARIO"), p = plano();
     var nomePlano = p === "admin" ? "Administrador (acesso completo)" : p === "assinante" ? "Alpha Pro" : "Gratuito";
     var m = (u && u.user_metadata) || {};
     ar.innerHTML = '<div class="pc-grid">' +
-      '<section class="box"><h2>Perfil</h2><form class="pc-form" id="pc-perfil"><label class="sub">Como quer ser chamado<input id="pc-nome" type="text" maxlength="40" value="' + esc(m.nome || "") + '" placeholder="Seu nome"></label><label class="sub">E-mail<input type="email" value="' + esc(u ? u.email : "") + '" disabled></label><p><button type="submit" class="bt-pro">Salvar</button></p><p class="pc-msg" id="pc-perfil-msg"></p></form></section>' +
+      '<section class="box"><h2>Perfil</h2><div class="pc-foto"><div class="pf-av" id="pc-av"></div><div><p style="margin:0 0 6px"><label class="bt-sec" style="cursor:pointer;display:inline-block">Trocar foto<input id="pc-foto-in" type="file" accept="image/jpeg,image/png,image/webp" hidden></label> <button type="button" class="bt-sec" id="pc-foto-rm">Remover</button></p><p class="sub" style="margin:0">JPG ou PNG. Se não enviar uma foto, usamos a do seu Gravatar, quando existir.</p><p class="pc-msg" id="pc-foto-msg"></p></div></div><form class="pc-form" id="pc-perfil"><label class="sub">Como quer ser chamado<input id="pc-nome" type="text" maxlength="40" value="' + esc(m.nome || "") + '" placeholder="Seu nome"></label><label class="sub">E-mail<input type="email" value="' + esc(u ? u.email : "") + '" disabled></label><p><button type="submit" class="bt-pro">Salvar</button></p><p class="pc-msg" id="pc-perfil-msg"></p></form></section>' +
       '<section class="box"><h2>Plano</h2><p style="font-size:18px;margin:6px 0"><b>' + esc(nomePlano) + '</b></p><p class="sub">' + (ehPro() ? "Você tem acesso a todos os recursos do Alpha Radar." : "Você usa o plano gratuito. Recursos marcados como Pro ficam disponíveis no Alpha Pro.") + '</p><p style="margin-top:10px"><button type="button" class="' + (ehPro() ? "bt-sec" : "bt-pro") + '" id="pc-ir-prem">' + (ehPro() ? "Ver o que está incluído" : "Conhecer Alpha Pro") + '</button></p><p class="sub" style="margin-top:12px">Para cancelar ou pedir reembolso, use a aba Suporte.</p></section>' +
       '<section class="box"><h2>Aparência</h2><p class="sub">Escolha o tema do painel.</p><div class="pers" id="pc-tema" style="margin-top:10px"><button type="button" data-t="light">Claro</button><button type="button" data-t="dark">Escuro</button><button type="button" data-t="">Seguir o sistema</button></div></section>' +
       '<section class="box"><h2>Segurança</h2><form class="pc-form" id="pc-senha"><label class="sub">Nova senha<input id="pc-nova" type="password" minlength="6" autocomplete="new-password" placeholder="6 ou mais caracteres" required></label><p><button type="submit" class="bt-sec">Alterar senha</button></p><p class="pc-msg" id="pc-senha-msg"></p></form></section>' +
       '<section class="box"><h2>Integrações</h2><p class="sub">Em breve: conexão automática com corretoras e carteiras para importar a sua carteira. Hoje, os ativos são cadastrados em Minha Carteira.</p><p style="margin-top:10px;display:flex;gap:8px;flex-wrap:wrap"><button type="button" class="bt-sec" disabled>Conectar corretora · em breve</button><button type="button" class="bt-sec" disabled>Conectar carteira · em breve</button></p></section>' +
+      '<section class="box"><h2>Indique o Alpha Radar</h2><p class="sub">Compartilhe o seu link. Quem criar a conta por ele fica registrado como sua indicação.</p><p style="margin:10px 0 6px"><input id="pc-ref-link" type="text" readonly style="width:100%;font-size:13.5px" aria-label="Seu link de indicação"></p><p style="display:flex;gap:8px;flex-wrap:wrap"><button type="button" class="bt-pro" id="pc-ref-copiar">Copiar link</button><a class="bt-sec" id="pc-ref-wa" target="_blank" rel="noopener">WhatsApp</a><a class="bt-sec" id="pc-ref-tg" target="_blank" rel="noopener">Telegram</a><a class="bt-sec" id="pc-ref-x" target="_blank" rel="noopener">X</a></p><p class="sub" id="pc-ref-n" style="margin-top:8px"></p></section>' +
       '<section class="box"><h2>Sessão</h2><p class="sub">Sair desta conta neste aparelho.</p><p style="margin-top:10px"><button type="button" class="bt-sec" id="pc-sair">Sair</button></p></section></div>' +
       '';
     $("pc-ir-prem").addEventListener("click", function () { ir("prem"); });
+    fotoConfig(); refConfig();
     olho($("pc-nova"));
     var tema = document.documentElement.getAttribute("data-theme") || "";
     [].forEach.call(ar.querySelectorAll("#pc-tema button"), function (b) { b.setAttribute("aria-pressed", b.dataset.t === tema ? "true" : "false"); b.addEventListener("click", function () { if (typeof window.temaPoe === "function") window.temaPoe(b.dataset.t || null); confDes(); }); });
@@ -1208,10 +1317,13 @@
     novaArea("ferramentas", "Ferramentas"); novaArea("premium", "Alpha Pro"); novaArea("config", "Configurações"); novaArea("ajuda", "Central de ajuda");
     montaNav(); guias(); guiaLinks(); loginExtras(); setTimeout(loginExtras, 1500); setTimeout(loginExtras, 4000); montaDash(); montaCripto(); montaCart(); montaAc(); rodape(); simReal();
     embrulha("acessoAplica", function () { aplicaPro(); estLibera(); });
-    embrulha("contaDesenha", function () { aplicaPro(); if (!$("area-inicio").hidden) dashDes(); if (logado() && !D.rota) { D.rota = 1; setTimeout(rotaInicial, 400); cfgPremium(); } if (logado() && RECUP) setTimeout(novaSenha, 500); loginExtras(); });
+    var irDash = function () { if (logado()) { ir("dash"); try { window.scrollTo({ top: 0, behavior: "smooth" }); } catch (e) { window.scrollTo(0, 0); } var l = $("lado"); if (l && l.classList.contains("aberto") && $("lado-bt")) $("lado-bt").click(); } };
+    ["marca-topo", "marca"].forEach(function (id) { var el = $(id); if (!el) return; el.setAttribute("role", "link"); el.setAttribute("tabindex", "0"); el.setAttribute("title", "Ir para o Dashboard"); el.addEventListener("click", irDash); el.addEventListener("keydown", function (e) { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); irDash(); } }); });
+    document.addEventListener("click", function (e) { var a = e.target && e.target.closest && e.target.closest("a[href]"); if (!a) return; var hr = (a.getAttribute("href") || "").trim().toLowerCase().replace(/[\s\u0000-\u001f]/g, ""); if (/^(javascript|data|vbscript):/.test(hr)) { e.preventDefault(); e.stopPropagation(); } }, true);
+    embrulha("contaDesenha", function () { if (logado()) { fotoAplica(); if (!EV.sessao) { EV.sessao = 1; evento("sessao", G("PLANOREAL") || null); } } aplicaPro(); if (!$("area-inicio").hidden) dashDes(); if (logado() && !D.rota) { D.rota = 1; setTimeout(rotaInicial, 400); cfgPremium(); } if (logado() && RECUP) setTimeout(novaSenha, 500); loginExtras(); });
     embrulha("mercDesenha", function () { if (!$("area-inicio").hidden) dashDes(); if ($("mj-macro") && !$("mj-macro").hidden) macroDes(); });
     embrulha("cDesenha", function () { carteiraDes(); });
-    embrulha("admCarrega", function () { setTimeout(admAcesso, 200); });
+    embrulha("admCarrega", function () { setTimeout(function () { admAcesso(); admStats(); }, 250); });
     embrulha("abasAplica", function () { var T2 = G("TITULOS"); if (T2) { T2.inicio = "Dashboard"; T2.ferramentas = "Ferramentas"; T2.premium = "Alpha Pro"; T2.config = "Configurações"; T2.ajuda = "Central de ajuda"; } espelhaOriginais(); });
     embrulha("mjanela", function (j) { if (j === "ativos") criptoDes(); var mk = { resumo: "m-resumo", ativos: "m-cripto", etfs: "m-etfs", macro: "m-macro", onchain: "m-onchain", defi: "m-defi", calendario: "m-cal", noticias: "i-nots" }[j]; if (mk && areaVisivel() === "mercado") marca(mk); });
     [].forEach.call(document.querySelectorAll("#mabas button"), function (b) { b.addEventListener("click", function () { var mx = $("mj-macro"); if (mx && b.dataset.mj !== "macro") mx.hidden = true; var bm = document.querySelector('#mabas button[data-mj="macro"]'); if (bm && b.dataset.mj !== "macro") bm.setAttribute("aria-selected", "false"); }); });
