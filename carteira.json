@@ -1,18 +1,22 @@
 {
- "saldo": 100.0,
- "posicao": {
-  "ativo": "ETH",
-  "vender": "hyper",
-  "comprar": "gate",
-  "valor": 50.0,
-  "aberto_em": 1791293554.8984776,
-  "ultimo": 1791710067.64683,
-  "funding": 0.04594630099401862,
-  "taxas": 0.05,
-  "d30": 0.058355757133333346,
-  "negativas": 2
- },
- "historico": [],
+ "saldo": 99.94415724804409,
+ "posicao": null,
+ "historico": [
+  {
+   "ativo": "ETH",
+   "vender": "hyper",
+   "comprar": "gate",
+   "valor": 50.0,
+   "aberto_em": 1791293554.8984776,
+   "ultimo": 1791734128.4306755,
+   "funding": 0.044157248044089936,
+   "taxas": 0.1,
+   "d30": 0.058355757133333346,
+   "negativas": 3,
+   "fechado_em": 1791734128.4306755,
+   "liquido": -0.05584275195591007
+  }
+ ],
  "inicio": 1791295081,
  "curva": [
   {
@@ -186,6 +190,14 @@
    "carteira": 99.9959,
    "btc": 83046.4,
    "eth": 2503.2,
+   "cdi": 1.00101602,
+   "usd": 4.9892
+  },
+  {
+   "t": 1791734128,
+   "carteira": 99.9442,
+   "btc": 83486.1,
+   "eth": 2529.1,
    "cdi": 1.00101602,
    "usd": 4.9892
   }
