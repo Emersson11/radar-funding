@@ -25,7 +25,7 @@ export async function onRequest(ctx) {
     const r = await fetch(SUPABASE_URL + "/rest/v1/rpc/eh_pago", { method: "POST", headers: h, body: "{}" });
     if (r.status === 401 || r.status === 403) return volta(url, "#cs-entrar");
     const pago = r.ok ? await r.json() : false;
-    if (pago !== true) return volta(url, "#cs-plano");
+    if (pago !== true) return volta(url, "#funding");
   } catch (e) {
     return new Response("Não foi possível confirmar a sua assinatura agora. Tente de novo em instantes.", { status: 503 });
   }
