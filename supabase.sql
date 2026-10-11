@@ -200,3 +200,50 @@ drop policy if exists "inscreve a si mesmo" on public.news_inscritos;
 create policy "inscreve a si mesmo" on public.news_inscritos for insert with check (auth.uid() = user_id);
 drop policy if exists "cancela a propria inscricao" on public.news_inscritos;
 create policy "cancela a propria inscricao" on public.news_inscritos for delete using (auth.uid() = user_id);
+
+-- ===== Assinaturas da Hotmart (liberação automática) =====
+-- O webhook functions/api/hotmart.js grava aqui cada compra, renovação, cancelamento e reembolso,
+-- usando a chave de serviço (só no servidor). Pelo site, só o administrador consegue ler.
+create table if not exists public.assinaturas (
+  email text primary key,
+  nome text,
+  status text not null,            -- ativa, cancelada, reembolsada, chargeback, disputa
+  oferta text,
+  transacao text,
+  ultimo_evento text,
+  valido_ate timestamptz,          -- fim do período pago (+3 dias de folga)
+  atualizado timestamptz not null default now()
+);
+alter table public.assinaturas enable row level security;
+drop policy if exists "admin le assinaturas" on public.assinaturas;
+create policy "admin le assinaturas" on public.assinaturas for select using (public.eh_admin());
+
+-- Quem compra antes de criar a conta: ao se cadastrar com o mesmo e-mail, já entra como assinante.
+create or replace function public.perfil_assinatura() returns trigger
+language plpgsql security definer set search_path = public as $$
+begin
+  if new.plano = 'gratis' and exists (
+    select 1 from public.assinaturas a
+    where a.email = lower(new.email) and a.status in ('ativa','cancelada') and a.valido_ate > now()
+  ) then
+    update public.perfis set plano = 'assinante' where user_id = new.user_id;
+  end if;
+  return new;
+end $$;
+drop trigger if exists ao_criar_perfil_assinatura on public.perfis;
+create trigger ao_criar_perfil_assinatura after insert on public.perfis
+  for each row execute function public.perfil_assinatura();
+
+-- Tira o acesso de quem passou do período pago (renovação não veio ou assinatura cancelada).
+-- Só mexe em quem tem registro da Hotmart; admin e assinante liberado à mão não são tocados.
+create or replace function public.expira_assinaturas() returns integer
+language sql security definer set search_path = public as $$
+  with alvo as (
+    update public.perfis p set plano = 'gratis'
+    from public.assinaturas a
+    where lower(p.email) = a.email and p.plano = 'assinante' and a.valido_ate < now()
+    returning 1
+  )
+  select count(*)::integer from alvo;
+$$;
+revoke all on function public.expira_assinaturas() from public, anon, authenticated;

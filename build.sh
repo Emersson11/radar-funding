@@ -6,7 +6,7 @@ cp home.html dist/index.html
 cp index.html dist/app.html
 # Recursos extras do painel (calendário EUA+Brasil, filtros TradFi, sessão para páginas protegidas)
 if [ -f extras.js ]; then echo "<script src=\"extras.js?v=$(date +%s)\"></script>" >> dist/app.html; fi
-for f in simulador-estrategias.html extras.js plataforma.js config.js logo_claro.png logo_escuro.png aulas.json; do [ -f "$f" ] && cp "$f" dist/; done
+for f in simulador-estrategias.html extras.js plataforma.js pixel.js config.js logo_claro.png logo_escuro.png aulas.json; do [ -f "$f" ] && cp "$f" dist/; done
 [ -f _headers ] && cp _headers dist/
 # Versão nos scripts para o navegador sempre pegar a publicação nova
 V=$(date +%s); sed -i "s#src=\"plataforma.js\"#src=\"plataforma.js?v=$V\"#" dist/app.html
@@ -20,4 +20,8 @@ if [ -d seo ]; then
   if [ -f seo/app_head.html ]; then awk 'FNR==NR{b=b $0 "\n"; next} /<\/head>/ && !d {printf "%s", b; d=1} {print}' seo/app_head.html dist/app.html > dist/a.tmp && mv dist/a.tmp dist/app.html; fi
 fi
 [ -d guias ] && cp -r guias dist/guias
+# Política de Privacidade e Termos de Uso
+[ -d legal ] && cp legal/*.html dist/
+# Pixels de anúncio (Meta/Google), ligados pelo Admin > Anúncios; sem ID preenchido não carregam nada
+if [ -f pixel.js ]; then for p in dist/index.html dist/app.html dist/privacidade.html dist/termos.html; do [ -f "$p" ] && sed -i "s#</body>#<script src=\"/pixel.js?v=$V\" defer></script></body>#" "$p"; done; fi
 ls -la dist

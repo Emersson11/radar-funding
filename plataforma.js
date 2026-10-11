@@ -1056,7 +1056,7 @@
     var assinar = G("assinar");
     if (!pro) {
       $("pp-mes").addEventListener("click", function () { var m = $("pp-msg-mes"); if (typeof assinar === "function") assinar(m); });
-      $("pp-ano").addEventListener("click", function () { var m = $("pp-msg-ano"); if (/^https:\/\//.test(ANUAL.link)) { window.open(ANUAL.link, "_blank", "noopener"); return; } if (typeof assinar === "function") assinar(m); });
+      $("pp-ano").addEventListener("click", function () { var m = $("pp-msg-ano"); if (/^https:\/\//.test(ANUAL.link)) { if (window.arTrack) window.arTrack("checkout"); window.open(ANUAL.link, "_blank", "noopener"); return; } if (typeof assinar === "function") assinar(m); });
     }
   }
   function cfgPremium() { var SB = G("SB"); if (!SB) return; SB.from("config_site").select("chave,valor").in("chave", ["link_pagamento_anual", "preco_anual", "preco", "acesso_v2"]).then(function (r) { (r.data || []).forEach(function (x) { if (x.chave === "link_pagamento_anual") ANUAL.link = x.valor || ""; if (x.chave === "preco_anual" && x.valor) PRECO_ANO = x.valor; if (x.chave === "preco" && x.valor) PRECO_MES = x.valor; if (x.chave === "acesso_v2") cfgAcesso(x.valor); }); if (!$("area-premium") || !$("area-premium").hidden) premDes(); }); }
