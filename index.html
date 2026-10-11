@@ -522,6 +522,14 @@ button.mini{font-size:12px;color:var(--muted)}
       <header><div><h2>Análise completa do cenário</h2><p id="in-comp-sub">Macro, mercados tradicionais e cripto, em uma leitura só.</p></div><button type="button" class="btn-capa" id="in-fechar">Fechar análise</button></header>
       <div class="corpo" id="in-comp-corpo"></div>
     </section>
+    <section class="box" id="in-social" hidden>
+      <h2>Posts para redes sociais</h2>
+      <p class="sub" id="in-social-desc">Gere imagens prontas, com a identidade visual do site, para postar no X.</p>
+      <label class="so-adm" style="display:flex;align-items:center;gap:8px;font-size:13px;color:var(--muted);margin:10px 0 14px"><input type="checkbox" id="in-social-pub"> Disponibilizar este recurso para assinantes também</label>
+      <button type="button" class="btn-capa" id="in-social-gerar">Gerar posts para redes sociais</button>
+      <p class="sub" id="in-social-status" style="margin-top:10px"></p>
+      <div id="in-social-grid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:18px;margin-top:16px"></div>
+    </section>
     <div class="tiles" id="in-tiles"></div>
     <div class="g21">
       <div class="box"><h2>Bitcoin</h2><p class="sub">Preço em dólares. O último ponto acompanha a cotação ao vivo.</p><div class="pers" id="in-per"><button type="button" data-d="30">30 dias</button><button type="button" data-d="90">90 dias</button><button type="button" data-d="365" aria-pressed="true">1 ano</button><button type="button" data-d="0">Tudo</button></div><div class="graf" id="in-g-btc"></div></div>
@@ -1599,7 +1607,7 @@ function contaMsg(t,erro){ var m=$("conta-msg"); m.textContent=t||""; m.hidden=!
 document.addEventListener("DOMContentLoaded",function(){ $("ver-como").addEventListener("change",function(){ if(PLANOREAL!=="admin") return; PLANO=this.value; try{ sessionStorage.setItem("ver_como",PLANO); }catch(e){} contaDesenha(); if(typeof comCarrega==="function") comCarrega(); }); });
 function contaDesenha(){
   if(!SB){ $("conta").hidden=true; return; }
-  document.body.classList.toggle("fora",!USUARIO); document.body.classList.toggle("adm",PLANO==="admin"); if(typeof capaAnima==="function") capaAnima(); if(typeof acessoAplica==="function") acessoAplica(); if(typeof nlDesenha==="function"&&USUARIO) nlDesenha(); if(typeof supCarrega==="function"&&USUARIO) supCarrega(); if(typeof capaDados==="function") capaDados();
+  document.body.classList.toggle("fora",!USUARIO); document.body.classList.toggle("adm",PLANO==="admin"); if(typeof capaAnima==="function") capaAnima(); if(typeof acessoAplica==="function") acessoAplica(); if(typeof nlDesenha==="function"&&USUARIO) nlDesenha(); if(typeof supCarrega==="function"&&USUARIO) supCarrega(); if(typeof capaDados==="function") capaDados(); if(typeof socialCfgCarrega==="function"&&USUARIO) socialCfgCarrega();
   $("conta").hidden=false; $("conta-fora").hidden=!!USUARIO; $("conta-dentro").hidden=!USUARIO;
   if(typeof temaDesenha==="function") $("tema-fora").hidden=!!USUARIO;
   var rc=$("recarregar"); if(USUARIO){ if(rc.parentNode.id!=="perfil-acoes") $("perfil-acoes").insertBefore(rc,$("perfil-acoes").firstChild); rc.textContent="Atualizar dados"; $("perfil-bt").textContent=(USUARIO.email||"?").charAt(0); } else if(rc.parentNode.id==="perfil-acoes"){ document.querySelector(".direita").appendChild(rc); rc.textContent="Atualizar"; $("perfil-menu").hidden=true; }
@@ -2061,6 +2069,71 @@ function grafOpc(fmt){ var e=escuro(); return {autoSize:true,layout:{background:
   crosshair:{mode:1,vertLine:{color:e?"rgba(159,176,198,.45)":"rgba(14,26,43,.35)",width:1,style:3,labelBackgroundColor:"#0b2545"},horzLine:{color:e?"rgba(159,176,198,.45)":"rgba(14,26,43,.35)",width:1,style:3,labelBackgroundColor:"#0b2545"}},
   localization:{locale:"pt-BR",priceFormatter:fmt||function(v){return usd(v,0);}},handleScroll:{mouseWheel:false,vertTouchDrag:false,horzTouchDrag:true,pressedMouseMove:true},handleScale:{axisPressedMouseMove:false,mouseWheel:false,pinch:true},kineticScroll:{touch:true,mouse:false},trackingMode:{exitMode:1}}; }
 var LOGOS={}; ["claro","escuro"].forEach(function(k){ var i=new Image(); i.src="logo_"+k+".png"; LOGOS[k]=i; });
+
+/* ---------- Posts para redes sociais (a partir da análise do dia) ---------- */
+var SOCIAL_ASSINANTES=false;
+function socialCfgCarrega(){ if(!SB) return; SB.from("config_site").select("valor").eq("chave","social_assinantes").then(function(r){ SOCIAL_ASSINANTES=!!(r.data&&r.data[0]&&r.data[0].valor==="1"); socialAplica(); }); }
+function socialAplica(){ var bx=$("in-social"); if(!bx) return; bx.hidden=!(PLANO==="admin"||(PLANO==="assinante"&&SOCIAL_ASSINANTES)); var cb=$("in-social-pub"); if(cb) cb.checked=SOCIAL_ASSINANTES; var desc=$("in-social-desc"); if(desc) desc.textContent=PLANO==="admin"?"Gere imagens prontas, com a identidade visual do site, para postar no X.":"Gostou da nossa análise? Publique na sua rede social."; }
+document.addEventListener("DOMContentLoaded",function(){
+  var cb=$("in-social-pub"); if(cb) cb.addEventListener("change",function(){ if(!SB||PLANO!=="admin") return; var v=cb.checked; SB.from("config_site").upsert({chave:"social_assinantes",valor:v?"1":"0"}).then(function(r){ if(r.error){ cb.checked=!v; return; } SOCIAL_ASSINANTES=v; socialAplica(); }); });
+  var bt=$("in-social-gerar"); if(bt) bt.addEventListener("click",socialGera);
+});
+function socialTexto(cap){ var txt="", chave=cap.querySelector(".txt>.chave"); if(chave) return chave.lastChild.textContent; var p=cap.querySelector(".txt>p:not(.note)"); return p?p.textContent:""; }
+function socialLegenda(titulo,txt){ var link=" alpharadarglobal.com.br", base=titulo+": "+txt, max=280-link.length; if(base.length>max) base=base.slice(0,max-1).replace(/\s+\S*$/,"")+"…"; return base+link; }
+function socialCanvas(titulo,fig){
+  var svgEl=fig.querySelector("svg"); if(!svgEl) return Promise.resolve(null);
+  var xml=new XMLSerializer().serializeToString(svgEl), W=1200, H=675;
+  return new Promise(function(resolve){
+    var img=new Image();
+    img.onload=function(){
+      var esc=escuro(), c=document.createElement("canvas"); c.width=W; c.height=H; var g=c.getContext("2d");
+      g.fillStyle=esc?"#0d1726":"#ffffff"; g.fillRect(0,0,W,H);
+      g.fillStyle="#0b2545"; g.fillRect(0,0,W,86); g.fillStyle="#3ebed6"; g.fillRect(0,86,Math.round(W*0.22),4);
+      var lg=esc?LOGOS.escuro:LOGOS.claro; if(lg.complete&&lg.naturalWidth){ var lh=32, lw=lh*lg.naturalWidth/lg.naturalHeight; g.drawImage(lg,W-32-lw,27,lw,lh); }
+      g.fillStyle="#fff"; g.textAlign="left"; g.textBaseline="middle"; g.font="600 16px 'IBM Plex Sans',sans-serif"; g.fillText("ALPHA RADAR · MERCADO GLOBAL",32,43);
+      var tmp=document.createElement("canvas").getContext("2d"); tmp.font="600 36px 'Source Serif 4',Georgia,serif";
+      var linhas=quebraLinhas(tmp,titulo,W-64,2), ty=86+54;
+      g.textBaseline="alphabetic"; g.fillStyle=esc?"#e4e9f0":"#0e1a2b"; g.font="600 36px 'Source Serif 4',Georgia,serif";
+      linhas.forEach(function(l){ g.fillText(l,32,ty); ty+=42; });
+      var chY=ty+18, chH=H-chY-56, chW=W-64, ratio=Math.min(chW/img.width,chH/img.height), dw=img.width*ratio, dh=img.height*ratio;
+      g.drawImage(img,32+(chW-dw)/2,chY+(chH-dh)/2,dw,dh);
+      g.strokeStyle=esc?"rgba(159,176,198,.25)":"rgba(14,26,43,.15)"; g.lineWidth=1; g.beginPath(); g.moveTo(32,H-44); g.lineTo(W-32,H-44); g.stroke();
+      g.fillStyle=esc?"#93a0b3":"#5a6678"; g.font="400 14px 'IBM Plex Sans',sans-serif"; g.textBaseline="middle"; g.textAlign="left";
+      g.fillText("Fonte: Alpha Radar, com dados públicos de mercado · "+new Date().toLocaleDateString("pt-BR"),32,H-26);
+      g.textAlign="right"; g.fillText("alpharadarglobal.com.br",W-32,H-26);
+      resolve(c);
+    };
+    img.onerror=function(){ resolve(null); };
+    img.src="data:image/svg+xml;charset=utf-8,"+encodeURIComponent(xml);
+  });
+}
+function socialGera(){
+  var st=$("in-social-status"), grid=$("in-social-grid"); if(!st||!grid) return; st.textContent="Montando os posts…"; grid.textContent="";
+  var pend=[ocCarrega(),defiCarrega(),etfCarrega()].map(function(p){return p.catch(function(){});});
+  Promise.all(pend).then(function(){
+    completaDes();
+    var caps=Array.prototype.slice.call($("in-comp-corpo").querySelectorAll(".cap")), picks=[];
+    caps.forEach(function(c){ if(picks.length<4&&c.querySelector(".txt>.fig")) picks.push(c); });
+    if(!picks.length){ st.textContent="Ainda não há gráficos suficientes para gerar os posts agora. Tente de novo em instantes."; return; }
+    var feitos=0;
+    picks.forEach(function(cap){
+      var h3=cap.querySelector(".lado h3"), titulo=h3?h3.textContent:"Alpha Radar", fig=cap.querySelector(".txt>.fig"), txt=socialTexto(cap);
+      socialCanvas(titulo,fig).then(function(c){
+        feitos++;
+        if(c){
+          var card=el("div","box"), prev=document.createElement("img"); prev.src=c.toDataURL("image/png"); prev.alt=titulo; prev.style.cssText="width:100%;border-radius:4px;display:block"; card.appendChild(prev);
+          var legenda=socialLegenda(titulo,txt);
+          var ta=document.createElement("textarea"); ta.readOnly=true; ta.value=legenda; ta.rows=4; ta.style.cssText="width:100%;margin-top:10px;font:13px/1.4 var(--sans);padding:8px;border:1px solid var(--line);border-radius:3px;background:var(--bg);color:var(--fg);resize:vertical"; card.appendChild(ta);
+          var row=el("p"); row.style.cssText="display:flex;gap:8px;flex-wrap:wrap;margin-top:10px";
+          var bd=el("button",null,"⤓ Baixar imagem"); bd.type="button"; bd.addEventListener("click",function(){ c.toBlob(function(b){ var a=document.createElement("a"); a.href=URL.createObjectURL(b); a.download="alpha-radar-post-"+semAcento(titulo).replace(/[^a-z0-9]+/g,"-").replace(/^-|-$/g,"").slice(0,40)+".png"; document.body.appendChild(a); a.click(); a.remove(); setTimeout(function(){URL.revokeObjectURL(a.href);},2000); },"image/png"); });
+          var bc=el("button",null,"Copiar legenda"); bc.type="button"; bc.className="sec"; bc.addEventListener("click",function(){ if(navigator.clipboard) navigator.clipboard.writeText(legenda).then(function(){ var o=bc.textContent; bc.textContent="Copiado!"; setTimeout(function(){bc.textContent=o;},1500); }); });
+          row.appendChild(bd); row.appendChild(bc); card.appendChild(row); grid.appendChild(card);
+        }
+        if(feitos===picks.length) st.textContent=grid.children.length?grid.children.length+" posts prontos. Baixe a imagem e copie a legenda (até 280 caracteres) para publicar no X.":"Não consegui montar os posts agora. Tente de novo em instantes.";
+      });
+    });
+  });
+}
 function quebraLinhas(ctx,texto,maxW,maxLinhas){ var palavras=(texto||"").trim().split(/\s+/).filter(Boolean); if(!palavras.length) return [];
   var linhas=[], atual=""; for(var i=0;i<palavras.length;i++){ var p=palavras[i], teste=atual?atual+" "+p:p;
     if(!atual||ctx.measureText(teste).width<=maxW){ atual=teste; } else { linhas.push(atual); atual=p; if(linhas.length>=maxLinhas) break; } }
