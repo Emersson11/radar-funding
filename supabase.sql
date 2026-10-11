@@ -168,7 +168,7 @@ create policy "admin apaga analises" on public.analises for delete using (public
 create table if not exists public.newsletters (
   id bigint generated always as identity primary key,
   titulo text not null check (char_length(titulo) between 1 and 140),
-  corpo text not null check (char_length(corpo) between 1 and 60000),
+  corpo text not null check (char_length(corpo) between 1 and 400000),
   categoria text not null default 'geral' check (categoria in ('mercado','onchain','defi','etfs','educacao','aviso','geral')),
   user_id uuid not null default auth.uid() references auth.users on delete cascade,
   criado_em timestamptz not null default now()
@@ -182,6 +182,11 @@ drop policy if exists "admin apaga newsletters" on public.newsletters;
 create policy "admin apaga newsletters" on public.newsletters for delete using (public.eh_admin());
 -- Coluna nova numa tabela que já existia antes da categoria ser criada:
 alter table public.newsletters add column if not exists categoria text not null default 'geral';
+-- O limite de tamanho do corpo subiu de 60.000 para 400.000 caracteres: "Preencher com a
+-- análise do dia" agora também embute os gráficos (SVG) de cada seção da análise, que
+-- ocupam bem mais espaço que texto puro.
+alter table public.newsletters drop constraint if exists newsletters_corpo_check;
+alter table public.newsletters add constraint newsletters_corpo_check check (char_length(corpo) between 1 and 400000);
 
 create table if not exists public.news_inscritos (
   user_id uuid primary key references auth.users on delete cascade,
